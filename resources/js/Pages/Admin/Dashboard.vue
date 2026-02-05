@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({
     stats: Object,
@@ -26,14 +26,14 @@ defineProps({
                         <div class="text-gray-900 dark:text-gray-100 font-bold text-xl">Lembaga</div>
                         <div class="text-3xl font-bold text-pail-gold">{{ stats.total_institutions }}</div>
                     </div>
-                    <div class="bg-pail-ivory dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-red-500">
+                    <Link :href="route('admin.requests.index')" class="bg-pail-ivory dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-red-500 hover:bg-gray-50 transition block">
                         <div class="text-gray-900 dark:text-gray-100 font-bold text-xl">Pending Requests</div>
                         <div class="text-3xl font-bold text-red-500">{{ stats.pending_requests }}</div>
-                    </div>
-                    <div class="bg-pail-ivory dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-orange-400">
+                    </Link>
+                    <Link :href="route('admin.items.index')" class="bg-pail-ivory dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-orange-400 hover:bg-gray-50 transition block">
                         <div class="text-gray-900 dark:text-gray-100 font-bold text-xl">Low Stock Items</div>
                         <div class="text-3xl font-bold text-orange-400">{{ stats.low_stock_items }}</div>
-                    </div>
+                    </Link>
                 </div>
 
                 <!-- Recent Activity -->

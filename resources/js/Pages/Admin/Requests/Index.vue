@@ -7,7 +7,16 @@ const props = defineProps({
     requests: Object,
 });
 
-const form = useForm({
+const adminForm = useForm({
+    status: "approved",
+    admin_note: "",
+});
+
+const isAdminModalOpen = ref(false);
+const isCreateModalOpen = ref(false);
+const selectedRequest = ref(null);
+
+const createForm = useForm({
     type: "utilitas",
     title: "",
     description: "",
@@ -15,27 +24,46 @@ const form = useForm({
     photo_evidence: null,
 });
 
-const isCreateModalOpen = ref(false);
-
 const openCreateModal = () => {
-    form.reset();
+    createForm.reset();
     isCreateModalOpen.value = true;
 };
 
 const closeCreateModal = () => {
     isCreateModalOpen.value = false;
-    form.reset();
-    form.clearErrors();
+    createForm.reset();
+    createForm.clearErrors();
 };
 
 const submitCreate = () => {
-    form.post(route("requests.store"), {
+    createForm.post(route("requests.store"), {
         onSuccess: () => closeCreateModal(),
     });
 };
 
 const onFileChange = (e) => {
-    form.photo_evidence = e.target.files[0];
+    createForm.photo_evidence = e.target.files[0];
+};
+
+const openAdminModal = (req) => {
+    selectedRequest.value = req;
+    adminForm.status = "approved";
+    adminForm.admin_note = "";
+    isAdminModalOpen.value = true;
+};
+
+const closeAdminModal = () => {
+    isAdminModalOpen.value = false;
+    selectedRequest.value = null;
+    adminForm.reset();
+};
+
+const submitAdminAction = () => {
+    if (selectedRequest.value) {
+        adminForm.put(route("admin.requests.update", selectedRequest.value.id), {
+            onSuccess: () => closeAdminModal(),
+        });
+    }
 };
 
 const getStatusColor = (status) => {
@@ -53,14 +81,14 @@ const getStatusColor = (status) => {
 </script>
 
 <template>
-    <Head title="Pengajuan Saya" />
+    <Head title="Manajemen Pengajuan (Admin)" />
 
     <AuthenticatedLayout>
         <template #header>
             <h2
                 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
             >
-                Data Pengajuan Saya (Utilitas, B7, Darurat)
+                Manajemen Pengajuan (Utilitas, B7, Darurat)
             </h2>
         </template>
 
@@ -70,7 +98,7 @@ const getStatusColor = (status) => {
                 <div class="mb-6 flex justify-end">
                     <button
                         @click="openCreateModal()"
-                        class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600 transition"
+                        class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600 transition shadow-sm font-bold"
                     >
                         + Buat Pengajuan Baru
                     </button>
@@ -86,6 +114,11 @@ const getStatusColor = (status) => {
                         >
                             <thead>
                                 <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                    >
+                                        Lembaga
+                                    </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                                     >
@@ -117,6 +150,11 @@ const getStatusColor = (status) => {
                                 class="divide-y divide-gray-200 dark:divide-gray-700"
                             >
                                 <tr v-for="req in requests.data" :key="req.id">
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                    >
+                                        {{ req.user.institution?.code || 'ADMIN' }}
+                                    </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap capitalize"
                                     >
@@ -153,9 +191,16 @@ const getStatusColor = (status) => {
                                             v-if="req.photo_evidence"
                                             :href="`/storage/${req.photo_evidence}`"
                                             target="_blank"
-                                            class="text-blue-600 hover:text-blue-900 mr-2 text-sm"
+                                            class="text-blue-600 hover:text-blue-900 mr-4 text-sm"
                                             >Lihat Foto</a
                                         >
+                                        <button
+                                            v-if="req.status === 'pending'"
+                                            @click="openAdminModal(req)"
+                                            class="text-green-600 hover:text-green-900 font-bold"
+                                        >
+                                            Proses
+                                        </button>
                                         <span
                                             v-if="req.admin_note"
                                             class="block text-xs text-gray-500 mt-1 max-w-[150px] ml-auto"
@@ -167,6 +212,69 @@ const getStatusColor = (status) => {
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+        <!-- Admin Action Modal -->
+        <div
+            v-if="isAdminModalOpen"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        >
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-sm p-6"
+            >
+                <h3
+                    class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100"
+                >
+                    Proses Pengajuan
+                </h3>
+                <p class="mb-4 text-sm text-gray-500">
+                    {{ selectedRequest?.title }}
+                </p>
+
+                <form @submit.prevent="submitAdminAction">
+                    <div class="mb-4">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >Keputusan</label
+                        >
+                        <select
+                            v-model="adminForm.status"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        >
+                            <option value="approved">Setujui</option>
+                            <option value="rejected">Tolak</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >Catatan Admin</label
+                        >
+                        <textarea
+                            v-model="adminForm.admin_note"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            placeholder="Opsional"
+                        ></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-2 mt-6">
+                        <button
+                            type="button"
+                            @click="closeAdminModal"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                        >
+                            Batal
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            :disabled="adminForm.processing"
+                        >
+                            Simpan
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -181,7 +289,7 @@ const getStatusColor = (status) => {
                 <h3
                     class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100"
                 >
-                    Buat Pengajuan Baru
+                    Buat Pengajuan Baru (Admin)
                 </h3>
 
                 <form @submit.prevent="submitCreate">
@@ -191,7 +299,7 @@ const getStatusColor = (status) => {
                             >Tipe Pengajuan</label
                         >
                         <select
-                            v-model="form.type"
+                            v-model="createForm.type"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
                             <option value="utilitas">
@@ -201,10 +309,10 @@ const getStatusColor = (status) => {
                             <option value="darurat">Darurat</option>
                         </select>
                         <div
-                            v-if="form.errors.type"
+                            v-if="createForm.errors.type"
                             class="text-red-500 text-sm mt-1"
                         >
-                            {{ form.errors.type }}
+                            {{ createForm.errors.type }}
                         </div>
                     </div>
 
@@ -214,16 +322,16 @@ const getStatusColor = (status) => {
                             >Judul</label
                         >
                         <input
-                            v-model="form.title"
+                            v-model="createForm.title"
                             type="text"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             required
                         />
                         <div
-                            v-if="form.errors.title"
+                            v-if="createForm.errors.title"
                             class="text-red-500 text-sm mt-1"
                         >
-                            {{ form.errors.title }}
+                            {{ createForm.errors.title }}
                         </div>
                     </div>
 
@@ -233,15 +341,15 @@ const getStatusColor = (status) => {
                             >Deskripsi</label
                         >
                         <textarea
-                            v-model="form.description"
+                            v-model="createForm.description"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             required
                         ></textarea>
                         <div
-                            v-if="form.errors.description"
+                            v-if="createForm.errors.description"
                             class="text-red-500 text-sm mt-1"
                         >
-                            {{ form.errors.description }}
+                            {{ createForm.errors.description }}
                         </div>
                     </div>
 
@@ -251,17 +359,17 @@ const getStatusColor = (status) => {
                             >Estimasi Biaya</label
                         >
                         <input
-                            v-model="form.estimated_cost"
+                            v-model="createForm.estimated_cost"
                             type="number"
                             min="0"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             required
                         />
                         <div
-                            v-if="form.errors.estimated_cost"
+                            v-if="createForm.errors.estimated_cost"
                             class="text-red-500 text-sm mt-1"
                         >
-                            {{ form.errors.estimated_cost }}
+                            {{ createForm.errors.estimated_cost }}
                         </div>
                     </div>
 
@@ -278,10 +386,10 @@ const getStatusColor = (status) => {
                             required
                         />
                         <div
-                            v-if="form.errors.photo_evidence"
+                            v-if="createForm.errors.photo_evidence"
                             class="text-red-500 text-sm mt-1"
                         >
-                            {{ form.errors.photo_evidence }}
+                            {{ createForm.errors.photo_evidence }}
                         </div>
                     </div>
 
@@ -295,8 +403,8 @@ const getStatusColor = (status) => {
                         </button>
                         <button
                             type="submit"
-                            class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600"
-                            :disabled="form.processing"
+                            class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600 font-bold"
+                            :disabled="createForm.processing"
                         >
                             Kirim
                         </button>
@@ -306,4 +414,3 @@ const getStatusColor = (status) => {
         </div>
     </AuthenticatedLayout>
 </template>
-

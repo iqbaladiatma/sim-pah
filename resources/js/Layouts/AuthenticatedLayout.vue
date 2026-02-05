@@ -1,13 +1,25 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
 
 const showingNavigationDropdown = ref(false);
+
+const dashboardUrl = computed(() => {
+    return usePage().props.auth.user.role === 'admin'
+        ? route('admin.dashboard')
+        : route('dashboard');
+});
+
+const isDashboardActive = computed(() => {
+    return usePage().props.auth.user.role === 'admin'
+        ? route().current('admin.dashboard')
+        : route().current('dashboard');
+});
 </script>
 
 <template>
@@ -22,7 +34,7 @@ const showingNavigationDropdown = ref(false);
                         <div class="flex">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="dashboardUrl">
                                     <ApplicationLogo
                                         class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
                                     />
@@ -34,8 +46,8 @@ const showingNavigationDropdown = ref(false);
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
                                 <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
+                                    :href="dashboardUrl"
+                                    :active="isDashboardActive"
                                 >
                                     Dashboard
                                 </NavLink>
@@ -60,8 +72,8 @@ const showingNavigationDropdown = ref(false);
                                     Users
                                 </NavLink>
                                 <NavLink
-                                    :href="route('items.index')"
-                                    :active="route().current('items.*')"
+                                    :href="$page.props.auth.user.role === 'admin' ? route('admin.items.index') : route('items.index')"
+                                    :active="$page.props.auth.user.role === 'admin' ? route().current('admin.items.*') : route().current('items.*')"
                                 >
                                     Barang
                                 </NavLink>
@@ -77,8 +89,8 @@ const showingNavigationDropdown = ref(false);
                                     Approval Stok
                                 </NavLink>
                                 <NavLink
-                                    :href="route('requests.index')"
-                                    :active="route().current('requests.*')"
+                                    :href="$page.props.auth.user.role === 'admin' ? route('admin.requests.index') : route('requests.index')"
+                                    :active="$page.props.auth.user.role === 'admin' ? route().current('admin.requests.*') : route().current('requests.*')"
                                 >
                                     Pengajuan
                                 </NavLink>
@@ -184,8 +196,8 @@ const showingNavigationDropdown = ref(false);
                 >
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
+                            :href="dashboardUrl"
+                            :active="isDashboardActive"
                         >
                             Dashboard
                         </ResponsiveNavLink>

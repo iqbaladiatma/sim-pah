@@ -25,8 +25,8 @@ class RequestController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if ($user->role !== 'karyawan')
-            abort(403, 'Hanya karyawan yang bisa membuat request.');
+        if ($user->role !== 'karyawan' && $user->role !== 'admin')
+            abort(403, 'Hanya karyawan atau admin yang bisa membuat request.');
 
         $validated = $request->validate([
             'type' => 'required|in:utilitas,b7,darurat',

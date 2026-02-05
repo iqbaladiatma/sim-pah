@@ -15,8 +15,16 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::resource('items', \App\Http\Controllers\ItemController::class);
-    Route::resource('requests', \App\Http\Controllers\RequestController::class)->only(['index', 'store']);
+    // Karyawan Items (Accessible only by Karyawan)
+    Route::resource('items', \App\Http\Controllers\ItemController::class)
+        ->only(['index', 'update'])
+        ->middleware('role:karyawan');
+
+    // Karyawan Requests (Accessible only by Karyawan)
+    Route::resource('requests', \App\Http\Controllers\RequestController::class)
+        ->only(['index', 'store'])
+        ->middleware('role:karyawan');
+
     // Karyawan Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\Karyawan\DashboardController::class , 'index'])
         ->middleware('role:karyawan')
@@ -27,11 +35,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class , 'index'])->name('dashboard');
             Route::resource('institutions', \App\Http\Controllers\Admin\InstitutionController::class);
             Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+            Route::resource('items', \App\Http\Controllers\Admin\ItemController::class);
             Route::get('/item-requests', [\App\Http\Controllers\Admin\ItemRequestController::class , 'index'])->name('item_requests.index');
             Route::post('/item-requests/{itemUpdateRequest}/approve', [\App\Http\Controllers\Admin\ItemRequestController::class , 'approve'])->name('item_requests.approve');
             Route::post('/item-requests/{itemUpdateRequest}/reject', [\App\Http\Controllers\Admin\ItemRequestController::class , 'reject'])->name('item_requests.reject');
-            // General Requests Admin Update
-            Route::put('/requests/{generalRequest}', [\App\Http\Controllers\RequestController::class , 'update'])->name('requests.update');
+            // General Requests Admin Management
+            Route::resource('requests', \App\Http\Controllers\Admin\GeneralRequestController::class)->only(['index', 'update']);
         }
         );
     });
