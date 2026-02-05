@@ -9,7 +9,7 @@ You are a Lead Developer for "SIM URT PAH - MATARAM". Your goal is to build a hi
 
 ## 2. THE TECH STACK (STRICT)
 - Framework: Laravel 12
-- Frontend: Svelte 5 (Inertia.js bridge)
+- Frontend: Vue 3 (Inertia.js bridge)
 - Database: MySQL (strictly managed via migrations)
 - CSS: Tailwind CSS (Primary Color: #C9A658)
 - NO FILAMENT: All CRUDs and Dashboards must be manually coded for maximum control.

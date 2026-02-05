@@ -9,7 +9,7 @@ class InstitutionController extends Controller
 {
     public function index()
     {
-        $institutions = \App\Models\Institution::latest()->paginate(10);
+        $institutions = \App\Models\Institution::latest()->paginate(50);
         return inertia('Admin/Institutions/Index', [
             'institutions' => $institutions
         ]);
@@ -45,5 +45,32 @@ class InstitutionController extends Controller
     {
         $institution->delete();
         return redirect()->back()->with('success', 'Lembaga berhasil dihapus.');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\InstitutionImport, $request->file('file'));
+
+        return redirect()->back()->with('success', 'Data lembaga berhasil diimpor.');
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = ['code', 'name'];
+        $callback = function () use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            fputcsv($file, ['SMA-AH', 'SMA Abu Hurairah']);
+            fputcsv($file, ['SMP-AH', 'SMP Abu Hurairah']);
+            fclose($file);
+        };
+
+        return response()->streamDownload($callback, 'template_lembaga.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 }

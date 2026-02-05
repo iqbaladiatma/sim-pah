@@ -12,7 +12,7 @@ const form = useForm({
     name: "",
     email: "",
     password: "",
-    role: "karyawan",
+    role: "lembaga",
     institution_id: "",
     phone: "",
 });
@@ -138,10 +138,12 @@ const deleteUser = (id) => {
                                         <span
                                             class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                             :class="{
+                                                'bg-purple-100 text-purple-800':
+                                                    user.role === 'super admin',
                                                 'bg-blue-100 text-blue-800':
                                                     user.role === 'admin',
                                                 'bg-green-100 text-green-800':
-                                                    user.role === 'karyawan',
+                                                    user.role === 'lembaga',
                                             }"
                                         >
                                             {{ user.role }}
@@ -260,8 +262,9 @@ const deleteUser = (id) => {
                             v-model="form.role"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         >
-                            <option value="karyawan">Karyawan</option>
+                            <option value="super admin">Super Admin</option>
                             <option value="admin">Admin</option>
+                            <option value="lembaga">Lembaga</option>
                         </select>
                         <div
                             v-if="form.errors.role"

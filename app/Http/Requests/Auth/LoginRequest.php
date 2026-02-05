@@ -29,6 +29,7 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'institution_id' => ['nullable', 'exists:institutions,id'],
         ];
     }
 
@@ -41,12 +42,38 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        if (!Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
             ]);
+        }
+
+        $user = Auth::user();
+
+        // Multi-tenancy check: 
+        // - Admin/Super Admin: Can login without selecting institution (institution_id ignored)
+        // - Karyawan: Must select their matching institution
+        if (in_array($user->role, ['admin', 'super admin'])) {
+        // Admin users don't need institution_id validation
+        // If they selected one, just ignore it
+        }
+        else {
+            // Karyawan (non-admin) users MUST select their institution
+            if (!$this->institution_id) {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'institution_id' => 'User Lembaga wajib memilih unit yang sesuai.',
+                ]);
+            }
+
+            if ($user->institution_id != $this->institution_id) {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'institution_id' => 'Lembaga yang dipilih tidak sesuai dengan akun Anda.',
+                ]);
+            }
         }
 
         RateLimiter::clear($this->throttleKey());
@@ -59,7 +86,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -80,6 +107,6 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey(): string
     {
-        return Str::transliterate(Str::lower($this->string('email')).'|'.$this->ip());
+        return Str::transliterate(Str::lower($this->string('email')) . '|' . $this->ip());
     }
 }

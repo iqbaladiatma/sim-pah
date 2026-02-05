@@ -29,14 +29,16 @@ class RequestController extends Controller
             abort(403, 'Hanya karyawan atau admin yang bisa membuat request.');
 
         $validated = $request->validate([
-            'type' => 'required|in:utilitas,b7,darurat',
+            'type' => 'required|string|max:50',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'estimated_cost' => 'required|numeric|min:0',
-            'photo_evidence' => 'required|image|max:2048', // Max 2MB
+            'photo_evidence' => 'nullable|image|max:2048', // Max 2MB, optional
         ]);
 
-        $path = $request->file('photo_evidence')->store('reports', 'public');
+        $path = $request->hasFile('photo_evidence')
+            ? $request->file('photo_evidence')->store('reports', 'public')
+            : null;
 
         \App\Models\Request::create([
             'user_id' => $user->id,

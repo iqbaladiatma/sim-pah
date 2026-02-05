@@ -15,16 +15,23 @@ class Item extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'stock', 'unit'])
+            ->logOnly(['name', 'stock', 'unit', 'room', 'brand', 'purchase_date', 'source', 'condition', 'responsible_person', 'note'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Item has been {$eventName}");
     }
 
     protected $fillable = [
         'institution_id',
+        'room_id',
         'name',
+        'brand',
+        'purchase_date',
         'stock',
         'unit',
+        'source',
+        'condition',
+        'responsible_person',
+        'note',
         'min_stock',
         'is_active',
     ];
@@ -32,6 +39,11 @@ class Item extends Model
     public function institution()
     {
         return $this->belongsTo(Institution::class);
+    }
+
+    public function room()
+    {
+        return $this->belongsTo(Room::class);
     }
 
     public function updateRequests()

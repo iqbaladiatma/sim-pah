@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { formatRupiah } from "@/Utils/format";
 
 defineProps({
     stats: Object,
@@ -13,64 +14,85 @@ defineProps({
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Dashboard - {{ $page.props.auth.user.institution?.name }}
+            <h2 class="text-xl font-bold leading-tight text-gray-800 dark:text-gray-200">
+                Unit Dashboard
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-8">
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-blue-500">
-                        <div class="text-gray-900 dark:text-gray-100 font-bold text-xl">Barang Divisi</div>
-                        <div class="text-3xl font-bold text-blue-500">{{ stats.my_items }}</div>
+        <div class="py-6">
+            <div class="mx-auto max-w-7xl">
+                <!-- Welcome Banner -->
+                <div class="mb-8 p-8 bg-gradient-to-r from-pail-gold to-yellow-600 rounded-3xl shadow-lg shadow-pail-gold/20 text-white relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h1 class="text-3xl font-extrabold mb-2">Selamat Datang, {{ $page.props.auth.user.name }}!</h1>
+                        <p class="opacity-90 max-w-xl">
+                            Kelola inventaris dan pengajuan operasional unit Anda dengan cepat dan transparan melalui sistem SIM PAH.
+                        </p>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-orange-500">
-                        <div class="text-gray-900 dark:text-gray-100 font-bold text-xl">Menunggu Approx</div>
-                        <div class="text-3xl font-bold text-orange-500">{{ stats.my_pending_requests }}</div>
-                    </div>
+                    <!-- Decorative element -->
+                    <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="flex gap-4 mb-8">
-                    <Link :href="route('dashboard')" class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600 transition">
-                        + Buat Pengajuan Baru
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <Link :href="route('items.index')" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-pail-gold/10 rounded-xl group-hover:bg-pail-gold/20 transition">
+                                <svg class="w-6 h-6 text-pail-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            </div>
+                            <span class="text-3xl font-black text-gray-800 dark:text-white">{{ stats.my_items }}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Item Barang Unit</h3>
+                        <p class="text-sm text-gray-500 mt-1">Total inventaris aktif di unit Anda.</p>
                     </Link>
-                    <Link :href="route('dashboard')" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition">
-                        Update Stok Barang
+
+                    <Link :href="route('requests.index')" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-red-50 rounded-xl group-hover:bg-red-100 transition">
+                                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <span class="text-3xl font-black text-red-500">{{ stats.my_pending_requests }}</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Pengajuan Menunggu</h3>
+                        <p class="text-sm text-gray-500 mt-1">Permintaan biaya/stok yang belum disetujui URT.</p>
                     </Link>
                 </div>
 
                 <!-- Recent Requests -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <h3 class="text-lg font-bold mb-4">Pengajuan Terakhir Saya</h3>
-                        <div v-if="last_requests.length === 0" class="text-gray-500 italic">Belum ada pengajuan.</div>
-                        <table v-else class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Aktivitas Pengajuan Terakhir</h3>
+                        <Link :href="route('requests.index')" class="text-xs font-bold text-pail-gold hover:underline">Lihat Semua</Link>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 dark:bg-gray-900/50 text-[10px] font-black uppercase text-gray-400">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Judul</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                    <th class="px-6 py-4">Judul</th>
+                                    <th class="px-6 py-4">Tipe</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-6 py-4 text-right">Biaya</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <tr v-for="req in last_requests" :key="req.id">
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ req.title }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap capitalize">{{ req.type.replace(/_/g, ' ') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                            :class="{
-                                                'bg-yellow-100 text-yellow-800': req.status === 'pending',
-                                                'bg-green-100 text-green-800': req.status === 'approved',
-                                                'bg-red-100 text-red-800': req.status === 'rejected',
-                                            }">
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tr v-for="req in last_requests" :key="req.id" class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{{ req.title }}</td>
+                                    <td class="px-6 py-4 text-xs font-bold uppercase text-gray-500">{{ req.type }}</td>
+                                    <td class="px-6 py-4">
+                                        <span :class="{
+                                            'bg-yellow-100 text-yellow-700': req.status === 'pending',
+                                            'bg-green-100 text-green-700': req.status === 'approved',
+                                            'bg-red-100 text-red-700': req.status === 'rejected'
+                                        }" class="px-2 py-1 rounded-full text-[10px] font-black uppercase">
                                             {{ req.status }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ new Date(req.created_at).toLocaleDateString() }}</td>
+                                    <td class="px-6 py-4 text-sm text-right font-mono font-bold text-gray-700 dark:text-gray-300">
+                                        {{ formatRupiah(req.estimated_cost) }}
+                                    </td>
+                                </tr>
+                                <tr v-if="last_requests.length === 0">
+                                    <td colspan="4" class="px-6 py-10 text-center text-sm text-gray-500 italic">Belum ada pengajuan.</td>
                                 </tr>
                             </tbody>
                         </table>

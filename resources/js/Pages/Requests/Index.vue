@@ -1,18 +1,26 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { formatRupiah, parseRupiah } from "@/Utils/format";
 
 const props = defineProps({
     requests: Object,
 });
 
 const form = useForm({
-    type: "utilitas",
+    type: "",
     title: "",
     description: "",
     estimated_cost: 0,
     photo_evidence: null,
+});
+
+const costDisplay = computed({
+    get: () => formatRupiah(form.estimated_cost),
+    set: (val) => {
+        form.estimated_cost = parseRupiah(val);
+    }
 });
 
 const isCreateModalOpen = ref(false);
@@ -57,111 +65,60 @@ const getStatusColor = (status) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-            >
-                Data Pengajuan Saya (Utilitas, B7, Darurat)
+            <h2 class="text-xl font-bold leading-tight text-gray-800 dark:text-gray-200">
+                Data Pengajuan Saya
             </h2>
         </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <!-- Add Button -->
-                <div class="mb-6 flex justify-end">
+                <div class="mb-8 flex justify-end">
                     <button
                         @click="openCreateModal()"
-                        class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600 transition"
+                        class="px-6 py-3 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition shadow-lg shadow-pail-gold/20 font-bold"
                     >
                         + Buat Pengajuan Baru
                     </button>
                 </div>
 
                 <!-- Table -->
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-                >
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-2xl border border-gray-100 dark:border-gray-700">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <table
-                            class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                        >
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead>
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Tipe
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Judul
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Est. Biaya
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Status
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Aksi
-                                    </th>
+                                <tr class="text-[10px] font-black uppercase text-gray-400">
+                                    <th class="px-6 py-4 text-left">Tipe</th>
+                                    <th class="px-6 py-4 text-left">Judul</th>
+                                    <th class="px-6 py-4 text-left">Est. Biaya</th>
+                                    <th class="px-6 py-4 text-left">Status</th>
+                                    <th class="px-6 py-4 text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody
-                                class="divide-y divide-gray-200 dark:divide-gray-700"
-                            >
-                                <tr v-for="req in requests.data" :key="req.id">
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap capitalize"
-                                    >
-                                        {{ req.type }}
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tr v-for="req in requests.data" :key="req.id" class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-xs font-bold uppercase text-gray-500">{{ req.type }}</span>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="font-bold">
-                                            {{ req.title }}
-                                        </div>
-                                        <div
-                                            class="text-xs text-gray-500 truncate max-w-xs"
-                                        >
-                                            {{ req.description }}
-                                        </div>
+                                        <div class="font-bold text-gray-900 dark:text-white">{{ req.title }}</div>
+                                        <div class="text-xs text-gray-400 truncate max-w-xs">{{ req.description }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap font-mono font-bold text-gray-700 dark:text-gray-300">
+                                        {{ formatRupiah(req.estimated_cost) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        Rp
-                                        {{
-                                            new Intl.NumberFormat(
-                                                "id-ID",
-                                            ).format(req.estimated_cost)
-                                        }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                            :class="getStatusColor(req.status)"
-                                        >
+                                        <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-black rounded-full uppercase" :class="getStatusColor(req.status)">
                                             {{ req.status }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <a
-                                            v-if="req.photo_evidence"
-                                            :href="`/storage/${req.photo_evidence}`"
-                                            target="_blank"
-                                            class="text-blue-600 hover:text-blue-900 mr-2 text-sm"
-                                            >Lihat Foto</a
-                                        >
-                                        <span
-                                            v-if="req.admin_note"
-                                            class="block text-xs text-gray-500 mt-1 max-w-[150px] ml-auto"
-                                            >Note: {{ req.admin_note }}</span
-                                        >
+                                        <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="text-pail-gold hover:underline font-bold text-xs">Lihat Bukti</a>
+                                        <div v-if="req.admin_note" class="text-[10px] text-gray-400 mt-1 italic">Note: {{ req.admin_note }}</div>
                                     </td>
+                                </tr>
+                                <tr v-if="requests.data.length === 0">
+                                    <td colspan="5" class="px-6 py-10 text-center text-gray-500 italic">Belum ada pengajuan.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -171,139 +128,38 @@ const getStatusColor = (status) => {
         </div>
 
         <!-- Create Modal -->
-        <div
-            v-if="isCreateModalOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-        >
-            <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6"
-            >
-                <h3
-                    class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100"
-                >
-                    Buat Pengajuan Baru
-                </h3>
+        <div v-if="isCreateModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md p-8 border border-gray-100 dark:border-gray-700">
+                <h3 class="text-xl font-black mb-6 text-gray-900 dark:text-white">Form Pengajuan Unit</h3>
 
-                <form @submit.prevent="submitCreate">
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Tipe Pengajuan</label
-                        >
-                        <select
-                            v-model="form.type"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        >
-                            <option value="utilitas">
-                                Utilitas (Air, Listrik, Internet)
-                            </option>
-                            <option value="b7">B7 (Beras, Bumbu, dll)</option>
-                            <option value="darurat">Darurat</option>
-                        </select>
-                        <div
-                            v-if="form.errors.type"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.type }}
-                        </div>
+                <form @submit.prevent="submitCreate" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tipe Pengajuan</label>
+                        <input v-model="form.type" type="text" class="block w-full border-gray-200 rounded-xl shadow-sm focus:border-pail-gold focus:ring-pail-gold dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" placeholder="Contoh: Utilitas, B7, Darurat" required />
                     </div>
 
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Judul</label
-                        >
-                        <input
-                            v-model="form.title"
-                            type="text"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required
-                        />
-                        <div
-                            v-if="form.errors.title"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.title }}
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Judul / Keperluan</label>
+                        <input v-model="form.title" type="text" class="block w-full border-gray-200 rounded-xl shadow-sm focus:border-pail-gold focus:ring-pail-gold dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" required placeholder="Contoh: Perbaikan AC Masjid" />
                     </div>
 
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Deskripsi</label
-                        >
-                        <textarea
-                            v-model="form.description"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required
-                        ></textarea>
-                        <div
-                            v-if="form.errors.description"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.description }}
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Deskripsi Lengkap</label>
+                        <textarea v-model="form.description" rows="3" class="block w-full border-gray-200 rounded-xl shadow-sm focus:border-pail-gold focus:ring-pail-gold dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" required placeholder="Jelaskan secara detail..."></textarea>
                     </div>
 
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Estimasi Biaya</label
-                        >
-                        <input
-                            v-model="form.estimated_cost"
-                            type="number"
-                            min="0"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required
-                        />
-                        <div
-                            v-if="form.errors.estimated_cost"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.estimated_cost }}
-                        </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Estimasi Biaya (Otomatis IDR)</label>
+                        <input v-model="costDisplay" type="text" class="block w-full border-gray-200 rounded-xl shadow-sm focus:border-pail-gold focus:ring-pail-gold dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono font-bold text-lg" required />
                     </div>
 
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Foto Bukti</label
-                        >
-                        <input
-                            @input="onFileChange"
-                            type="file"
-                            accept="image/*"
-                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300"
-                            required
-                        />
-                        <div
-                            v-if="form.errors.photo_evidence"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.photo_evidence }}
-                        </div>
-                    </div>
 
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button
-                            type="button"
-                            @click="closeCreateModal"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600"
-                            :disabled="form.processing"
-                        >
-                            Kirim
-                        </button>
+                    <div class="flex justify-end gap-3 mt-8">
+                        <button type="button" @click="closeCreateModal" class="px-6 py-2.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 font-bold transition">Batal</button>
+                        <button type="submit" class="px-6 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 font-bold shadow-lg shadow-pail-gold/20 transition" :disabled="form.processing">Kirim Pengajuan</button>
                     </div>
                 </form>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-

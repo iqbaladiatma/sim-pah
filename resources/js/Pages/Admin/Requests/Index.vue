@@ -1,7 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { formatRupiah, parseRupiah } from "@/Utils/format";
 
 const props = defineProps({
     requests: Object,
@@ -17,11 +18,18 @@ const isCreateModalOpen = ref(false);
 const selectedRequest = ref(null);
 
 const createForm = useForm({
-    type: "utilitas",
+    type: "",
     title: "",
     description: "",
     estimated_cost: 0,
     photo_evidence: null,
+});
+
+const costDisplay = computed({
+    get: () => formatRupiah(createForm.estimated_cost),
+    set: (val) => {
+        createForm.estimated_cost = parseRupiah(val);
+    }
 });
 
 const openCreateModal = () => {
@@ -170,13 +178,8 @@ const getStatusColor = (status) => {
                                             {{ req.description }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        Rp
-                                        {{
-                                            new Intl.NumberFormat(
-                                                "id-ID",
-                                            ).format(req.estimated_cost)
-                                        }}
+                                    <td class="px-6 py-4 whitespace-nowrap font-mono font-bold text-gray-700">
+                                        {{ formatRupiah(req.estimated_cost) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span
@@ -214,6 +217,7 @@ const getStatusColor = (status) => {
                 </div>
             </div>
         </div>
+
         <!-- Admin Action Modal -->
         <div
             v-if="isAdminModalOpen"
@@ -298,16 +302,13 @@ const getStatusColor = (status) => {
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                             >Tipe Pengajuan</label
                         >
-                        <select
+                        <input
                             v-model="createForm.type"
+                            type="text"
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        >
-                            <option value="utilitas">
-                                Utilitas (Air, Listrik, Internet)
-                            </option>
-                            <option value="b7">B7 (Beras, Bumbu, dll)</option>
-                            <option value="darurat">Darurat</option>
-                        </select>
+                            placeholder="Contoh: Utilitas, B7, Darurat"
+                            required
+                        />
                         <div
                             v-if="createForm.errors.type"
                             class="text-red-500 text-sm mt-1"
@@ -359,10 +360,9 @@ const getStatusColor = (status) => {
                             >Estimasi Biaya</label
                         >
                         <input
-                            v-model="createForm.estimated_cost"
-                            type="number"
-                            min="0"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            v-model="costDisplay"
+                            type="text"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono font-bold"
                             required
                         />
                         <div
@@ -373,25 +373,6 @@ const getStatusColor = (status) => {
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Foto Bukti</label
-                        >
-                        <input
-                            @input="onFileChange"
-                            type="file"
-                            accept="image/*"
-                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-300"
-                            required
-                        />
-                        <div
-                            v-if="createForm.errors.photo_evidence"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ createForm.errors.photo_evidence }}
-                        </div>
-                    </div>
 
                     <div class="flex justify-end gap-2 mt-6">
                         <button

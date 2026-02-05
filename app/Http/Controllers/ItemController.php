@@ -10,7 +10,7 @@ class ItemController extends Controller
     {
         $user = $request->user();
 
-        $query = \App\Models\Item::with('institution');
+        $query = \App\Models\Item::with(['institution', 'room']);
 
         if ($user->role === 'karyawan') {
             $query->where('institution_id', $user->institution_id);

@@ -15,32 +15,51 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Karyawan Items (Accessible only by Karyawan)
+    // Lembaga Items (Accessible only by Lembaga)
     Route::resource('items', \App\Http\Controllers\ItemController::class)
         ->only(['index', 'update'])
-        ->middleware('role:karyawan');
+        ->middleware('role:lembaga');
 
-    // Karyawan Requests (Accessible only by Karyawan)
+    // Lembaga Requests (Accessible only by Lembaga)
     Route::resource('requests', \App\Http\Controllers\RequestController::class)
         ->only(['index', 'store'])
-        ->middleware('role:karyawan');
+        ->middleware('role:lembaga');
 
-    // Karyawan Dashboard
+    // Lembaga Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\Karyawan\DashboardController::class , 'index'])
-        ->middleware('role:karyawan')
+        ->middleware('role:lembaga')
         ->name('dashboard');
 
     // Admin Routes
-    Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware('admin.access')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class , 'index'])->name('dashboard');
+
+            // Institutions
+            Route::post('/institutions/import', [\App\Http\Controllers\Admin\InstitutionController::class , 'import'])->name('institutions.import');
+            Route::get('/institutions/template', [\App\Http\Controllers\Admin\InstitutionController::class , 'downloadTemplate'])->name('institutions.template');
             Route::resource('institutions', \App\Http\Controllers\Admin\InstitutionController::class);
-            Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+
+            // Items / Inventory
+            Route::post('/items/import', [\App\Http\Controllers\Admin\ItemController::class , 'import'])->name('items.import');
+            Route::get('/items/template', [\App\Http\Controllers\Admin\ItemController::class , 'downloadTemplate'])->name('items.template');
             Route::resource('items', \App\Http\Controllers\Admin\ItemController::class);
+
+            // Rooms
+            Route::get('/rooms-data/{institution}', [\App\Http\Controllers\Admin\RoomController::class , 'getByInstitution'])->name('rooms.by_institution');
+            Route::post('/rooms/import', [\App\Http\Controllers\Admin\RoomController::class , 'import'])->name('rooms.import');
+            Route::get('/rooms/template', [\App\Http\Controllers\Admin\RoomController::class , 'downloadTemplate'])->name('rooms.template');
+            Route::resource('rooms', \App\Http\Controllers\Admin\RoomController::class);
+
+            Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+
             Route::get('/item-requests', [\App\Http\Controllers\Admin\ItemRequestController::class , 'index'])->name('item_requests.index');
             Route::post('/item-requests/{itemUpdateRequest}/approve', [\App\Http\Controllers\Admin\ItemRequestController::class , 'approve'])->name('item_requests.approve');
             Route::post('/item-requests/{itemUpdateRequest}/reject', [\App\Http\Controllers\Admin\ItemRequestController::class , 'reject'])->name('item_requests.reject');
+
             // General Requests Admin Management
             Route::resource('requests', \App\Http\Controllers\Admin\GeneralRequestController::class)->only(['index', 'update']);
+            Route::get('/logs', [\App\Http\Controllers\Admin\LogController::class , 'index'])->name('logs.index');
+            Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class , 'index'])->name('reports.index');
         }
         );
     });

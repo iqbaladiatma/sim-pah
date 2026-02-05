@@ -36,4 +36,9 @@ class Institution extends Model
     {
         return $this->hasMany(Item::class);
     }
+
+    public function requests()
+    {
+        return $this->hasMany(Request::class);
+    }
 }

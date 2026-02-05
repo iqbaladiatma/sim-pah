@@ -61,6 +61,21 @@ class User extends Authenticatable
         ];
     }
 
+    public function isSuperAdmin()
+    {
+        return $this->role === 'super admin';
+    }
+
+    public function isAdmin()
+    {
+        return in_array($this->role, ['super admin', 'admin']);
+    }
+
+    public function isLembaga()
+    {
+        return $this->role === 'lembaga';
+    }
+
     public function institution()
     {
         return $this->belongsTo(Institution::class);

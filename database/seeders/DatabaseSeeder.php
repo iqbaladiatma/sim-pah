@@ -2,47 +2,54 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Institution;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        $institutions = [
-            ['name' => 'SD Islam Al-Azhar', 'code' => 'SD-IA'],
-            ['name' => 'SMP Islam Al-Azhar', 'code' => 'SMP-IA'],
-            ['name' => 'SMA Islam Al-Azhar', 'code' => 'SMA-IA'],
-            ['name' => 'Rumah Tangga', 'code' => 'RT'],
-            ['name' => 'Kesantrian Putra', 'code' => 'KES-PA'],
-            ['name' => 'Kesantrian Putri', 'code' => 'KES-PI'],
-        ];
+        // 1. Super Admin (Akses Penuh)
+        User::updateOrCreate(
+        ['email' => 'admin@sim-pah.com'],
+        [
+            'name' => 'Super Admin',
+            'password' => bcrypt('password'),
+            'role' => 'super admin',
+            'institution_id' => null,
+        ]
+        );
 
-        foreach ($institutions as $inst) {
-            \App\Models\Institution::create($inst);
+        // 2. Admin URT (Operasional Pusat)
+        $urt = Institution::where('code', 'URT')->first();
+        if ($urt) {
+            User::updateOrCreate(
+            ['email' => 'urt@sim-pah.com'],
+            [
+                'name' => 'Admin URT',
+                'password' => bcrypt('password'),
+                'role' => 'admin',
+                'institution_id' => $urt->id,
+            ]
+            );
         }
 
-        User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'admin@sim-pah.com',
-            'password' => bcrypt('password'),
-            'role' => 'admin',
-            'institution_id' => null,
-        ]);
-
-        $sd = \App\Models\Institution::where('code', 'SD-IA')->first();
-        User::factory()->create([
-            'name' => 'Karyawan SD',
-            'email' => 'sd@sim-pah.com',
-            'password' => bcrypt('password'),
-            'role' => 'karyawan',
-            'institution_id' => $sd->id,
-        ]);
+        // 3. Contoh User Lembaga (SD Putra)
+        $sd = Institution::where('code', 'SD_PA')->first();
+        if ($sd) {
+            User::updateOrCreate(
+            ['email' => 'sdputra@sim-pah.com'],
+            [
+                'name' => 'Admin SD Putra',
+                'password' => bcrypt('password'),
+                'role' => 'lembaga',
+                'institution_id' => $sd->id,
+            ]
+            );
+        }
     }
 }
