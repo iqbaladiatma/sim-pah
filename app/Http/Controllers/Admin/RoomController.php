@@ -20,6 +20,14 @@ class RoomController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        $institutions = Institution::all();
+        return Inertia::render('Admin/Rooms/Create', [
+            'institutions' => $institutions
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -30,7 +38,16 @@ class RoomController extends Controller
 
         Room::create($validated);
 
-        return redirect()->back()->with('success', 'Ruangan berhasil dibuat.');
+        return redirect()->route('admin.rooms.index')->with('success', 'Ruangan berhasil dibuat.');
+    }
+
+    public function edit(Room $room)
+    {
+        $institutions = Institution::all();
+        return Inertia::render('Admin/Rooms/Edit', [
+            'room' => $room,
+            'institutions' => $institutions
+        ]);
     }
 
     public function update(Request $request, Room $room)
@@ -43,7 +60,7 @@ class RoomController extends Controller
 
         $room->update($validated);
 
-        return redirect()->back()->with('success', 'Ruangan berhasil diperbarui.');
+        return redirect()->route('admin.rooms.index')->with('success', 'Ruangan berhasil diperbarui.');
     }
 
     public function destroy(Room $room)

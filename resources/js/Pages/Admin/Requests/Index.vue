@@ -1,78 +1,11 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
-import { ref, computed } from "vue";
-import { formatRupiah, parseRupiah } from "@/Utils/format";
+import { Head, Link } from "@inertiajs/vue3";
+import { formatRupiah } from "@/Utils/format";
 
 const props = defineProps({
     requests: Object,
 });
-
-const adminForm = useForm({
-    status: "approved",
-    admin_note: "",
-});
-
-const isAdminModalOpen = ref(false);
-const isCreateModalOpen = ref(false);
-const selectedRequest = ref(null);
-
-const createForm = useForm({
-    type: "",
-    title: "",
-    description: "",
-    estimated_cost: 0,
-    photo_evidence: null,
-});
-
-const costDisplay = computed({
-    get: () => formatRupiah(createForm.estimated_cost),
-    set: (val) => {
-        createForm.estimated_cost = parseRupiah(val);
-    }
-});
-
-const openCreateModal = () => {
-    createForm.reset();
-    isCreateModalOpen.value = true;
-};
-
-const closeCreateModal = () => {
-    isCreateModalOpen.value = false;
-    createForm.reset();
-    createForm.clearErrors();
-};
-
-const submitCreate = () => {
-    createForm.post(route("requests.store"), {
-        onSuccess: () => closeCreateModal(),
-    });
-};
-
-const onFileChange = (e) => {
-    createForm.photo_evidence = e.target.files[0];
-};
-
-const openAdminModal = (req) => {
-    selectedRequest.value = req;
-    adminForm.status = "approved";
-    adminForm.admin_note = "";
-    isAdminModalOpen.value = true;
-};
-
-const closeAdminModal = () => {
-    isAdminModalOpen.value = false;
-    selectedRequest.value = null;
-    adminForm.reset();
-};
-
-const submitAdminAction = () => {
-    if (selectedRequest.value) {
-        adminForm.put(route("admin.requests.update", selectedRequest.value.id), {
-            onSuccess: () => closeAdminModal(),
-        });
-    }
-};
 
 const getStatusColor = (status) => {
     switch (status) {
@@ -101,296 +34,150 @@ const getStatusColor = (status) => {
         </template>
 
         <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <!-- Add Button -->
-                <div class="mb-6 flex justify-end">
-                    <button
-                        @click="openCreateModal()"
-                        class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600 transition shadow-sm font-bold"
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+                <!-- Add Button Container -->
+                <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Manajemen Pengajuan</h3>
+                        <p class="text-sm text-gray-500">Utilitas, B7, Darurat</p>
+                    </div>
+                    <Link 
+                        :href="route('admin.requests.create')" 
+                        class="px-5 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all duration-200 shadow-md hover:shadow-lg font-semibold text-sm flex items-center gap-2"
                     >
-                        + Buat Pengajuan Baru
-                    </button>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Buat Pengajuan Baru
+                    </Link>
                 </div>
 
-                <!-- Table -->
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <table
-                            class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                        >
+                <!-- Desktop Table View (hidden on mobile) -->
+                <div class="hidden md:block bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <div class="p-6">
+                        <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
                             <thead>
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Lembaga
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Tipe
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Judul
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Est. Biaya
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Status
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Aksi
-                                    </th>
+                                <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
+                                    <th class="px-6 py-4 text-left">Lembaga</th>
+                                    <th class="px-6 py-4 text-left">Detail Pengajuan</th>
+                                    <th class="px-6 py-4 text-left">Biaya</th>
+                                    <th class="px-6 py-4 text-left">Status</th>
+                                    <th class="px-6 py-4 text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody
-                                class="divide-y divide-gray-200 dark:divide-gray-700"
-                            >
-                                <tr v-for="req in requests.data" :key="req.id">
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                    >
-                                        {{ req.user.institution?.code || 'ADMIN' }}
-                                    </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap capitalize"
-                                    >
-                                        {{ req.type }}
+                            <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                                <tr v-for="req in requests.data" :key="req.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                            {{ req.user.institution?.code || 'ADMIN' }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="font-bold">
-                                            {{ req.title }}
+                                        <div class="flex flex-col gap-1">
+                                            <span class="text-[10px] uppercase font-bold text-gray-400 tracking-widest">{{ req.type }}</span>
+                                            <span class="font-bold text-gray-900 dark:text-white line-clamp-1">{{ req.title }}</span>
+                                            <p class="text-xs text-gray-500 line-clamp-1">{{ req.description }}</p>
                                         </div>
-                                        <div
-                                            class="text-xs text-gray-500 truncate max-w-xs"
-                                        >
-                                            {{ req.description }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-mono font-bold text-gray-700">
-                                        {{ formatRupiah(req.estimated_cost) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span
-                                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                            :class="getStatusColor(req.status)"
-                                        >
+                                        <span class="font-mono font-bold text-gray-700 dark:text-gray-300">
+                                            {{ formatRupiah(req.estimated_cost) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm"
+                                            :class="getStatusColor(req.status)">
                                             {{ req.status }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <a
-                                            v-if="req.photo_evidence"
-                                            :href="`/storage/${req.photo_evidence}`"
-                                            target="_blank"
-                                            class="text-blue-600 hover:text-blue-900 mr-4 text-sm"
-                                            >Lihat Foto</a
-                                        >
-                                        <button
-                                            v-if="req.status === 'pending'"
-                                            @click="openAdminModal(req)"
-                                            class="text-green-600 hover:text-green-900 font-bold"
-                                        >
-                                            Proses
-                                        </button>
-                                        <span
-                                            v-if="req.admin_note"
-                                            class="block text-xs text-gray-500 mt-1 max-w-[150px] ml-auto"
-                                            >Note: {{ req.admin_note }}</span
-                                        >
+                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs font-bold underline">
+                                                Foto
+                                            </a>
+                                            <Link 
+                                                v-if="req.status === 'pending'"
+                                                :href="route('admin.requests.edit', req.id)"
+                                                class="px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition shadow-sm font-bold text-xs"
+                                            >
+                                                Proses
+                                            </Link>
+                                            <Link 
+                                                v-else
+                                                :href="route('admin.requests.edit', req.id)"
+                                                class="text-gray-400 hover:text-gray-600 text-xs font-bold underline"
+                                            >
+                                                Detail
+                                            </Link>
+                                        </div>
+                                        <div v-if="req.admin_note" class="mt-2 text-[10px] text-gray-500 italic max-w-[150px] ml-auto truncate">
+                                            Note: {{ req.admin_note }}
+                                        </div>
                                     </td>
+                                </tr>
+                                <tr v-if="requests.data.length === 0">
+                                    <td colspan="5" class="px-6 py-20 text-center text-gray-400 italic font-medium">Belum ada pengajuan.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Admin Action Modal -->
-        <div
-            v-if="isAdminModalOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-        >
-            <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-sm p-6"
-            >
-                <h3
-                    class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100"
-                >
-                    Proses Pengajuan
-                </h3>
-                <p class="mb-4 text-sm text-gray-500">
-                    {{ selectedRequest?.title }}
-                </p>
+                <!-- Mobile Card View (visible only on mobile) -->
+                <div class="md:hidden space-y-4">
+                    <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                    {{ req.user.institution?.code || 'ADMIN' }}
+                                </span>
+                                <span class="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm"
+                                    :class="getStatusColor(req.status)">
+                                    {{ req.status }}
+                                </span>
+                            </div>
 
-                <form @submit.prevent="submitAdminAction">
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Keputusan</label
-                        >
-                        <select
-                            v-model="adminForm.status"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        >
-                            <option value="approved">Setujui</option>
-                            <option value="rejected">Tolak</option>
-                        </select>
-                    </div>
+                            <div class="mb-4">
+                                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1 block">{{ req.type }}</span>
+                                <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-1">{{ req.title }}</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{{ req.description }}</p>
+                            </div>
 
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Catatan Admin</label
-                        >
-                        <textarea
-                            v-model="adminForm.admin_note"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="Opsional"
-                        ></textarea>
-                    </div>
+                            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl mb-4 border border-gray-100 dark:border-gray-700/50">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] uppercase font-black text-gray-400">Estimasi Biaya</span>
+                                    <span class="font-mono font-black text-gray-800 dark:text-gray-200 text-base">
+                                        {{ formatRupiah(req.estimated_cost) }}
+                                    </span>
+                                </div>
+                            </div>
 
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button
-                            type="button"
-                            @click="closeAdminModal"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                            :disabled="adminForm.processing"
-                        >
-                            Simpan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Create Modal -->
-        <div
-            v-if="isCreateModalOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-        >
-            <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6"
-            >
-                <h3
-                    class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100"
-                >
-                    Buat Pengajuan Baru (Admin)
-                </h3>
-
-                <form @submit.prevent="submitCreate">
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Tipe Pengajuan</label
-                        >
-                        <input
-                            v-model="createForm.type"
-                            type="text"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            placeholder="Contoh: Utilitas, B7, Darurat"
-                            required
-                        />
-                        <div
-                            v-if="createForm.errors.type"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ createForm.errors.type }}
+                            <div class="flex gap-2">
+                                <a 
+                                    v-if="req.photo_evidence" 
+                                    :href="`/storage/${req.photo_evidence}`" 
+                                    target="_blank"
+                                    class="flex-1 py-2.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 transition text-center font-bold text-sm"
+                                >
+                                    Lihat Bukti Foto
+                                </a>
+                                <Link 
+                                    :href="route('admin.requests.edit', req.id)"
+                                    class="flex-1 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition text-center font-bold text-sm shadow-md shadow-green-500/20"
+                                >
+                                    {{ req.status === 'pending' ? 'Proses Pengajuan' : 'Lihat Detail' }}
+                                </Link>
+                            </div>
+                            
+                            <div v-if="req.admin_note" class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-100 dark:border-yellow-900/30 rounded-xl">
+                                <span class="text-[10px] uppercase font-black text-yellow-600 dark:text-yellow-500 block mb-1">Catatan Admin</span>
+                                <p class="text-xs text-yellow-800 dark:text-yellow-200 italic">"{{ req.admin_note }}"</p>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Judul</label
-                        >
-                        <input
-                            v-model="createForm.title"
-                            type="text"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required
-                        />
-                        <div
-                            v-if="createForm.errors.title"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ createForm.errors.title }}
-                        </div>
+                    
+                    <div v-if="requests.data.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-16 text-center">
+                        <p class="text-gray-400 italic font-medium">Belum ada pengajuan.</p>
                     </div>
-
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Deskripsi</label
-                        >
-                        <textarea
-                            v-model="createForm.description"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required
-                        ></textarea>
-                        <div
-                            v-if="createForm.errors.description"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ createForm.errors.description }}
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Estimasi Biaya</label
-                        >
-                        <input
-                            v-model="costDisplay"
-                            type="text"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono font-bold"
-                            required
-                        />
-                        <div
-                            v-if="createForm.errors.estimated_cost"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ createForm.errors.estimated_cost }}
-                        </div>
-                    </div>
-
-
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button
-                            type="button"
-                            @click="closeCreateModal"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600 font-bold"
-                            :disabled="createForm.processing"
-                        >
-                            Kirim
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </AuthenticatedLayout>

@@ -15,6 +15,11 @@ class InstitutionController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        return inertia('Admin/Institutions/Create');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -25,7 +30,14 @@ class InstitutionController extends Controller
 
         \App\Models\Institution::create($validated);
 
-        return redirect()->back()->with('success', 'Lembaga berhasil ditambahkan.');
+        return redirect()->route('admin.institutions.index')->with('success', 'Lembaga berhasil ditambahkan.');
+    }
+
+    public function edit(\App\Models\Institution $institution)
+    {
+        return inertia('Admin/Institutions/Edit', [
+            'institution' => $institution
+        ]);
     }
 
     public function update(Request $request, \App\Models\Institution $institution)
@@ -38,7 +50,7 @@ class InstitutionController extends Controller
 
         $institution->update($validated);
 
-        return redirect()->back()->with('success', 'Lembaga berhasil diperbarui.');
+        return redirect()->route('admin.institutions.index')->with('success', 'Lembaga berhasil diperbarui.');
     }
 
     public function destroy(\App\Models\Institution $institution)

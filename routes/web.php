@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Lembaga Requests (Accessible only by Lembaga)
     Route::resource('requests', \App\Http\Controllers\RequestController::class)
-        ->only(['index', 'store'])
+        ->only(['index', 'store', 'create'])
         ->middleware('role:lembaga');
 
     // Lembaga Dashboard
@@ -57,7 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/item-requests/{itemUpdateRequest}/reject', [\App\Http\Controllers\Admin\ItemRequestController::class , 'reject'])->name('item_requests.reject');
 
             // General Requests Admin Management
-            Route::resource('requests', \App\Http\Controllers\Admin\GeneralRequestController::class)->only(['index', 'update']);
+            Route::resource('requests', \App\Http\Controllers\Admin\GeneralRequestController::class);
             Route::get('/logs', [\App\Http\Controllers\Admin\LogController::class , 'index'])->name('logs.index');
             Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class , 'index'])->name('reports.index');
         }

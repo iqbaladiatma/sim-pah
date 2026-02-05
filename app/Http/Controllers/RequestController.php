@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class RequestController extends Controller
 {
@@ -11,22 +12,31 @@ class RequestController extends Controller
         $user = $request->user();
         $query = \App\Models\Request::with(['user.institution', 'institution']);
 
-        if ($user->role === 'karyawan') {
+        // Filter for Lembaga role
+        if ($user->role === 'lembaga' && $user->institution_id) {
             $query->where('institution_id', $user->institution_id);
         }
 
         $requests = $query->latest()->paginate(10);
 
-        return inertia('Requests/Index', [
+        return Inertia::render('Requests/Index', [
             'requests' => $requests
         ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Requests/Create');
     }
 
     public function store(Request $request)
     {
         $user = $request->user();
-        if ($user->role !== 'karyawan' && $user->role !== 'admin')
-            abort(403, 'Hanya karyawan atau admin yang bisa membuat request.');
+
+        // Ensure user has permission (Lembaga or Admin)
+        if (!in_array($user->role, ['lembaga', 'admin'])) {
+            abort(403, 'Akses ditolak. Hanya karyawan lembaga atau admin yang bisa membuat request.');
+        }
 
         $validated = $request->validate([
             'type' => 'required|string|max:50',
@@ -40,9 +50,10 @@ class RequestController extends Controller
             ? $request->file('photo_evidence')->store('reports', 'public')
             : null;
 
+        // Auto-assign Institution ID from the User
         \App\Models\Request::create([
             'user_id' => $user->id,
-            'institution_id' => $user->institution_id,
+            'institution_id' => $user->institution_id, // Automatically tracked
             'type' => $validated['type'],
             'title' => $validated['title'],
             'description' => $validated['description'],
@@ -51,25 +62,9 @@ class RequestController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->back()->with('success', 'Pengajuan berhasil dikirim.');
+        return redirect()->route('requests.index')->with('success', 'Pengajuan berhasil dikirim.');
     }
 
-    public function update(Request $request, \App\Models\Request $generalRequest)
-    {
-        // Renamed variable to avoid conflict with Type Request
-        if ($request->user()->role !== 'admin')
-            abort(403);
-
-        $validated = $request->validate([
-            'status' => 'required|in:approved,rejected',
-            'admin_note' => 'nullable|string',
-        ]);
-
-        $generalRequest->update([
-            'status' => $validated['status'],
-            'admin_note' => $validated['admin_note'] ?? null,
-        ]);
-
-        return redirect()->back()->with('success', 'Status pengajuan diperbarui.');
-    }
+// Update is handled by Admin/GeneralRequestController for approval
+// But if we need 'edit' for the user (e.g. while pending), we can add it later.
 }

@@ -18,6 +18,14 @@ class UserController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        $institutions = \App\Models\Institution::all();
+        return inertia('Admin/Users/Create', [
+            'institutions' => $institutions
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -33,7 +41,16 @@ class UserController extends Controller
 
         \App\Models\User::create($validated);
 
-        return redirect()->back()->with('success', 'User berhasil ditambahkan.');
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
+    }
+
+    public function edit(\App\Models\User $user)
+    {
+        $institutions = \App\Models\Institution::all();
+        return inertia('Admin/Users/Edit', [
+            'user' => $user,
+            'institutions' => $institutions
+        ]);
     }
 
     public function update(Request $request, \App\Models\User $user)
@@ -56,7 +73,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        return redirect()->back()->with('success', 'User berhasil diperbarui.');
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
 
     public function destroy(\App\Models\User $user)

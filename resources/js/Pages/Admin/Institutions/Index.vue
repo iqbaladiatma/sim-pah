@@ -1,55 +1,15 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, Link, router, useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
 import Pagination from "@/Components/Pagination.vue";
+import FolderIcon from "@/Components/Icons/FolderIcon.vue";
+import PlusIcon from "@/Components/Icons/PlusIcon.vue";
+import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
 
 const props = defineProps({
     institutions: Object,
 });
-
-const form = useForm({
-    name: "",
-    code: "",
-    description: "",
-});
-
-const isModalOpen = ref(false);
-const editingInstitution = ref(null);
-
-const openModal = (institution = null) => {
-    if (institution) {
-        editingInstitution.value = institution;
-        form.name = institution.name;
-        form.code = institution.code;
-        form.description = institution.description;
-    } else {
-        editingInstitution.value = null;
-        form.reset();
-    }
-    isModalOpen.value = true;
-};
-
-const closeModal = () => {
-    isModalOpen.value = false;
-    form.reset();
-    form.clearErrors();
-};
-
-const submit = () => {
-    if (editingInstitution.value) {
-        form.put(
-            route("admin.institutions.update", editingInstitution.value.id),
-            {
-                onSuccess: () => closeModal(),
-            },
-        );
-    } else {
-        form.post(route("admin.institutions.store"), {
-            onSuccess: () => closeModal(),
-        });
-    }
-};
 
 const importForm = useForm({
     file: null,
@@ -74,7 +34,7 @@ const handleImport = () => {
 
 const deleteInstitution = (id) => {
     if (confirm("Yakin ingin menghapus lembaga ini?")) {
-        form.delete(route("admin.institutions.destroy", id));
+        router.delete(route("admin.institutions.destroy", id));
     }
 };
 </script>
@@ -94,25 +54,23 @@ const deleteInstitution = (id) => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <!-- Add Button -->
-                <div class="mb-6 flex justify-end gap-2">
+                <div class="mb-6 flex justify-end gap-3">
                     <button
                         @click="openImportModal"
-                        class="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition shadow-sm font-bold text-sm"
+                        class="px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 shadow-md hover:shadow-lg font-semibold text-sm flex items-center gap-2"
                     >
-                        📂 Impor Excel
+                        <FolderIcon className="w-4 h-4" /> Impor Excel
                     </button>
-                    <button
-                        @click="openModal()"
-                        class="px-4 py-2 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition shadow-sm font-bold text-sm"
+                    <Link
+                        :href="route('admin.institutions.create')"
+                        class="px-5 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all duration-200 shadow-md hover:shadow-lg font-semibold text-sm flex items-center gap-2"
                     >
-                        + Tambah Lembaga
-                    </button>
+                        <PlusIcon className="w-4 h-4" /> Tambah Lembaga
+                    </Link>
                 </div>
 
-                <!-- Table -->
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-                >
+                <!-- Desktop Table View (hidden on mobile) -->
+                <div class="hidden md:block bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
                         <table
                             class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
@@ -135,8 +93,7 @@ const deleteInstitution = (id) => {
                                         Deskripsi
                                     </th>
                                     <th
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
-                                    >
+                                        class="px-6 py-3 text-right text-xs font-extrabold text-gray-500 uppercase tracking-wider">
                                         Aksi
                                     </th>
                                 </tr>
@@ -160,16 +117,14 @@ const deleteInstitution = (id) => {
                                         {{ inst.description || "-" }}
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <button
-                                            @click="openModal(inst)"
-                                            class="text-blue-600 hover:text-blue-900 mr-2"
-                                        >
+                                        <Link
+                                            :href="route('admin.institutions.edit', inst.id)"
+                                            class="text-blue-600 hover:text-blue-900 font-semibold mr-2 underline">
                                             Edit
-                                        </button>
+                                        </Link>
                                         <button
                                             @click="deleteInstitution(inst.id)"
-                                            class="text-red-600 hover:text-red-900"
-                                        >
+                                            class="text-red-600 hover:text-red-900 font-semibold underline">
                                             Hapus
                                         </button>
                                     </td>
@@ -178,94 +133,47 @@ const deleteInstitution = (id) => {
                         </table>
                     </div>
                 </div>
+
+                <!-- Mobile Card View (visible only on mobile) -->
+                <div class="md:hidden space-y-4">
+                    <div v-for="inst in institutions.data" :key="inst.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="p-5">
+                            <!-- Header -->
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <span class="px-2 py-0.5 bg-pail-gold/10 text-pail-gold font-bold text-xs rounded mb-2 inline-block">{{ inst.code }}</span>
+                                    <h3 class="font-bold text-gray-900 dark:text-white text-base">{{ inst.name }}</h3>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div v-if="inst.description" class="mb-4">
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Deskripsi</span>
+                                <p class="text-sm text-gray-700 dark:text-gray-300">{{ inst.description }}</p>
+                            </div>
+                            <div v-else class="mb-4">
+                                <p class="text-sm text-gray-400 italic">Tidak ada deskripsi</p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-2">
+                                <Link :href="route('admin.institutions.edit', inst.id)" class="flex-1 py-2.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all duration-200 font-semibold text-sm text-center">
+                                    Edit
+                                </Link>
+                                <button @click="deleteInstitution(inst.id)" class="flex-1 py-2.5 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200 font-semibold text-sm">
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-if="institutions.data.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-16 text-center">
+                        <p class="text-gray-400 italic font-medium">Belum ada data lembaga.</p>
+                    </div>
+                </div>
                 <!-- Pagination -->
                 <Pagination :links="institutions.links" />
-            </div>
-        </div>
-
-        <!-- Modal -->
-        <div
-            v-if="isModalOpen"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-        >
-            <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6"
-            >
-                <h3
-                    class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100"
-                >
-                    {{
-                        editingInstitution
-                            ? "Edit Lembaga"
-                            : "Tambah Lembaga Baru"
-                    }}
-                </h3>
-
-                <form @submit.prevent="submit">
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Nama Lembaga</label
-                        >
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required
-                        />
-                        <div
-                            v-if="form.errors.name"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.name }}
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Kode Unit</label
-                        >
-                        <input
-                            v-model="form.code"
-                            type="text"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            required
-                        />
-                        <div
-                            v-if="form.errors.code"
-                            class="text-red-500 text-sm mt-1"
-                        >
-                            {{ form.errors.code }}
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >Deskripsi</label
-                        >
-                        <textarea
-                            v-model="form.description"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        ></textarea>
-                    </div>
-
-                    <div class="flex justify-end gap-2 mt-6">
-                        <button
-                            type="button"
-                            @click="closeModal"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-pail-gold text-white rounded hover:bg-yellow-600"
-                            :disabled="form.processing"
-                        >
-                            Simpan
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
 
@@ -292,8 +200,8 @@ const deleteInstitution = (id) => {
                         <p class="font-black text-gray-700 dark:text-gray-300 uppercase mb-2">Format Headers:</p>
                         <code class="block bg-white dark:bg-gray-800 p-2 rounded-lg border border-gray-200 dark:border-gray-700 font-mono">name, code, description</code>
                         <p class="mt-2 text-red-500 font-bold italic">* Pastikan kode lembaga unik.</p>
-                        <a :href="route('admin.institutions.template')" class="mt-4 block text-center py-2 px-4 bg-blue-50 text-blue-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-100 transition border border-blue-100">
-                             📥 Download Contoh CSV
+                        <a :href="route('admin.institutions.template')" class="mt-4 flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 text-blue-600 rounded-xl font-semibold text-xs uppercase tracking-wide hover:bg-blue-100 transition-all duration-200 border border-blue-100">
+                            <DownloadIcon className="w-4 h-4" /> Download Template CSV
                         </a>
                     </div>
                     <div class="flex justify-end gap-3 mt-8">

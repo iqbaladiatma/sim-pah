@@ -22,6 +22,14 @@ class ItemController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        $institutions = Institution::all();
+        return inertia('Admin/Items/Create', [
+            'institutions' => $institutions
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -42,7 +50,16 @@ class ItemController extends Controller
             'min_stock' => 0
         ]));
 
-        return redirect()->back()->with('success', 'Barang berhasil ditambahkan.');
+        return redirect()->route('admin.items.index')->with('success', 'Barang berhasil ditambahkan.');
+    }
+
+    public function edit(Item $item)
+    {
+        $institutions = Institution::all();
+        return inertia('Admin/Items/Edit', [
+            'item' => $item,
+            'institutions' => $institutions
+        ]);
     }
 
     public function update(Request $request, Item $item)
@@ -60,7 +77,7 @@ class ItemController extends Controller
         ]);
 
         $item->update($validated);
-        return redirect()->back()->with('success', 'Barang berhasil diperbarui.');
+        return redirect()->route('admin.items.index')->with('success', 'Barang berhasil diperbarui.');
     }
 
     public function destroy(Item $item)

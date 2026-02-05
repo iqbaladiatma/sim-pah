@@ -1,58 +1,19 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
+import { Head, useForm, Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
 import Pagination from "@/Components/Pagination.vue";
+import FolderIcon from "@/Components/Icons/FolderIcon.vue";
+import PlusIcon from "@/Components/Icons/PlusIcon.vue";
+import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
 
 const props = defineProps({
     rooms: Object,
-    institutions: Array,
 });
-
-const form = useForm({
-    institution_id: "",
-    name: "",
-    description: "",
-});
-
-const isModalOpen = ref(false);
-const editingRoom = ref(null);
-
-const openModal = (room = null) => {
-    if (room) {
-        editingRoom.value = room;
-        form.institution_id = room.institution_id;
-        form.name = room.name;
-        form.description = room.description;
-    } else {
-        editingRoom.value = null;
-        form.reset();
-        form.institution_id = "";
-    }
-    isModalOpen.value = true;
-};
-
-const closeModal = () => {
-    isModalOpen.value = false;
-    form.reset();
-    form.clearErrors();
-};
-
-const submit = () => {
-    if (editingRoom.value) {
-        form.put(route("admin.rooms.update", editingRoom.value.id), {
-            onSuccess: () => closeModal(),
-        });
-    } else {
-        form.post(route("admin.rooms.store"), {
-            onSuccess: () => closeModal(),
-        });
-    }
-};
 
 const deleteRoom = (id) => {
     if (confirm("Yakin ingin menghapus ruangan ini?")) {
-        form.delete(route("admin.rooms.destroy", id));
+        router.delete(route("admin.rooms.destroy", id));
     }
 };
 
@@ -91,27 +52,27 @@ const handleImport = () => {
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <!-- Action Buttons -->
-                <div class="mb-8 flex justify-end gap-3">
+                <div class="mb-6 flex justify-end gap-3">
                     <button
                         @click="openImportModal"
-                        class="px-6 py-3 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition shadow-lg shadow-green-600/20 font-bold text-sm flex items-center gap-2"
+                        class="px-5 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 shadow-md hover:shadow-lg font-semibold text-sm flex items-center gap-2"
                     >
-                        <span>📂</span> Impor Excel
+                        <FolderIcon className="w-4 h-4" /> Impor Excel
                     </button>
-                    <button
-                        @click="openModal()"
-                        class="px-6 py-3 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 transition shadow-lg shadow-pail-gold/20 font-bold text-sm flex items-center gap-2"
+                    <Link
+                        :href="route('admin.rooms.create')"
+                        class="px-5 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all duration-200 shadow-md hover:shadow-lg font-semibold text-sm flex items-center gap-2"
                     >
-                        <span>+</span> Tambah Ruangan
-                    </button>
+                        <PlusIcon className="w-4 h-4" /> Tambah Ruangan
+                    </Link>
                 </div>
 
-                <!-- Table Container -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700">
+                <!-- Desktop Table View (hidden on mobile) -->
+                <div class="hidden md:block bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
                     <div class="p-6">
                         <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
                             <thead>
-                                <tr class="text-[10px] font-black uppercase text-gray-400 tracking-widest bg-gray-50/50 dark:bg-gray-900/50">
+                                <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
                                     <th class="px-6 py-4 text-left">Lembaga</th>
                                     <th class="px-6 py-4 text-left">Nama Ruangan</th>
                                     <th class="px-6 py-4 text-left">Deskripsi / Lokasi</th>
@@ -120,19 +81,58 @@ const handleImport = () => {
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
                                 <tr v-for="room in rooms.data" :key="room.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
-                                    <td class="px-6 py-4 font-black text-pail-gold">{{ room.institution?.code }}</td>
+                                    <td class="px-6 py-4 font-bold text-pail-gold">{{ room.institution?.code }}</td>
                                     <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ room.name }}</td>
                                     <td class="px-6 py-4 text-gray-500 italic">{{ room.description || '-' }}</td>
                                     <td class="px-6 py-4 text-right whitespace-nowrap">
-                                        <button @click="openModal(room)" class="text-blue-600 hover:text-blue-900 font-bold mr-3 underline italic">Edit</button>
-                                        <button @click="deleteRoom(room.id)" class="text-red-600 hover:text-red-900 font-bold underline italic">Hapus</button>
+                                        <Link :href="route('admin.rooms.edit', room.id)" class="text-blue-600 hover:text-blue-900 font-semibold mr-3 underline">Edit</Link>
+                                        <button @click="deleteRoom(room.id)" class="text-red-600 hover:text-red-900 font-semibold underline">Hapus</button>
                                     </td>
                                 </tr>
                                 <tr v-if="rooms.data.length === 0">
-                                    <td colspan="4" class="px-6 py-20 text-center text-gray-400 italic font-bold text-sm">Belum ada data ruangan.</td>
+                                    <td colspan="4" class="px-6 py-20 text-center text-gray-400 italic font-medium text-sm">Belum ada data ruangan.</td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- Mobile Card View (visible only on mobile) -->
+                <div class="md:hidden space-y-4">
+                    <div v-for="room in rooms.data" :key="room.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="p-5">
+                            <!-- Header -->
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1">
+                                    <span class="px-2 py-0.5 bg-pail-gold/10 text-pail-gold font-bold text-xs rounded mb-2 inline-block">{{ room.institution?.code }}</span>
+                                    <h3 class="font-bold text-gray-900 dark:text-white text-base">{{ room.name }}</h3>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div v-if="room.description" class="mb-4">
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Deskripsi / Lokasi</span>
+                                <p class="text-sm text-gray-700 dark:text-gray-300 italic">{{ room.description }}</p>
+                            </div>
+                            <div v-else class="mb-4">
+                                <p class="text-sm text-gray-400 italic">Tidak ada deskripsi</p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-2">
+                                <Link :href="route('admin.rooms.edit', room.id)" class="flex-1 py-2.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all duration-200 font-semibold text-sm text-center">
+                                    Edit
+                                </Link>
+                                <button @click="deleteRoom(room.id)" class="flex-1 py-2.5 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200 font-semibold text-sm">
+                                    Hapus
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-if="rooms.data.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-16 text-center">
+                        <p class="text-gray-400 italic font-medium">Belum ada data ruangan.</p>
                     </div>
                 </div>
                 <!-- Pagination -->
@@ -140,45 +140,12 @@ const handleImport = () => {
             </div>
         </div>
 
-        <!-- Form Modal -->
-        <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-            <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl w-full max-w-md p-10 border border-gray-100 dark:border-gray-700">
-                <h3 class="text-2xl font-black mb-8 text-gray-900 dark:text-white uppercase tracking-tighter text-center">
-                    {{ editingRoom ? "📝 Edit Ruangan" : "✨ Ruangan Baru" }}
-                </h3>
-
-                <form @submit.prevent="submit" class="space-y-6">
-                    <div>
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Pilih Lembaga</label>
-                        <select v-model="form.institution_id" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required>
-                            <option value="">- Pilih Lembaga -</option>
-                            <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.code }} - {{ inst.name }}</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nama Ruangan</label>
-                        <input v-model="form.name" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Contoh: Lab Komputer 1, Gudang..." required />
-                        <div v-if="form.errors.name" class="text-red-500 text-[10px] mt-1 font-bold">{{ form.errors.name }}</div>
-                    </div>
-
-                    <div>
-                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keterangan / Deskripsi</label>
-                        <textarea v-model="form.description" rows="3" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Contoh: Lantai 2, Sebelah Perpustakaan..."></textarea>
-                    </div>
-
-                    <div class="flex gap-3 mt-8">
-                        <button type="button" @click="closeModal" class="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl hover:bg-gray-200 font-bold transition">Batal</button>
-                        <button type="submit" class="flex-[2] py-4 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-black shadow-lg shadow-pail-gold/20 transition uppercase tracking-widest" :disabled="form.processing">Simpan Ruangan</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <!-- Import Modal -->
         <div v-if="isImportModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl w-full max-w-md p-10 border border-gray-100 dark:border-gray-700">
-                <h3 class="text-xl font-black mb-6 text-gray-900 dark:text-white uppercase tracking-tighter italic text-center text-green-600">📂 Import Master Ruangan</h3>
+                <h3 class="text-xl font-bold mb-6 text-gray-900 dark:text-white text-center flex items-center justify-center gap-2">
+                    <FolderIcon className="w-5 h-5 text-green-600" /> Import Master Ruangan
+                </h3>
                 <form @submit.prevent="handleImport">
                     <div class="mb-6">
                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Pilih File Excel (.xlsx, .xls, .csv)</label>
@@ -194,8 +161,8 @@ const handleImport = () => {
                         <div class="space-y-1 font-mono text-[9px] text-center">
                             <code>institution_code, name, description</code>
                         </div>
-                        <a :href="route('admin.rooms.template')" class="mt-4 block text-center py-3 px-4 bg-blue-50 text-blue-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-100 transition border border-blue-100 shadow-sm">
-                             📥 Download Template Ruangan (.csv)
+                        <a :href="route('admin.rooms.template')" class="mt-4 flex items-center justify-center gap-2 py-3 px-4 bg-blue-50 text-blue-600 rounded-xl font-semibold text-xs uppercase tracking-wide hover:bg-blue-100 transition-all duration-200 border border-blue-100 shadow-sm">
+                            <DownloadIcon className="w-4 h-4" /> Download Template (.csv)
                         </a>
                     </div>
                     <div class="flex flex-col gap-3">

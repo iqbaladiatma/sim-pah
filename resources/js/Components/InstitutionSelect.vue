@@ -73,7 +73,7 @@ const toggle = () => {
                     v-model="searchQuery"
                     type="text" 
                     placeholder="Cari lembaga..."
-                    class="w-full p-2 text-sm bg-gray-50 dark:bg-gray-700 border-none rounded focus:ring-pail-gold"
+                    class="w-full p-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white border-none rounded focus:ring-pail-gold"
                     autofocus
                 />
             </div>
@@ -82,7 +82,7 @@ const toggle = () => {
                     v-for="institution in filteredInstitutions" 
                     :key="institution.id"
                     @click="select(institution)"
-                    class="p-2.5 text-sm hover:bg-pail-gold hover:text-white cursor-pointer transition flex items-center justify-between"
+                    class="p-2.5 text-sm text-gray-900 dark:text-gray-200 hover:bg-pail-gold hover:text-white cursor-pointer transition flex items-center justify-between"
                 >
                     <span>{{ institution.name }}</span>
                     <span class="text-xs opacity-60">{{ institution.code }}</span>

@@ -34,111 +34,112 @@ const reject = (id) => {
         </template>
 
         <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <div
-                            v-if="requests.data.length === 0"
-                            class="text-center py-8 text-gray-500"
-                        >
-                            Tidak ada permintaan update stok pending.
-                        </div>
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+                <!-- Page Header -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Validasi Update Stok</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Review dan approve permintaan update stok dari karyawan</p>
+                </div>
 
-                        <table
-                            v-else
-                            class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                        >
+                <!-- Desktop Table View (hidden on mobile) -->
+                <div v-if="requests.data.length > 0" class="hidden md:block bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <div class="p-6">
+                        <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
                             <thead>
-                                <tr>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Lembaga
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Barang
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Perubahan
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Alasan
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
-                                    >
-                                        Aksi
-                                    </th>
+                                <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
+                                    <th class="px-6 py-3 text-left">Lembaga</th>
+                                    <th class="px-6 py-3 text-left">Barang</th>
+                                    <th class="px-6 py-3 text-left">Perubahan</th>
+                                    <th class="px-6 py-3 text-left">Alasan</th>
+                                    <th class="px-6 py-3 text-right">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody
-                                class="divide-y divide-gray-200 dark:divide-gray-700"
-                            >
-                                <tr v-for="req in requests.data" :key="req.id">
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                                    >
-                                        {{ req.user.institution.code }} -
-                                        {{ req.user.institution.name }}
+                            <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                                <tr v-for="req in requests.data" :key="req.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="font-bold text-pail-gold">{{ req.user.institution.code }}</span>
+                                        <span class="text-gray-500">- {{ req.user.institution.name }}</span>
                                     </td>
-                                    <td
-                                        class="px-6 py-4 whitespace-nowrap font-bold"
-                                    >
+                                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900 dark:text-white">
                                         {{ req.item.name }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <span
-                                                class="text-gray-500 line-through mr-2"
-                                                >{{ req.old_data.stock }}</span
-                                            >
-                                            <span
-                                                class="text-lg font-bold text-blue-600"
-                                                >{{ req.new_data.stock }}</span
-                                            >
-                                            <span
-                                                class="ml-1 text-xs text-gray-400"
-                                                >{{ req.item.unit }}</span
-                                            >
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-gray-400 line-through text-sm">{{ req.old_data.stock }}</span>
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                            </svg>
+                                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ req.new_data.stock }}</span>
+                                            <span class="text-xs text-gray-400">{{ req.item.unit }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm">
+                                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
                                         {{ req.reason }}
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <button
-                                            @click="approve(req.id)"
-                                            class="text-green-600 hover:text-green-900 mr-4 font-bold"
-                                        >
+                                    <td class="px-6 py-4 text-right whitespace-nowrap">
+                                        <button @click="approve(req.id)" class="text-green-600 hover:text-green-900 dark:hover:text-green-400 mr-4 font-semibold underline">
                                             Terima
                                         </button>
-                                        <button
-                                            @click="reject(req.id)"
-                                            class="text-red-600 hover:text-red-900 font-bold"
-                                        >
+                                        <button @click="reject(req.id)" class="text-red-600 hover:text-red-900 dark:hover:text-red-400 font-semibold underline">
                                             Tolak
                                         </button>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
 
-                        <!-- Pagination -->
-                        <div
-                            class="mt-4"
-                            v-if="requests.links && requests.links.length > 3"
-                        >
-                            <!-- Implement Pagination here if needed -->
+                <!-- Mobile Card View (visible only on mobile) -->
+                <div v-if="requests.data.length > 0" class="md:hidden space-y-4">
+                    <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="p-5">
+                            <!-- Header -->
+                            <div class="mb-4">
+                                <span class="px-2 py-0.5 bg-pail-gold/10 text-pail-gold font-bold text-xs rounded inline-block mb-2">{{ req.user.institution.code }}</span>
+                                <h3 class="font-bold text-gray-900 dark:text-white text-base">{{ req.item.name }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ req.user.institution.name }}</p>
+                            </div>
+
+                            <!-- Stock Change -->
+                            <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-2">Perubahan Stok</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl font-bold text-gray-400 line-through">{{ req.old_data.stock }}</span>
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                    </svg>
+                                    <span class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ req.new_data.stock }}</span>
+                                    <span class="text-sm text-gray-500">{{ req.item.unit }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Reason -->
+                            <div class="mb-4">
+                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Alasan</span>
+                                <p class="text-sm text-gray-700 dark:text-gray-300">{{ req.reason }}</p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-2">
+                                <button @click="approve(req.id)" class="flex-1 py-2.5 bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-all duration-200 font-semibold text-sm">
+                                    ✓ Terima
+                                </button>
+                                <button @click="reject(req.id)" class="flex-1 py-2.5 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200 font-semibold text-sm">
+                                    ✗ Tolak
+                                </button>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Empty State -->
+                <div v-if="requests.data.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-16 text-center">
+                    <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <p class="text-gray-400 italic font-medium">Tidak ada permintaan update stok pending</p>
+                    <p class="text-sm text-gray-400 mt-1">Semua request sudah diproses</p>
                 </div>
             </div>
         </div>
