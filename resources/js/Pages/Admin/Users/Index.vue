@@ -19,90 +19,93 @@ const deleteUser = (id) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-            >
-                Manajemen User
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Manajemen Pengguna
+                </h2>
+                <Link
+                    :href="route('admin.users.create')"
+                    class="px-6 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-xs uppercase tracking-widest flex items-center gap-2"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah User
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-8">
                 
                 <!-- Stats Overview -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-pail-gold shadow-sm">
-                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Total User</h3>
-                        <div class="text-3xl font-black text-gray-900 dark:text-white">{{ stats.total }}</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Total User</h3>
+                        <div class="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total }}</div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-blue-500 shadow-sm">
-                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Admin Pusat</h3>
-                        <div class="text-3xl font-black text-blue-600">{{ stats.admins }}</div>
+                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Admin Pusat</h3>
+                        <div class="text-4xl font-black text-blue-600 tracking-tighter">{{ stats.admins }}</div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-green-500 shadow-sm">
-                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">User Lembaga</h3>
-                        <div class="text-3xl font-black text-green-600">{{ stats.lembaga }}</div>
+                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">User Lembaga</h3>
+                        <div class="text-4xl font-black text-green-600 tracking-tighter">{{ stats.lembaga }}</div>
+                    </div>
+                    <div class="hidden md:block bg-gradient-to-br from-gray-900 to-black p-8 rounded-[2.5rem] shadow-xl col-span-1">
+                        <div class="flex flex-col justify-center h-full">
+                            <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Keamanan</h3>
+                            <div class="text-sm font-black text-white uppercase tracking-widest">Akses Berlapis</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Add Button Container -->
-                <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Manajemen User</h3>
-                        <p class="text-sm text-gray-500">Kelola data pengguna sistem dan hak akses mereka</p>
-                    </div>
-                    <Link :href="route('admin.users.create')" class="px-5 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all duration-200 shadow-md hover:shadow-lg font-semibold text-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Tambah User
-                    </Link>
-                </div>
-
-                <!-- Desktop Table View (hidden on mobile) -->
-                <div class="hidden md:block bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
-                    <div class="p-6">
-                        <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                <!-- Desktop Table View -->
+                <div class="hidden md:block bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-8">
+                        <table class="min-w-full">
                             <thead>
-                                <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
-                                    <th class="px-6 py-4 text-left">No</th>
-                                    <th class="px-6 py-4 text-left">User</th>
-                                    <th class="px-6 py-4 text-left">Role & Lembaga</th>
-                                    <th class="px-6 py-4 text-right">Aksi</th>
+                                <tr class="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b border-gray-100 dark:border-gray-700">
+                                    <th class="px-6 py-6 text-left">No</th>
+                                    <th class="px-6 py-6 text-left">Pengguna</th>
+                                    <th class="px-6 py-6 text-left">Role & Lembaga</th>
+                                    <th class="px-6 py-6 text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                                <tr v-for="(user, index) in users.data" :key="user.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
-                                    <td class="px-6 py-4 font-bold text-gray-500">
+                                <tr v-for="(user, index) in users.data" :key="user.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-all group">
+                                    <td class="px-6 py-8 font-black text-gray-300">
                                         {{ (users.current_page - 1) * users.per_page + index + 1 }}
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-10 h-10 rounded-xl bg-pail-gold/10 text-pail-gold flex items-center justify-center font-black">
+                                    <td class="px-6 py-8">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-[1.25rem] bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white flex items-center justify-center font-black text-lg shadow-sm border border-gray-200 dark:border-gray-600 group-hover:bg-pail-gold group-hover:text-white group-hover:border-pail-gold transition-all duration-500">
                                                 {{ user.name.charAt(0) }}
                                             </div>
                                             <div>
-                                                <div class="font-bold text-gray-900 dark:text-white">{{ user.name }}</div>
-                                                <div class="text-xs text-gray-500">{{ user.email }}</div>
+                                                <div class="font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ user.name }}</div>
+                                                <div class="text-xs text-gray-400 font-medium">{{ user.email }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex flex-col gap-1">
-                                            <span class="px-2 py-0.5 inline-flex text-[10px] font-black uppercase rounded-lg w-fit transition-colors"
+                                    <td class="px-6 py-8">
+                                        <div class="flex flex-col gap-2">
+                                            <span class="px-3 py-1 inline-flex text-[9px] font-black uppercase tracking-widest rounded-xl w-fit border shadow-sm transition-all"
                                                 :class="{
-                                                    'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400': user.role === 'super admin',
-                                                    'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': user.role === 'admin',
-                                                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': user.role === 'lembaga',
+                                                    'bg-purple-50 text-purple-700 border-purple-100': user.role === 'super admin',
+                                                    'bg-blue-50 text-blue-700 border-blue-100': user.role === 'admin',
+                                                    'bg-green-50 text-green-700 border-green-100': user.role === 'lembaga',
                                                 }">
                                                 {{ user.role }}
                                             </span>
-                                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                                                {{ user.institution ? user.institution.name : "-" }}
+                                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                                {{ user.institution ? user.institution.name : "ADMINISTRATOR" }}
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-right whitespace-nowrap">
-                                        <Link :href="route('admin.users.edit', user.id)" class="text-blue-600 hover:text-blue-900 font-semibold mr-3 underline">Edit</Link>
-                                        <button @click="deleteUser(user.id)" class="text-red-600 hover:text-red-900 font-semibold underline">Hapus</button>
+                                    <td class="px-6 py-8 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-3">
+                                            <Link :href="route('admin.users.edit', user.id)" class="px-5 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg font-black text-[10px] uppercase tracking-widest">Edit</Link>
+                                            <button @click="deleteUser(user.id)" class="px-5 py-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest border border-red-100">Hapus</button>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -110,46 +113,45 @@ const deleteUser = (id) => {
                     </div>
                 </div>
 
-                <!-- Mobile Card View (visible only on mobile) -->
-                <div class="md:hidden space-y-4">
-                    <div v-for="user in users.data" :key="user.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="p-5">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="w-12 h-12 rounded-2xl bg-pail-gold text-white flex items-center justify-center text-xl font-black shadow-lg shadow-pail-gold/20">
+                <!-- Mobile Card View -->
+                <div class="md:hidden space-y-6">
+                    <div v-for="user in users.data" :key="user.id" class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-8">
+                            <div class="flex items-center gap-5 mb-8">
+                                <div class="w-16 h-16 rounded-[1.5rem] bg-pail-gold text-white flex items-center justify-center text-2xl font-black shadow-xl shadow-pail-gold/20">
                                     {{ user.name.charAt(0) }}
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <h3 class="font-bold text-gray-900 dark:text-white text-base truncate">{{ user.name }}</h3>
-                                    <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
+                                    <h3 class="font-black text-gray-900 dark:text-white text-xl uppercase tracking-tight truncate leading-none mb-1">{{ user.name }}</h3>
+                                    <p class="text-xs text-gray-400 font-medium truncate">{{ user.email }}</p>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4 mb-5 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
+                            <div class="grid grid-cols-2 gap-6 mb-8 p-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border border-gray-100 dark:border-gray-800">
                                 <div>
-                                    <span class="text-[10px] uppercase font-black text-gray-400 block mb-1">Role</span>
-                                    <span class="px-2 py-0.5 inline-flex text-[10px] font-black uppercase rounded-lg transition-colors shadow-sm"
+                                    <span class="text-[9px] uppercase font-black text-gray-400 tracking-widest block mb-2">Role Akses</span>
+                                    <span class="px-3 py-1 inline-flex text-[9px] font-black uppercase tracking-widest rounded-xl transition-all border shadow-sm"
                                         :class="{
-                                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400': user.role === 'super admin',
-                                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': user.role === 'admin',
-                                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': user.role === 'lembaga',
+                                            'bg-purple-50 text-purple-700 border-purple-100': user.role === 'super admin',
+                                            'bg-blue-50 text-blue-700 border-blue-100': user.role === 'admin',
+                                            'bg-green-50 text-green-700 border-green-100': user.role === 'lembaga',
                                         }">
                                         {{ user.role }}
                                     </span>
                                 </div>
                                 <div>
-                                    <span class="text-[10px] uppercase font-black text-gray-400 block mb-1">Lembaga</span>
-                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-200 truncate block">
-                                        {{ user.institution ? user.institution.name : "-" }}
+                                    <span class="text-[9px] uppercase font-black text-gray-400 tracking-widest block mb-2">Penempatan</span>
+                                    <span class="text-[10px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-widest leading-tight block">
+                                        {{ user.institution ? user.institution.name : "ADMIN PUSAT" }}
                                     </span>
                                 </div>
                             </div>
 
-                            <!-- Action Buttons -->
-                            <div class="flex gap-2">
-                                <Link :href="route('admin.users.edit', user.id)" class="flex-1 py-2.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all duration-200 font-semibold text-sm text-center">
+                            <div class="flex gap-3">
+                                <Link :href="route('admin.users.edit', user.id)" class="flex-1 py-4 bg-gray-900 text-white rounded-2xl transition text-center font-black text-[10px] uppercase tracking-widest shadow-xl shadow-black/10">
                                     Edit
                                 </Link>
-                                <button @click="deleteUser(user.id)" class="flex-1 py-2.5 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200 font-semibold text-sm">
+                                <button @click="deleteUser(user.id)" class="flex-1 py-4 bg-red-50 text-red-600 rounded-2xl transition text-center font-black text-[10px] uppercase tracking-widest border border-red-100">
                                     Hapus
                                 </button>
                             </div>

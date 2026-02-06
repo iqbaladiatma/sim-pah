@@ -27,145 +27,123 @@ const reject = (id) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-            >
-                Validasi Update Stok
-            </h2>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                        Audit & Validasi Stok
+                    </h2>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Gudang Pusat v2.0</p>
+                </div>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-12">
                 
-                <!-- Stats Overview -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-yellow-50 dark:bg-yellow-900/10 rounded-2xl p-5 border border-yellow-100 dark:border-yellow-900/30">
-                        <h3 class="text-yellow-600 dark:text-yellow-500 font-black uppercase tracking-wider text-[10px] mb-1">Pending</h3>
-                        <div class="text-2xl font-black text-yellow-700 dark:text-yellow-400">{{ stats.pending }}</div>
+                <!-- Premium Stats Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl group-hover:bg-yellow-500/20 transition-all"></div>
+                        <h3 class="text-yellow-600 dark:text-yellow-500 font-black uppercase tracking-[0.2em] text-[10px] mb-4">Pending Audit</h3>
+                        <div class="flex items-end gap-2">
+                            <span class="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.pending }}</span>
+                            <span class="text-[10px] font-black text-gray-400 uppercase mb-2">Request</span>
+                        </div>
                     </div>
-                    <div class="bg-green-50 dark:bg-green-900/10 rounded-2xl p-5 border border-green-100 dark:border-green-900/30">
-                        <h3 class="text-green-600 dark:text-green-500 font-black uppercase tracking-wider text-[10px] mb-1">Disetujui</h3>
-                        <div class="text-2xl font-black text-green-700 dark:text-green-400">{{ stats.approved }}</div>
+                    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-all"></div>
+                        <h3 class="text-green-600 dark:text-green-500 font-black uppercase tracking-[0.2em] text-[10px] mb-4">Disetujui</h3>
+                        <div class="flex items-end gap-2">
+                            <span class="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.approved }}</span>
+                            <span class="text-[10px] font-black text-gray-400 uppercase mb-2">Aksi</span>
+                        </div>
                     </div>
-                    <div class="bg-red-50 dark:bg-red-900/10 rounded-2xl p-5 border border-red-100 dark:border-red-900/30">
-                        <h3 class="text-red-600 dark:text-red-500 font-black uppercase tracking-wider text-[10px] mb-1">Ditolak</h3>
-                        <div class="text-2xl font-black text-red-700 dark:text-red-400">{{ stats.rejected }}</div>
+                    <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-gray-700 relative overflow-hidden group hover:shadow-xl transition-all duration-500">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all"></div>
+                        <h3 class="text-red-600 dark:text-red-500 font-black uppercase tracking-[0.2em] text-[10px] mb-4">Ditolak</h3>
+                        <div class="flex items-end gap-2">
+                            <span class="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.rejected }}</span>
+                            <span class="text-[10px] font-black text-gray-400 uppercase mb-2">Aksi</span>
+                        </div>
                     </div>
-                     <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700">
-                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-1">Total Request</h3>
-                        <div class="text-2xl font-black text-gray-900 dark:text-white">{{ stats.total }}</div>
+                    <div class="bg-pail-gold rounded-[2.5rem] p-8 shadow-xl shadow-pail-gold/20 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                        <h3 class="text-white/80 font-black uppercase tracking-[0.2em] text-[10px] mb-4">Total Siklus</h3>
+                        <div class="flex items-end gap-2 text-white">
+                            <span class="text-4xl font-black tracking-tighter">{{ stats.total }}</span>
+                            <span class="text-[10px] font-black uppercase mb-2 opacity-80">Update</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Page Header -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-6">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1">Validasi Update Stok</h3>
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Review dan approve permintaan update stok dari karyawan</p>
-                </div>
+                <!-- Main Content Canvas -->
+                <div class="bg-white dark:bg-gray-800 rounded-[3rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-10 border-b border-gray-50 dark:border-gray-700/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div>
+                            <h3 class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">Daftar Audit Menunggu</h3>
+                            <p class="text-sm text-gray-400 font-medium">Validasi perubahan stok inventaris dari setiap lembaga.</p>
+                        </div>
+                    </div>
 
-                <!-- Desktop Table View (hidden on mobile) -->
-                <div v-if="requests.data.length > 0" class="hidden md:block bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
-                    <div class="p-6">
-                        <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                    <div v-if="requests.data.length > 0" class="overflow-x-auto">
+                        <table class="w-full">
                             <thead>
-                                <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
-                                    <th class="px-6 py-3 text-left">No</th>
-                                    <th class="px-6 py-3 text-left">Lembaga</th>
-                                    <th class="px-6 py-3 text-left">Barang</th>
-                                    <th class="px-6 py-3 text-left">Perubahan</th>
-                                    <th class="px-6 py-3 text-left">Alasan</th>
-                                    <th class="px-6 py-3 text-right">Aksi</th>
+                                <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 transition">
+                                    <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Info Lembaga</th>
+                                    <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Item & Perubahan</th>
+                                    <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Alasan / Note</th>
+                                    <th class="px-8 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                                <tr v-for="(req, index) in requests.data" :key="req.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition">
-                                    <td class="px-6 py-4 font-bold text-gray-500">
-                                        {{ (requests.current_page - 1) * requests.per_page + index + 1 }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="font-bold text-pail-gold">{{ req.user.institution.code }}</span>
-                                        <span class="text-gray-500">- {{ req.user.institution.name }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-900 dark:text-white">
-                                        {{ req.item.name }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center gap-2">
-                                            <span class="text-gray-400 line-through text-sm">{{ req.old_data.stock }}</span>
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                            </svg>
-                                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">{{ req.new_data.stock }}</span>
-                                            <span class="text-xs text-gray-400">{{ req.item.unit }}</span>
+                                <tr v-for="req in requests.data" :key="req.id" class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/40 transition-all duration-300">
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-900 flex items-center justify-center font-black text-gray-400 border border-gray-200/50 group-hover:bg-pail-gold group-hover:text-white group-hover:border-pail-gold transition-all duration-500">
+                                                {{ req.user.institution.code.charAt(0) }}
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-black text-gray-900 dark:text-white tracking-tight">{{ req.user.institution.name }}</div>
+                                                <div class="text-[10px] font-black text-pail-gold uppercase tracking-widest">{{ req.user.institution.code }}</div>
+                                            </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                                        {{ req.reason }}
+                                    <td class="px-8 py-6">
+                                        <div class="text-sm font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tight">{{ req.item.name }}</div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="px-3 py-1 rounded-lg bg-gray-100 dark:bg-gray-900 text-[10px] font-black text-gray-400 line-through">{{ req.old_data.stock }}</span>
+                                            <svg class="w-4 h-4 text-pail-gold animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                                            <span class="px-3 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-[11px] font-black text-blue-600 dark:text-blue-400">{{ req.new_data.stock }} Unit</span>
+                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 text-right whitespace-nowrap">
-                                        <button @click="approve(req.id)" class="text-green-600 hover:text-green-900 dark:hover:text-green-400 mr-4 font-semibold underline">
-                                            Terima
-                                        </button>
-                                        <button @click="reject(req.id)" class="text-red-600 hover:text-red-900 dark:hover:text-red-400 font-semibold underline">
-                                            Tolak
-                                        </button>
+                                    <td class="px-8 py-6">
+                                        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs italic line-clamp-2">
+                                            "{{ req.reason }}"
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6 text-right">
+                                        <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+                                            <button @click="approve(req.id)" class="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-600/20 font-black text-[10px] uppercase tracking-widest">
+                                                Approve
+                                            </button>
+                                            <button @click="reject(req.id)" class="px-6 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition font-black text-[10px] uppercase tracking-widest">
+                                                Reject
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
 
-                <!-- Mobile Card View (visible only on mobile) -->
-                <div v-if="requests.data.length > 0" class="md:hidden space-y-4">
-                    <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="p-5">
-                            <!-- Header -->
-                            <div class="mb-4">
-                                <span class="px-2 py-0.5 bg-pail-gold/10 text-pail-gold font-bold text-xs rounded inline-block mb-2">{{ req.user.institution.code }}</span>
-                                <h3 class="font-bold text-gray-900 dark:text-white text-base">{{ req.item.name }}</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ req.user.institution.name }}</p>
-                            </div>
-
-                            <!-- Stock Change -->
-                            <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-2">Perubahan Stok</span>
-                                <div class="flex items-center gap-3">
-                                    <span class="text-2xl font-bold text-gray-400 line-through">{{ req.old_data.stock }}</span>
-                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-                                    </svg>
-                                    <span class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ req.new_data.stock }}</span>
-                                    <span class="text-sm text-gray-500">{{ req.item.unit }}</span>
-                                </div>
-                            </div>
-
-                            <!-- Reason -->
-                            <div class="mb-4">
-                                <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Alasan</span>
-                                <p class="text-sm text-gray-700 dark:text-gray-300">{{ req.reason }}</p>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="flex gap-2">
-                                <button @click="approve(req.id)" class="flex-1 py-2.5 bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-all duration-200 font-semibold text-sm">
-                                    ✓ Terima
-                                </button>
-                                <button @click="reject(req.id)" class="flex-1 py-2.5 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-200 font-semibold text-sm">
-                                    ✗ Tolak
-                                </button>
-                            </div>
+                    <!-- Empty State -->
+                    <div v-else class="py-32 text-center">
+                        <div class="inline-flex w-24 h-24 items-center justify-center rounded-[2rem] bg-gray-50 dark:bg-gray-900 text-gray-200 dark:text-gray-800 mb-8 border border-gray-100 dark:border-gray-800 transition-transform transform hover:scale-110 duration-700">
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
+                        <h4 class="text-xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Audit Selesai</h4>
+                        <p class="text-sm text-gray-400 font-medium">Tidak ada antrian validasi stok. Pekerjaan bagus!</p>
                     </div>
-                </div>
-
-                <!-- Empty State -->
-                <div v-if="requests.data.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 p-16 text-center">
-                    <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <p class="text-gray-400 italic font-medium">Tidak ada permintaan update stok pending</p>
-                    <p class="text-sm text-gray-400 mt-1">Semua request sudah diproses</p>
                 </div>
             </div>
         </div>

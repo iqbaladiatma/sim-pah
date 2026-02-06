@@ -27,127 +27,118 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                Edit User
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Profil Pengguna
+                </h2>
+                <Link :href="route('admin.users.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                    &larr; Batalkan
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
-                    <div class="p-8 text-gray-900 dark:text-gray-100">
-                        <header class="mb-8 flex justify-between items-center">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-5xl sm:px-6 lg:px-8 space-y-8">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-12">
+                        <header class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Update Informasi User</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Ubah detail pengguna. Kosongkan password jika tidak ingin mengubahnya.
+                                <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Update Akun</h3>
+                                <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-sm">
+                                    Modifikasi informasi autentikasi dan otorisasi pengguna.
                                 </p>
                             </div>
-                            <Link :href="route('admin.users.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
-                                &larr; Kembali
-                            </Link>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-[1.5rem] bg-gray-50 dark:bg-gray-900 flex items-center justify-center font-black text-2xl text-pail-gold border border-gray-100 dark:border-gray-800">
+                                    {{ user.name.charAt(0) }}
+                                </div>
+                                <div>
+                                    <div class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Terdaftar Sejak</div>
+                                    <div class="text-sm font-black text-gray-900 dark:text-white">{{ new Date(user.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) }}</div>
+                                </div>
+                            </div>
                         </header>
 
-                        <form @submit.prevent="submit" class="max-w-2xl space-y-6">
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    v-model="form.name"
-                                    required
-                                    autofocus
-                                />
-                                <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
-                            </div>
+                        <form @submit.prevent="submit" class="space-y-10">
+                            <!-- Detail Section -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Nama Lengkap</label>
+                                        <input v-model="form.name" type="text" 
+                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            required autofocus />
+                                        <div v-if="form.errors.name" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.name }}</div>
+                                    </div>
 
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    v-model="form.email"
-                                    required
-                                />
-                                <div v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</div>
-                            </div>
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Email Address</label>
+                                        <input v-model="form.email" type="email" 
+                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            required />
+                                        <div v-if="form.errors.email" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.email }}</div>
+                                    </div>
 
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Password (Opsional)</label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    v-model="form.password"
-                                    placeholder="Biarkan kosong jika tidak ingin mengubah"
-                                />
-                                <div v-if="form.errors.password" class="text-red-500 text-xs mt-1">{{ form.errors.password }}</div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Role / Peran</label>
-                                    <select
-                                        id="role"
-                                        v-model="form.role"
-                                        class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    >
-                                        <option value="super admin">Super Admin</option>
-                                        <option value="admin">Admin</option>
-                                        <option value="lembaga">Lembaga</option>
-                                    </select>
-                                    <div v-if="form.errors.role" class="text-red-500 text-xs mt-1">{{ form.errors.role }}</div>
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Password (Opsional)</label>
+                                        <input v-model="form.password" type="password" 
+                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            placeholder="••••••••" />
+                                        <p class="text-[9px] text-gray-400 font-bold italic mt-2 ml-1">* Kosongkan jika tidak ingin mengubah password.</p>
+                                        <div v-if="form.errors.password" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.password }}</div>
+                                    </div>
                                 </div>
-                                
-                                <div>
-                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga (Opsional)</label>
-                                    <select
-                                        id="institution_id"
-                                        v-model="form.institution_id"
-                                        class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    >
-                                        <option value="">- Pilih Lembaga -</option>
-                                        <option :value="null">Bukan Lembaga</option>
-                                        <option
-                                            v-for="inst in institutions"
-                                            :key="inst.id"
-                                            :value="inst.id"
-                                        >
-                                            {{ inst.code }} - {{ inst.name }}
-                                        </option>
-                                    </select>
-                                    <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
+
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Akses Role</label>
+                                        <select v-model="form.role" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6">
+                                            <option value="super admin">Super Admin (IT)</option>
+                                            <option value="admin">Admin (URT)</option>
+                                            <option value="lembaga">Karyawan Lembaga</option>
+                                        </select>
+                                        <div v-if="form.errors.role" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.role }}</div>
+                                    </div>
+                                    
+                                    <div v-if="form.role === 'lembaga'">
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Penempatan Lembaga</label>
+                                        <select v-model="form.institution_id" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6">
+                                            <option value="">- Pilih Lembaga -</option>
+                                            <option v-for="inst in institutions" :key="inst.id" :value="inst.id">
+                                                {{ inst.code }} - {{ inst.name }}
+                                            </option>
+                                        </select>
+                                        <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.institution_id }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">WhatsApp / No. HP</label>
+                                        <input v-model="form.phone" type="text" 
+                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" />
+                                        <div v-if="form.errors.phone" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.phone }}</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">No. Telepon (Opsional)</label>
-                                <input
-                                    id="phone"
-                                    type="text"
-                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    v-model="form.phone"
-                                />
-                                <div v-if="form.errors.phone" class="text-red-500 text-xs mt-1">{{ form.errors.phone }}</div>
-                            </div>
-
-                            <div class="flex items-center gap-4 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
-                                <button type="submit" class="px-10 py-3 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-bold shadow-lg shadow-pail-gold/20 transition" :disabled="form.processing">
-                                    Simpan Perubahan
+                            <!-- Actions -->
+                            <div class="flex items-center gap-6 mt-8 pt-10 border-t border-gray-50 dark:border-gray-800">
+                                <button 
+                                    type="submit" 
+                                    class="flex-1 py-5 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-xs" 
+                                    :disabled="form.processing"
+                                >
+                                    Perbarui Data User
                                 </button>
-                                <Link :href="route('admin.users.index')" class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl hover:bg-gray-200 font-bold transition text-center">
+                                <Link :href="route('admin.users.index')" class="px-8 py-5 bg-gray-50 text-gray-400 rounded-[2rem] hover:bg-gray-100 font-bold transition text-xs uppercase tracking-widest">
                                     Batal
                                 </Link>
-
                                 <Transition
-                                    enter-active-class="transition ease-in-out"
-                                    enter-from-class="opacity-0"
-                                    leave-active-class="transition ease-in-out"
-                                    leave-to-class="opacity-0"
+                                    enter-active-class="transition ease-in-out duration-500"
+                                    enter-from-class="opacity-0 translate-x-4"
+                                    leave-active-class="transition ease-in-out duration-500"
+                                    leave-to-class="opacity-0 -translate-x-4"
                                 >
-                                    <p v-if="form.recentlySuccessful" class="text-sm text-green-600 dark:text-green-400 font-bold">✓ Tersimpan.</p>
+                                    <p v-if="form.recentlySuccessful" class="text-[10px] font-black text-green-500 uppercase tracking-widest">✓ Berhasil Disimpan</p>
                                 </Transition>
                             </div>
                         </form>

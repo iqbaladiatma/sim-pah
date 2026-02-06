@@ -39,79 +39,110 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                Buat Pengajuan Baru
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Buat Pengajuan Baru
+                </h2>
+                <Link :href="route('admin.requests.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                    &larr; Batalkan
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700">
-                    <div class="p-8 text-gray-900 dark:text-gray-100">
-                        <header class="mb-8 flex justify-between items-center">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Form Pengajuan</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Isi detail pengajuan baru (Utilitas, B7, Darurat) secara manual.
-                                </p>
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-4xl sm:px-6 lg:px-8 space-y-8">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-pail-gold opacity-5 rounded-full blur-3xl"></div>
+                    
+                    <div class="p-12 relative z-10">
+                        <header class="mb-14">
+                            <div class="flex items-center gap-4 mb-3">
+                                <div class="w-10 h-[2px] bg-pail-gold"></div>
+                                <span class="text-[10px] font-black text-pail-gold uppercase tracking-[0.3em]">Operational Portal</span>
                             </div>
-                            <Link :href="route('admin.requests.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
-                                &larr; Kembali
-                            </Link>
+                            <h3 class="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-3">Form Pengajuan</h3>
+                            <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
+                                Masukkan rincian kebutuhan operasional lembaga. Pastikan data estimasi biaya dan bukti pendukung akurat untuk proses audit.
+                            </p>
                         </header>
 
-                        <form @submit.prevent="submit" class="max-w-xl space-y-6">
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga Pengaju</label>
-                                <SearchableSelect
-                                    v-model="form.institution_id"
-                                    :options="institutions"
-                                    placeholder="- Pilih Lembaga -"
-                                    :customLabel="(opt) => `${opt.code} - ${opt.name}`"
-                                />
-                                <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
+                        <form @submit.prevent="submit" class="space-y-10">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Lembaga / Unit Pengaju</label>
+                                    <SearchableSelect
+                                        v-model="form.institution_id"
+                                        :options="institutions"
+                                        placeholder="- Pilih Lembaga Unit -"
+                                        :customLabel="(opt) => `${opt.code} - ${opt.name}`"
+                                        class="premium-select"
+                                    />
+                                    <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.institution_id }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Klasifikasi Tipe</label>
+                                    <input v-model="form.type" type="text" list="type-suggestions" 
+                                        class="w-full h-16 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-8 transition-all" 
+                                        placeholder="E.g. Utilitas, B7" required />
+                                    <datalist id="type-suggestions">
+                                        <option value="Utilitas"></option>
+                                        <option value="Barang Habis Pakai (B7)"></option>
+                                        <option value="Darurat"></option>
+                                        <option value="Pemeliharaan"></option>
+                                    </datalist>
+                                    <div v-if="form.errors.type" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.type }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Judul Pengajuan</label>
+                                    <input v-model="form.title" type="text" 
+                                        class="w-full h-16 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-8 transition-all" 
+                                        placeholder="Ringkasan singkat..." required />
+                                    <div v-if="form.errors.title" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.title }}</div>
+                                </div>
+
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Deskripsi & Justifikasi</label>
+                                    <textarea v-model="form.description" rows="5" 
+                                        class="w-full border-gray-100 rounded-[2.5rem] bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold p-8 leading-relaxed transition-all" 
+                                        placeholder="Berikan rincian lengkap mengenai kebutuhan ini..." required></textarea>
+                                    <div v-if="form.errors.description" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.description }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Estimasi Anggaran</label>
+                                    <div class="relative group">
+                                        <div class="absolute left-6 top-1/2 -translate-y-1/2 text-pail-gold font-black text-lg">Rp</div>
+                                        <input v-model="costDisplay" type="text" 
+                                            class="w-full h-20 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-3xl font-black font-mono tracking-tighter text-gray-900 dark:text-white pl-16 pr-8 focus:ring-pail-gold focus:border-pail-gold" 
+                                            required />
+                                    </div>
+                                    <div v-if="form.errors.estimated_cost" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.estimated_cost }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Bukti Foto / Lampiran</label>
+                                    <div class="relative group">
+                                        <input type="file" @change="onFileChange" 
+                                            class="w-full text-[10px] text-gray-400 file:mr-6 file:py-5 file:px-8 file:rounded-2xl file:border-0 file:text-[10px] file:font-black file:bg-gray-900 file:text-pail-gold hover:file:bg-pail-gold hover:file:text-white file:transition-all bg-gray-50/50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 h-20 flex items-center" />
+                                    </div>
+                                    <div v-if="form.errors.photo_evidence" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.photo_evidence }}</div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Tipe Pengajuan</label>
-                                <input v-model="form.type" type="text" list="type-suggestions" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Contoh: Utilitas, B7, Darurat" required />
-                                <datalist id="type-suggestions">
-                                    <option value="Utilitas"></option>
-                                    <option value="Barang Habis Pakai (B7)"></option>
-                                    <option value="Darurat"></option>
-                                    <option value="Pemeliharaan"></option>
-                                    <option value="Renovasi"></option>
-                                    <option value="Pengadaan"></option>
-                                </datalist>
-                                <div v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type }}</div>
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Judul Pengajuan</label>
-                                <input v-model="form.title" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required />
-                                <div v-if="form.errors.title" class="text-red-500 text-xs mt-1">{{ form.errors.title }}</div>
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Deskripsi Detail</label>
-                                <textarea v-model="form.description" rows="4" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required></textarea>
-                                <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Estimasi Biaya</label>
-                                <input v-model="costDisplay" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-lg font-mono font-bold tracking-tight text-gray-900 dark:text-white" required />
-                                <div v-if="form.errors.estimated_cost" class="text-red-500 text-xs mt-1">{{ form.errors.estimated_cost }}</div>
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Bukti Foto (Opsional)</label>
-                                <input type="file" @change="onFileChange" class="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition" />
-                                <div v-if="form.errors.photo_evidence" class="text-red-500 text-xs mt-1">{{ form.errors.photo_evidence }}</div>
-                            </div>
-
-                            <div class="flex items-center gap-4 mt-8 pt-4 border-t border-gray-100 dark:border-gray-700">
-                                <button type="submit" class="px-8 py-3 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-bold shadow-lg shadow-pail-gold/20 transition" :disabled="form.processing">Kirim Pengajuan</button>
+                            <div class="flex items-center gap-6 mt-14 pt-12 border-t border-gray-50 dark:border-gray-800">
+                                <button 
+                                    type="submit" 
+                                    class="flex-1 py-6 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-2xl shadow-pail-gold/30 transition-all uppercase tracking-[0.3em] text-xs transform active:scale-[0.98]" 
+                                    :disabled="form.processing"
+                                >
+                                    Konfirmasi & Kirim
+                                </button>
+                                <Link :href="route('admin.requests.index')" 
+                                    class="px-10 py-6 bg-gray-50 text-gray-400 rounded-[2rem] hover:bg-gray-100 font-black transition-all text-xs uppercase tracking-[0.2em] border border-gray-100">
+                                    Batalkan
+                                </Link>
                             </div>
                         </form>
                     </div>

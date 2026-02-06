@@ -23,51 +23,81 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Edit Ruangan
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Profil Ruangan
+                </h2>
+                <Link :href="route('admin.rooms.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                    &larr; Batalkan
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700">
-                    <div class="p-8 text-gray-900 dark:text-gray-100">
-                        <header class="mb-8 flex justify-between items-center">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-5xl sm:px-6 lg:px-8 space-y-8">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-12">
+                        <header class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Form Edit Ruangan</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Perbarui data ruangan.
+                                <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Update Lokasi</h3>
+                                <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-sm">
+                                    Modifikasi detail penempatan dan keterangan fisik ruangan.
                                 </p>
                             </div>
-                            <Link :href="route('admin.rooms.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
-                                &larr; Kembali
-                            </Link>
+                            <div class="px-8 py-4 bg-gray-50 dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+                                <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Room ID</div>
+                                <div class="text-xl font-black text-pail-gold tracking-tighter">#{{ room.id }}</div>
+                            </div>
                         </header>
 
-                        <form @submit.prevent="submit" class="max-w-xl">
-                            <div class="mb-6">
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Pilih Lembaga</label>
-                                <select v-model="form.institution_id" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required>
-                                    <option value="">- Pilih Lembaga -</option>
-                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.code }} - {{ inst.name }}</option>
-                                </select>
-                                <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
+                        <form @submit.prevent="submit" class="space-y-10">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div class="space-y-8">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Penempatan Lembaga</label>
+                                        <select v-model="form.institution_id" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6" required>
+                                            <option value="">- Pilih Lembaga -</option>
+                                            <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.code }} - {{ inst.name }}</option>
+                                        </select>
+                                        <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.institution_id }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Nama Ruangan</label>
+                                        <input v-model="form.name" type="text" 
+                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            placeholder="Misal: Lab Komputer 1, Gudang..." required />
+                                        <div v-if="form.errors.name" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.name }}</div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Keterangan Spesifik</label>
+                                    <textarea v-model="form.description" rows="5" 
+                                        class="w-full border-gray-100 rounded-[2rem] bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold p-6 leading-relaxed"></textarea>
+                                    <div v-if="form.errors.description" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.description }}</div>
+                                </div>
                             </div>
 
-                            <div class="mb-6">
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nama Ruangan</label>
-                                <input v-model="form.name" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Contoh: Lab Komputer 1, Gudang..." required />
-                                <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keterangan / Deskripsi</label>
-                                <textarea v-model="form.description" rows="3" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Contoh: Lantai 2, Sebelah Perpustakaan..."></textarea>
-                                <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>
-                            </div>
-
-                            <div class="flex items-center gap-4 mt-8">
-                                <button type="submit" class="px-8 py-3 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-bold shadow-lg shadow-pail-gold/20 transition" :disabled="form.processing">Simpan Perubahan</button>
+                            <div class="flex items-center gap-6 mt-8 pt-10 border-t border-gray-50 dark:border-gray-800">
+                                <button 
+                                    type="submit" 
+                                    class="flex-1 py-5 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-xs" 
+                                    :disabled="form.processing"
+                                >
+                                    Perbarui Data Ruangan
+                                </button>
+                                <Link :href="route('admin.rooms.index')" class="px-8 py-5 bg-gray-50 text-gray-400 rounded-[2rem] hover:bg-gray-100 font-bold transition text-xs uppercase tracking-widest">
+                                    Batal
+                                </Link>
+                                <Transition
+                                    enter-active-class="transition ease-in-out duration-500"
+                                    enter-from-class="opacity-0 translate-x-4"
+                                    leave-active-class="transition ease-in-out duration-500"
+                                    leave-to-class="opacity-0 -translate-x-4"
+                                >
+                                    <p v-if="form.recentlySuccessful" class="text-[10px] font-black text-green-500 uppercase tracking-widest">✓ Tersimpan</p>
+                                </Transition>
                             </div>
                         </form>
                     </div>

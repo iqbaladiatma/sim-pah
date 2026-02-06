@@ -54,127 +54,136 @@ const getStatusColor = (status) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                Proses Pengajuan
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Proses Pengajuan
+                </h2>
+                <Link :href="route('admin.requests.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                    &larr; Batalkan
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700">
-                    <div class="p-8 text-gray-900 dark:text-gray-100">
-                        <header class="mb-8 flex justify-between items-center">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-6xl sm:px-6 lg:px-8 space-y-8">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-12">
+                        <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Detail Pengajuan</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Tinjau dan proses pengajuan dari user.
+                                <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Detail Pengajuan</h3>
+                                <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
+                                    Tinjau dokumen, verifikasi estimasi biaya, dan berikan keputusan akhir untuk pengajuan operasional ini.
                                 </p>
                             </div>
-                            <Link :href="route('admin.requests.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
-                                &larr; Kembali
-                            </Link>
+                            <div class="flex items-center gap-4">
+                                <span class="px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-sm"
+                                    :class="request.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : 
+                                            request.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100' : 
+                                            'bg-red-50 text-red-700 border-red-100'">
+                                    Status: {{ request.status }}
+                                </span>
+                            </div>
                         </header>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                            <!-- Left Column: Request Details -->
-                            <div class="space-y-6">
-                                <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <span class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                            {{ request.user?.institution?.code || 'ADMIN' }}
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                            <!-- Left: Content Info -->
+                            <div class="lg:col-span-5 space-y-8">
+                                <div class="bg-gray-50 dark:bg-gray-900/50 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800/50">
+                                    <div class="mb-6">
+                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white dark:bg-gray-800 text-gray-500 border border-gray-100 dark:border-gray-700 mb-4 inline-block">
+                                            Lembaga: {{ request.user?.institution?.code || 'URT' }}
                                         </span>
-                                        <span class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider shadow-sm"
-                                            :class="getStatusColor(request.status)">
-                                            {{ request.status }}
-                                        </span>
+                                        <h4 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-3 uppercase leading-none">{{ request.title }}</h4>
+                                        <p class="text-sm text-gray-500 font-medium leading-[1.8]">{{ request.description }}</p>
                                     </div>
-                                    
-                                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ request.title }}</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">{{ request.description }}</p>
-                                    
-                                    <div class="flex justify-between items-center py-3 border-t border-gray-200 dark:border-gray-700">
-                                        <span class="text-xs uppercase font-black text-gray-400">Tipe</span>
-                                        <span class="font-bold text-gray-800 dark:text-gray-200">{{ request.type }}</span>
-                                    </div>
-                                    <div class="flex justify-between items-center py-3 border-t border-gray-200 dark:border-gray-700">
-                                        <span class="text-xs uppercase font-black text-gray-400">Estimasi Biaya</span>
-                                        <span class="font-mono font-bold text-lg text-gray-900 dark:text-white">{{ formatRupiah(request.estimated_cost) }}</span>
+
+                                    <div class="space-y-4 pt-6 border-t border-gray-200/50 dark:border-gray-700">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[9px] uppercase font-black text-gray-400 tracking-widest">Jenis</span>
+                                            <span class="px-4 py-2 bg-white dark:bg-gray-800 rounded-xl text-xs font-black text-pail-gold border border-gray-100 dark:border-gray-700 uppercase tracking-widest">{{ request.type }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[9px] uppercase font-black text-gray-400 tracking-widest">Estimasi Biaya</span>
+                                            <span class="text-xl font-black font-mono text-gray-900 dark:text-white tracking-tighter">{{ formatRupiah(request.estimated_cost) }}</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div v-if="request.photo_evidence" class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-3xl border border-gray-100 dark:border-gray-800">
-                                    <h5 class="text-xs uppercase font-black text-gray-400 mb-4">Bukti Foto</h5>
-                                    <img :src="`/storage/${request.photo_evidence}`" alt="Bukti Foto" class="w-full h-auto rounded-xl shadow-md border border-gray-200 dark:border-gray-700" />
-                                    <a :href="`/storage/${request.photo_evidence}`" target="_blank" class="block mt-4 text-center text-blue-600 hover:text-blue-800 font-bold text-sm underline">
-                                        Lihat Ukuran Penuh
-                                    </a>
+                                <div v-if="request.photo_evidence" class="bg-gray-50 dark:bg-gray-900/50 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800/50">
+                                    <h5 class="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-6">Bukti Dokumentasi</h5>
+                                    <div class="group relative overflow-hidden rounded-[2rem] border border-gray-200 dark:border-gray-700">
+                                        <img :src="`/storage/${request.photo_evidence}`" alt="Bukti Foto" class="w-full h-auto grayscale-[50%] group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100" />
+                                        <a :href="`/storage/${request.photo_evidence}`" target="_blank" class="absolute inset-0 bg-pail-gold/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all font-black text-[10px] text-white uppercase tracking-widest">
+                                            Klik untuk Memperbesar
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Right Column: Admin Action Form -->
-                            <div>
-                                <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Edit & Proses Pengajuan</h4>
-                                <form @submit.prevent="submit" class="space-y-6">
-                                    <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga Pengaju</label>
-                                        <SearchableSelect
-                                            v-model="form.institution_id"
-                                            :options="institutions"
-                                            placeholder="- Pilih Lembaga -"
-                                            :customLabel="(opt) => `${opt.code} - ${opt.name}`"
-                                        />
-                                        <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Tipe Pengajuan</label>
-                                        <input v-model="form.type" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required />
-                                        <div v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Judul</label>
-                                        <input v-model="form.title" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required />
-                                        <div v-if="form.errors.title" class="text-red-500 text-xs mt-1">{{ form.errors.title }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Deskripsi</label>
-                                        <textarea v-model="form.description" rows="3" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required></textarea>
-                                        <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Estimasi Biaya</label>
-                                        <input v-model="costDisplay" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-mono font-bold" required />
-                                        <div v-if="form.errors.estimated_cost" class="text-red-500 text-xs mt-1">{{ form.errors.estimated_cost }}</div>
-                                    </div>
-
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keputusan</label>
-                                            <select v-model="form.status" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold">
-                                                <option value="pending">Tertunda (Pending)</option>
-                                                <option value="approved">Setujui (Approved)</option>
-                                                <option value="rejected">Tolak (Rejected)</option>
-                                            </select>
-                                            <div v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</div>
+                            <!-- Right: Decision Form -->
+                            <div class="lg:col-span-7">
+                                <form @submit.prevent="submit" class="space-y-8">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div class="col-span-2">
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Lembaga/Unit</label>
+                                            <SearchableSelect
+                                                v-model="form.institution_id"
+                                                :options="institutions"
+                                                placeholder="- Pilih Lembaga/Unit -"
+                                                :customLabel="(opt) => `${opt.code} - ${opt.name}`"
+                                            />
                                         </div>
+
                                         <div>
-                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Bukti Baru (Optional)</label>
-                                            <input type="file" @change="e => form.photo_evidence = e.target.files[0]" class="w-full text-[10px] text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition" />
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Tipe Pengajuan</label>
+                                            <input v-model="form.type" type="text" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" required />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Update Judul</label>
+                                            <input v-model="form.title" type="text" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" required />
+                                        </div>
+
+                                        <div class="col-span-2">
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Deskripsi Detail</label>
+                                            <textarea v-model="form.description" rows="3" class="w-full border-gray-100 rounded-3xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold p-6 leading-relaxed" required></textarea>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Lembaga Biaya</label>
+                                            <input v-model="costDisplay" type="text" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xl font-black font-mono tracking-tighter px-6" required />
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Unggah Baru (Opsional)</label>
+                                            <input type="file" @change="e => form.photo_evidence = e.target.files[0]" class="w-full text-xs text-gray-400 file:mr-4 file:py-4 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-600 hover:file:bg-gray-200 transition bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700" />
+                                        </div>
+
+                                        <div class="col-span-2 pt-6 border-t border-gray-50 dark:border-gray-800">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div>
+                                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Status Keputusan</label>
+                                                    <select v-model="form.status" class="w-full h-16 border-gray-100 rounded-3xl bg-gray-50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold focus:border-pail-gold px-6">
+                                                        <option value="pending">🟡 Pendampingan</option>
+                                                        <option value="approved">🟢 Disetujui</option>
+                                                        <option value="rejected">🔴 Ditolak</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Catatan Verifikasi</label>
+                                                    <textarea v-model="form.admin_note" rows="2" class="w-full border-gray-100 rounded-3xl bg-gray-50 dark:bg-gray-900 dark:border-gray-700 text-sm font-bold focus:ring-pail-gold focus:border-pail-gold p-6" placeholder="Misal: Biaya disesuaikan..."></textarea>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Catatan Admin</label>
-                                        <textarea v-model="form.admin_note" rows="3" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Opsional..."></textarea>
-                                        <div v-if="form.errors.admin_note" class="text-red-500 text-xs mt-1">{{ form.errors.admin_note }}</div>
-                                    </div>
-
-                                    <div class="pt-4">
-                                        <button type="submit" class="w-full py-4 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-black shadow-lg shadow-pail-gold/20 transition uppercase tracking-widest" :disabled="form.processing">
-                                            Simpan Perubahan
+                                    <div class="flex items-center gap-4 mt-8 pt-8">
+                                        <button 
+                                            type="submit" 
+                                            class="w-full py-5 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-xs" 
+                                            :disabled="form.processing"
+                                        >
+                                            Simpan Keputusan Final
                                         </button>
                                     </div>
                                 </form>

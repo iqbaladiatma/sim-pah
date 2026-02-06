@@ -23,79 +23,79 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                Edit Lembaga
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Profil Lembaga
+                </h2>
+                <Link :href="route('admin.institutions.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                    &larr; Batalkan
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
-                    <div class="p-8 text-gray-900 dark:text-gray-100">
-                        <header class="mb-8 flex justify-between items-center">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-5xl sm:px-6 lg:px-8 space-y-8">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-12">
+                        <header class="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Lembaga</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Perbarui informasi lembaga.
+                                <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Update Lembaga</h3>
+                                <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-sm">
+                                    Modifikasi identitas dan rincian operasional unit lembaga.
                                 </p>
                             </div>
-                            <Link :href="route('admin.institutions.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
-                                &larr; Kembali
-                            </Link>
+                            <div class="px-8 py-4 bg-gray-50 dark:bg-gray-900 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+                                <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">ID Unit</div>
+                                <div class="text-xl font-black text-pail-gold tracking-tighter">#{{ institution.id }}</div>
+                            </div>
                         </header>
 
-                        <form @submit.prevent="submit" class="max-w-2xl space-y-6">
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nama Lembaga</label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    v-model="form.name"
-                                    required
-                                    autofocus
-                                />
-                                <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
+                        <form @submit.prevent="submit" class="space-y-10">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div class="space-y-8">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Nama Lembaga</label>
+                                        <input v-model="form.name" type="text" 
+                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            required autofocus />
+                                        <div v-if="form.errors.name" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.name }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Kode Unit</label>
+                                        <input v-model="form.code" type="text" 
+                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            required />
+                                        <div v-if="form.errors.code" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.code }}</div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Deskripsi & Catatan</label>
+                                    <textarea v-model="form.description" rows="5" 
+                                        class="w-full border-gray-100 rounded-[2rem] bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold p-6 leading-relaxed"></textarea>
+                                    <div v-if="form.errors.description" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.description }}</div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Kode Unit</label>
-                                <input
-                                    id="code"
-                                    type="text"
-                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    v-model="form.code"
-                                    required
-                                />
-                                <div v-if="form.errors.code" class="text-red-500 text-xs mt-1">{{ form.errors.code }}</div>
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Deskripsi (Opsional)</label>
-                                <textarea
-                                    id="description"
-                                    v-model="form.description"
-                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
-                                    rows="3"
-                                ></textarea>
-                                <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>
-                            </div>
-
-                            <div class="flex items-center gap-4 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
-                                <button type="submit" class="px-10 py-3 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-bold shadow-lg shadow-pail-gold/20 transition" :disabled="form.processing">
-                                    Simpan Perubahan
+                            <div class="flex items-center gap-6 mt-8 pt-10 border-t border-gray-50 dark:border-gray-800">
+                                <button 
+                                    type="submit" 
+                                    class="flex-1 py-5 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-xs" 
+                                    :disabled="form.processing"
+                                >
+                                    Perbarui Data Lembaga
                                 </button>
-                                <Link :href="route('admin.institutions.index')" class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl hover:bg-gray-200 font-bold transition text-center">
+                                <Link :href="route('admin.institutions.index')" class="px-8 py-5 bg-gray-50 text-gray-400 rounded-[2rem] hover:bg-gray-100 font-bold transition text-xs uppercase tracking-widest">
                                     Batal
                                 </Link>
-
                                 <Transition
-                                    enter-active-class="transition ease-in-out"
-                                    enter-from-class="opacity-0"
-                                    leave-active-class="transition ease-in-out"
-                                    leave-to-class="opacity-0"
+                                    enter-active-class="transition ease-in-out duration-500"
+                                    enter-from-class="opacity-0 translate-x-4"
+                                    leave-active-class="transition ease-in-out duration-500"
+                                    leave-to-class="opacity-0 -translate-x-4"
                                 >
-                                    <p v-if="form.recentlySuccessful" class="text-sm text-green-600 dark:text-green-400 font-bold">✓ Tersimpan.</p>
+                                    <p v-if="form.recentlySuccessful" class="text-[10px] font-black text-green-500 uppercase tracking-widest">✓ Tersimpan</p>
                                 </Transition>
                             </div>
                         </form>

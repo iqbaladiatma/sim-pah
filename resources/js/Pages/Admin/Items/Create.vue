@@ -63,119 +63,127 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                Tambah Barang Baru
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Tambah Barang Baru
+                </h2>
+                <Link :href="route('admin.items.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                    &larr; Batalkan
+                </Link>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700">
-                    <div class="p-8 text-gray-900 dark:text-gray-100">
-                        <header class="mb-8 flex justify-between items-center">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Form Inventaris</h3>
-                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Lengkapi data di bawah ini untuk menambahkan aset baru.
-                                </p>
-                            </div>
-                            <Link :href="route('admin.items.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
-                                &larr; Kembali
-                            </Link>
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-5xl sm:px-6 lg:px-8 space-y-8">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-12">
+                        <header class="mb-10">
+                            <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Registrasi Barang</h3>
+                            <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
+                                Registrasi aset dan inventaris baru ke dalam sistem pergudangan pusat. Pastikan data koordinat ruangan sudah sesuai.
+                            </p>
                         </header>
 
-                        <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                            <!-- Row 1: Institution & Room -->
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga Pemilik</label>
-                                <SearchableSelect
-                                    v-model="form.institution_id"
-                                    :options="institutions"
-                                    placeholder="- Pilih Lembaga -"
-                                    :customLabel="(opt) => `${opt.code} - ${opt.name}`"
-                                />
-                                <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <LocationIcon className="w-3.5 h-3.5" /> Lokasi / Ruangan
-                                </label>
-                                <SearchableSelect
-                                    v-model="form.room_id"
-                                    :options="rooms"
-                                    placeholder="- Pilih Ruangan -"
-                                    :disabled="!form.institution_id || isLoadingRooms"
-                                    label-key="name"
-                                />
-                                <div v-if="form.errors.room_id" class="text-red-500 text-xs mt-1">{{ form.errors.room_id }}</div>
+                        <form @submit.prevent="submit" class="space-y-10">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                                <!-- Owners & Location -->
+                                <div class="space-y-8 col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-10">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-pail-gold uppercase tracking-widest mb-3 ml-1">Lembaga Pemilik Aset</label>
+                                        <SearchableSelect
+                                            v-model="form.institution_id"
+                                            :options="institutions"
+                                            placeholder="- Pilih Lembaga -"
+                                            :customLabel="(opt) => `${opt.code} - ${opt.name}`"
+                                        />
+                                        <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.institution_id }}</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                            <LocationIcon className="w-3 h-3" /> Lokasi / Ruangan Penempatan
+                                        </label>
+                                        <SearchableSelect
+                                            v-model="form.room_id"
+                                            :options="rooms"
+                                            placeholder="- Pilih Ruangan -"
+                                            :disabled="!form.institution_id || isLoadingRooms"
+                                            label-key="name"
+                                        />
+                                        <div v-if="form.errors.room_id" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.room_id }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Details -->
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                        <PackageIcon className="w-3 h-3" /> Nama Barang & Spesifikasi Ringkas
+                                    </label>
+                                    <input v-model="form.name" type="text" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6 uppercase tracking-tight" placeholder="Misal: AC Samsung 1/2 PK" required />
+                                    <div v-if="form.errors.name" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.name }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                        <CalendarIcon className="w-3 h-3" /> Tanggal Perolehan
+                                    </label>
+                                    <input v-model="form.purchase_date" type="date" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-mono font-black px-6" />
+                                    <div v-if="form.errors.purchase_date" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.purchase_date }}</div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                        <NumberIcon className="w-3 h-3" /> Jumlah Kuantitas Unit
+                                    </label>
+                                    <input v-model="form.stock" type="number" min="0" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-lg focus:ring-pail-gold focus:border-pail-gold font-black px-6 text-center" required />
+                                    <div v-if="form.errors.stock" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.stock }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                        <DiamondIcon className="w-3 h-3" /> Sumber Dana / Perolehan
+                                    </label>
+                                    <input v-model="form.source" type="text" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-black px-6" placeholder="APB, Hibah, Yayasan" required />
+                                    <div v-if="form.errors.source" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.source }}</div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                        <CheckIcon className="w-3 h-3" /> Kondisi Aset Saat Ini
+                                    </label>
+                                    <select v-model="form.condition" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-black px-6 uppercase tracking-widest">
+                                        <option value="Baik">Baik</option>
+                                        <option value="Rusak Ringan">Rusak Ringan</option>
+                                        <option value="Rusak Berat">Rusak Berat</option>
+                                    </select>
+                                    <div v-if="form.errors.condition" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.condition }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                        <UserIcon className="w-3 h-3" /> Nama Penanggung Jawab
+                                    </label>
+                                    <input v-model="form.responsible_person" type="text" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-black px-6" placeholder="Petugas URT / Lembaga" />
+                                    <div v-if="form.errors.responsible_person" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.responsible_person }}</div>
+                                </div>
+
+                                <div class="col-span-2">
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
+                                        <DocumentIcon className="w-3 h-3" /> Catatan Tambahan
+                                    </label>
+                                    <textarea v-model="form.note" rows="3" class="w-full border-gray-100 rounded-3xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold p-6 leading-relaxed" placeholder="Spesifikasi teknis, nomor seri, dll..."></textarea>
+                                    <div v-if="form.errors.note" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.note }}</div>
+                                </div>
                             </div>
 
-                            <!-- Row 2: Jenis -->
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <PackageIcon className="w-3.5 h-3.5" /> Jenis Barang
-                                </label>
-                                <input v-model="form.name" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all" placeholder="Contoh: AC, Laptop, Meja" required />
-                                <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
-                            </div>
-
-                            <!-- Row 3: Tgl Pembukuan & Kuantitas -->
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <CalendarIcon className="w-3.5 h-3.5" /> Tanggal Pembukuan
-                                </label>
-                                <input v-model="form.purchase_date" type="date" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-mono font-bold transition-all" />
-                                <div v-if="form.errors.purchase_date" class="text-red-500 text-xs mt-1">{{ form.errors.purchase_date }}</div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <NumberIcon className="w-3.5 h-3.5" /> Kuantitas
-                                </label>
-                                <input v-model="form.stock" type="number" min="0" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold text-center transition-all" required />
-                                <div v-if="form.errors.stock" class="text-red-500 text-xs mt-1">{{ form.errors.stock }}</div>
-                            </div>
-
-                            <!-- Row 4: Sumber & Keadaan -->
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <DiamondIcon className="w-3.5 h-3.5" /> Sumber Perolehan
-                                </label>
-                                <input v-model="form.source" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all" placeholder="Contoh: Hibah, APB, Yayasan" required />
-                                <div v-if="form.errors.source" class="text-red-500 text-xs mt-1">{{ form.errors.source }}</div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <CheckIcon className="w-3.5 h-3.5" /> Keadaan Barang
-                                </label>
-                                <select v-model="form.condition" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all" required>
-                                    <option value="Baik">Baik</option>
-                                    <option value="Rusak Ringan">Rusak Ringan</option>
-                                    <option value="Rusak Berat">Rusak Berat</option>
-                                </select>
-                                <div v-if="form.errors.condition" class="text-red-500 text-xs mt-1">{{ form.errors.condition }}</div>
-                            </div>
-
-                            <!-- Row 5: PJ -->
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <UserIcon className="w-3.5 h-3.5" /> Penanggung Jawab
-                                </label>
-                                <input v-model="form.responsible_person" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all" placeholder="Nama petugas" />
-                                <div v-if="form.errors.responsible_person" class="text-red-500 text-xs mt-1">{{ form.errors.responsible_person }}</div>
-                            </div>
-
-                            <!-- Row 6: Keterangan -->
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-                                    <DocumentIcon className="w-3.5 h-3.5" /> Keterangan
-                                </label>
-                                <textarea v-model="form.note" rows="3" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all" placeholder="Berikan catatan tambahan jika ada..."></textarea>
-                                <div v-if="form.errors.note" class="text-red-500 text-xs mt-1">{{ form.errors.note }}</div>
-                            </div>
-
-                            <div class="md:col-span-2 flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
-                                <Link :href="route('admin.items.index')" class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl hover:bg-gray-200 font-bold transition text-center">Batal</Link>
-                                <button type="submit" class="px-10 py-3 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-bold shadow-lg shadow-pail-gold/20 transition" :disabled="form.processing">Simpan Data</button>
+                            <div class="flex items-center gap-4 pt-10 border-t border-gray-50 dark:border-gray-800">
+                                <button 
+                                    type="submit" 
+                                    class="px-12 py-5 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-xs" 
+                                    :disabled="form.processing"
+                                >
+                                    Simpan Aset Baru
+                                </button>
+                                <Link :href="route('admin.items.index')" class="px-8 py-5 bg-gray-50 text-gray-400 rounded-[2rem] hover:bg-gray-100 font-bold transition text-xs uppercase tracking-widest">
+                                    Batalkan
+                                </Link>
                             </div>
                         </form>
                     </div>

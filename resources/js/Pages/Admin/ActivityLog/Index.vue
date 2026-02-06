@@ -75,217 +75,231 @@ const getEventIcon = (event) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                Activity Log Sistem
-            </h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                    Activity Log Sistem
+                </h2>
+                <div class="flex items-center gap-4">
+                    <button v-if="Object.values(filters).some(x => x)" @click="router.visit(route('admin.activity_log.index'))" class="text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-50 px-4 py-2 rounded-xl transition-all">
+                        Reset Filter
+                    </button>
+                    <button @click="confirmClearLogs" class="px-6 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 font-black text-xs uppercase tracking-widest flex items-center gap-2">
+                        🗑️ Bersihkan Log
+                    </button>
+                </div>
+            </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-8">
                 
                 <!-- Stats Overview -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-pail-gold shadow-sm">
-                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Total Aktivitas</h3>
-                        <div class="text-3xl font-black text-gray-900 dark:text-white">{{ stats.total }}</div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Total Log</h3>
+                        <div class="text-4xl font-black tracking-tighter">{{ stats.total }}</div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-blue-500 shadow-sm">
-                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Hari Ini</h3>
-                        <div class="text-3xl font-black text-blue-600">{{ stats.today }}</div>
+                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm text-blue-600">
+                        <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Hari Ini</h3>
+                        <div class="text-4xl font-black tracking-tighter">{{ stats.today }}</div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-green-500 shadow-sm">
-                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Minggu Ini</h3>
-                        <div class="text-3xl font-black text-green-600">{{ stats.this_week }}</div>
+                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm text-green-600">
+                        <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Minggu Ini</h3>
+                        <div class="text-4xl font-black tracking-tighter">{{ stats.this_week }}</div>
+                    </div>
+                    <div class="hidden md:block bg-gradient-to-br from-gray-900 to-black p-8 rounded-[2.5rem] shadow-xl col-span-1">
+                        <div class="flex flex-col justify-center h-full">
+                            <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Audit Trail</h3>
+                            <div class="text-sm font-black text-white uppercase tracking-widest leading-tight">Keamanan Data Terjamin</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Activity List -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
-                    <div class="p-6">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
-                            <span>Riwayat Aktivitas</span>
-                            <div class="flex gap-2">
-                                <button v-if="Object.values(filters).some(x => x)" @click="router.visit(route('admin.activity_log.index'))" class="text-xs text-red-500 font-bold hover:underline">
-                                    Reset Filter
-                                </button>
-                                <button @click="confirmClearLogs" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition font-bold text-xs">
-                                    🗑️ Bersihkan Log
-                                </button>
-                            </div>
-                        </h3>
-                        
-                        <!-- Filters -->
-                        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <select v-model="filterForm.role" class="w-full border-gray-100 rounded-xl bg-gray-50/50 text-sm focus:ring-pail-gold font-bold">
-                                    <option value="">Semua Role</option>
-                                    <option value="admin">Admin & Superadmin</option>
-                                    <option value="lembaga">Lembaga</option>
-                                </select>
-                            </div>
-                           <div>
-                                <select v-model="filterForm.event" class="w-full border-gray-100 rounded-xl bg-gray-50/50 text-sm focus:ring-pail-gold font-bold">
-                                    <option value="">Semua Event</option>
-                                    <option value="created">Created</option>
-                                    <option value="updated">Updated</option>
-                                    <option value="deleted">Deleted</option>
-                                </select>
-                            </div>
-                             <div>
-                                <input v-model="filterForm.date_from" type="date" class="w-full border-gray-100 rounded-xl bg-gray-50/50 text-sm focus:ring-pail-gold font-bold" placeholder="Dari Tanggal">
-                            </div>
+                <!-- Filters -->
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Filter Role</label>
+                            <select v-model="filterForm.role" class="w-full h-12 border-gray-100 rounded-xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xs font-black uppercase tracking-widest focus:ring-pail-gold">
+                                <option value="">Semua Role</option>
+                                <option value="admin">Admin & Superadmin</option>
+                                <option value="lembaga">Lembaga</option>
+                            </select>
                         </div>
-                        
-                        <!-- Desktop Table -->
-                        <div class="hidden md:block overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                                <thead>
-                                    <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
-                                        <th class="px-6 py-4 text-left">Event</th>
-                                        <th class="px-6 py-4 text-left">User</th>
-                                        <th class="px-6 py-4 text-left">Subject</th>
-                                        <th class="px-6 py-4 text-left">Description</th>
-                                        <th class="px-6 py-4 text-left">Waktu</th>
-                                        <th class="px-6 py-4 text-center">Detail</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                                    <tr v-for="activity in activities.data" :key="activity.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
-                                        <td class="px-6 py-4">
-                                            <span class="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1"
-                                                :class="getEventColor(activity.event)">
-                                                <span>{{ getEventIcon(activity.event) }}</span>
-                                                {{ activity.event }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-8 h-8 rounded-lg bg-pail-gold/10 text-pail-gold flex items-center justify-center font-black text-xs">
-                                                    {{ activity.causer?.name?.charAt(0) || '?' }}
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-gray-900 dark:text-white text-xs">{{ activity.causer?.name || 'System' }}</div>
-                                                    <div class="text-[10px] text-gray-500">{{ activity.causer?.role || '-' }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ activity.subject_type?.split('\\').pop() || '-' }}</span>
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <span class="text-xs text-gray-600 dark:text-gray-400">{{ activity.description }}</span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-xs text-gray-500">{{ new Date(activity.created_at).toLocaleString('id-ID') }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 text-center">
-                                            <button v-if="activity.properties && Object.keys(activity.properties).length > 0"
-                                                @click="viewDetails(activity)"
-                                                class="px-3 py-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition shadow-sm font-bold text-xs">
-                                                👁️ View
-                                            </button>
-                                            <span v-else class="text-xs text-gray-400">-</span>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="activities.data.length === 0">
-                                        <td colspan="6" class="px-6 py-20 text-center text-gray-400 italic font-medium">Belum ada aktivitas tercatat.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div>
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Jenis Event</label>
+                            <select v-model="filterForm.event" class="w-full h-12 border-gray-100 rounded-xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xs font-black uppercase tracking-widest focus:ring-pail-gold">
+                                <option value="">Semua Event</option>
+                                <option value="created">Created</option>
+                                <option value="updated">Updated</option>
+                                <option value="deleted">Deleted</option>
+                            </select>
                         </div>
-
-                        <!-- Mobile View -->
-                        <div class="md:hidden space-y-4">
-                            <div v-for="activity in activities.data" :key="activity.id" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                <div class="flex items-center justify-between mb-3">
-                                    <span class="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1"
-                                        :class="getEventColor(activity.event)">
-                                        <span>{{ getEventIcon(activity.event) }}</span>
-                                        {{ activity.event }}
-                                    </span>
-                                    <span class="text-[10px] text-gray-500">{{ new Date(activity.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) }}</span>
-                                </div>
-                                <div class="flex items-center gap-2 mb-2">
-                                    <div class="w-8 h-8 rounded-lg bg-pail-gold/10 text-pail-gold flex items-center justify-center font-black text-xs">
-                                        {{ activity.causer?.name?.charAt(0) || '?' }}
-                                    </div>
-                                    <div>
-                                        <div class="font-bold text-gray-900 dark:text-white text-xs">{{ activity.causer?.name || 'System' }}</div>
-                                        <div class="text-[10px] text-gray-500">{{ activity.causer?.role || '-' }}</div>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">{{ activity.description }}</p>
-                                <button v-if="activity.properties && Object.keys(activity.properties).length > 0"
-                                    @click="viewDetails(activity)"
-                                    class="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-bold text-xs">
-                                    👁️ View Details
-                                </button>
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Rentang Waktu</label>
+                            <div class="flex items-center gap-3">
+                                <input v-model="filterForm.date_from" type="date" class="flex-1 h-12 border-gray-100 rounded-xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xs font-black focus:ring-pail-gold">
+                                <span class="text-gray-300 font-black uppercase text-[10px]">s/d</span>
+                                <input v-model="filterForm.date_to" type="date" class="flex-1 h-12 border-gray-100 rounded-xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xs font-black focus:ring-pail-gold">
                             </div>
-                            <div v-if="activities.data.length === 0" class="p-16 text-center text-gray-400 italic font-medium">Belum ada aktivitas tercatat.</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- Desktop Table View -->
+                <div class="hidden md:block bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden text-sm">
+                    <div class="p-8">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b border-gray-100 dark:border-gray-700">
+                                    <th class="px-6 py-6 text-left">Event</th>
+                                    <th class="px-6 py-6 text-left">Pelaksana</th>
+                                    <th class="px-6 py-6 text-left">Subjek</th>
+                                    <th class="px-6 py-6 text-left">Deskripsi</th>
+                                    <th class="px-6 py-6 text-left">Timestamp</th>
+                                    <th class="px-6 py-6 text-right">Opsi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                                <tr v-for="activity in activities.data" :key="activity.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-all group">
+                                    <td class="px-6 py-8">
+                                        <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 border shadow-sm"
+                                            :class="getEventColor(activity.event)">
+                                            <span>{{ getEventIcon(activity.event) }}</span>
+                                            {{ activity.event }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-8">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-black text-gray-600 dark:text-gray-300 group-hover:bg-pail-gold group-hover:text-white transition-all shadow-sm">
+                                                {{ activity.causer?.name?.charAt(0) || '?' }}
+                                            </div>
+                                            <div>
+                                                <div class="font-black text-gray-900 dark:text-white uppercase tracking-tighter">{{ activity.causer?.name || 'SYSTEM' }}</div>
+                                                <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ activity.causer?.role || '-' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-8 text-gray-400 font-black uppercase tracking-widest text-[9px]">
+                                        {{ activity.subject_type?.split('\\').pop() || '-' }}
+                                    </td>
+                                    <td class="px-6 py-8 font-medium text-gray-500 max-w-[200px] truncate group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                                        {{ activity.description }}
+                                    </td>
+                                    <td class="px-6 py-8 text-gray-400 font-mono tracking-tighter text-xs">
+                                        {{ new Date(activity.created_at).toLocaleString('id-ID') }}
+                                    </td>
+                                    <td class="px-6 py-8 text-right">
+                                        <button v-if="activity.properties && Object.keys(activity.properties).length > 0"
+                                            @click="viewDetails(activity)"
+                                            class="px-5 py-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg font-black text-[9px] uppercase tracking-widest">
+                                            View Detail
+                                        </button>
+                                        <span v-else class="text-[10px] font-black text-gray-200 uppercase tracking-widest">No Meta</span>
+                                    </td>
+                                </tr>
+                                <tr v-if="activities.data.length === 0">
+                                    <td colspan="6" class="px-6 py-20 text-center">
+                                        <div class="text-gray-400 font-black uppercase tracking-widest text-xs italic">Log aktivitas kosong</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Mobile View -->
+                <div class="md:hidden space-y-6">
+                    <div v-for="activity in activities.data" :key="activity.id" class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <div class="p-8">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 border shadow-sm"
+                                    :class="getEventColor(activity.event)">
+                                    {{ getEventIcon(activity.event) }} {{ activity.event }}
+                                </span>
+                                <span class="text-[10px] font-mono text-gray-400">{{ new Date(activity.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) }}</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 rounded-2xl bg-pail-gold text-white flex items-center justify-center font-black text-xl shadow-lg shadow-pail-gold/20">
+                                    {{ activity.causer?.name?.charAt(0) || '?' }}
+                                </div>
+                                <div>
+                                    <div class="font-black text-gray-900 dark:text-white uppercase tracking-tighter">{{ activity.causer?.name || 'SYSTEM' }}</div>
+                                    <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ activity.causer?.role || '-' }}</div>
+                                </div>
+                            </div>
+
+                            <p class="text-sm font-medium text-gray-500 mb-6 italic">"{{ activity.description }}"</p>
+                            
+                            <button v-if="activity.properties && Object.keys(activity.properties).length > 0"
+                                @click="viewDetails(activity)"
+                                class="w-full py-4 bg-gray-900 text-white rounded-2xl shadow-xl shadow-black/10 font-black text-[10px] uppercase tracking-widest transition-all active:scale-95">
+                                Lihat Meta Data Perubahan
+                            </button>
+                        </div>
+                    </div>
+                    <div v-if="activities.data.length === 0" class="bg-white dark:bg-gray-800 rounded-[2.5rem] p-20 text-center border border-gray-100 dark:border-gray-700 italic text-gray-400 font-black uppercase tracking-widest text-xs">Log aktivitas kosong</div>
                 </div>
 
                 <!-- Pagination -->
-                <Pagination :links="activities.links" />
+                <div class="mt-8">
+                    <Pagination :links="activities.links" />
+                </div>
             </div>
         </div>
 
         <!-- Detail Modal -->
-        <div v-if="isDetailModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" @click="closeModal">
-            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl p-8 border border-gray-100 dark:border-gray-700" @click.stop>
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">📋 Detail Perubahan</h3>
-                    <button @click="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+        <div v-if="isDetailModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xl p-4" @click="closeModal">
+            <div class="bg-white dark:bg-gray-800 rounded-[3rem] shadow-2xl w-full max-w-2xl p-12 border border-white/20 relative overflow-hidden" @click.stop>
+                <div class="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 bg-pail-gold opacity-5 rounded-full blur-[100px]"></div>
+                
+                <header class="relative z-10 flex items-center justify-between mb-10">
+                    <div>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-1">Audit Log Meta</h3>
+                        <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest italic">Rincian parameter perubahan objek sistem.</p>
+                    </div>
+                    <button @click="closeModal" class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all border border-gray-100 dark:border-gray-700">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
-                </div>
+                </header>
 
-                <div v-if="selectedActivity" class="space-y-4">
-                    <!-- Activity Info -->
-                    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-2xl p-4 border border-gray-200 dark:border-gray-700">
-                        <div class="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <span class="text-gray-500 dark:text-gray-400 font-medium block mb-1">Event</span>
-                                <span class="px-2 py-1 rounded-lg text-[10px] font-black uppercase inline-flex items-center gap-1"
-                                    :class="getEventColor(selectedActivity.event)">
-                                    {{ getEventIcon(selectedActivity.event) }} {{ selectedActivity.event }}
-                                </span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500 dark:text-gray-400 font-medium block mb-1">User</span>
-                                <span class="text-gray-900 dark:text-white font-bold">{{ selectedActivity.causer?.name || 'System' }}</span>
-                            </div>
-                            <div class="col-span-2">
-                                <span class="text-gray-500 dark:text-gray-400 font-medium block mb-1">Description</span>
-                                <span class="text-gray-900 dark:text-white">{{ selectedActivity.description }}</span>
-                            </div>
+                <div v-if="selectedActivity" class="relative z-10 space-y-8">
+                    <div class="grid grid-cols-2 gap-8 p-8 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800">
+                        <div>
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Aksi Sistem</span>
+                            <span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 border shadow-sm"
+                                :class="getEventColor(selectedActivity.event)">
+                                {{ getEventIcon(selectedActivity.event) }} {{ selectedActivity.event }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Inisiator</span>
+                            <span class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">{{ selectedActivity.causer?.name || 'SYSTEM CORE' }}</span>
                         </div>
                     </div>
 
-                    <!-- Properties -->
-                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-800">
-                        <h4 class="font-bold text-blue-900 dark:text-blue-300 mb-3 flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Detail Perubahan
+                    <div class="p-8 bg-pail-gold/5 rounded-[2.5rem] border border-pail-gold/10">
+                        <h4 class="text-[10px] font-black text-pail-gold uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-pail-gold animate-pulse"></span>
+                            Perubahan Data Objek
                         </h4>
-                        <div class="space-y-2">
-                            <div v-for="(value, key) in selectedActivity.properties" :key="key" class="flex items-start justify-between py-2 border-b border-blue-200 dark:border-blue-800 last:border-0">
-                                <span class="text-sm font-medium text-blue-700 dark:text-blue-400 capitalize">{{ key.replace(/_/g, ' ') }}:</span>
-                                <span class="text-sm text-blue-900 dark:text-blue-200 font-bold ml-3 text-right">{{ value }}</span>
+                        <div class="space-y-4 max-h-[300px] overflow-y-auto pr-4 custom-scrollbar">
+                            <div v-for="(value, key) in selectedActivity.properties" :key="key" class="group flex flex-col gap-1 p-4 bg-white dark:bg-gray-900/80 rounded-2xl border border-pail-gold/10 shadow-sm">
+                                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ key.replace(/_/g, ' ') }}</span>
+                                <span class="text-xs font-black text-gray-900 dark:text-white break-words lowercase italic text-right">{{ value }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Timestamp -->
-                    <div class="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <span class="text-xs text-gray-500">Waktu: {{ new Date(selectedActivity.created_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) }}</span>
+                    <div class="text-center pt-8 border-t border-gray-100 dark:border-gray-800">
+                        <span class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Waktu Eksekusi: {{ new Date(selectedActivity.created_at).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'medium' }) }}</span>
                     </div>
                 </div>
 
-                <div class="mt-6 flex justify-end">
-                    <button @click="closeModal" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition font-bold">
-                        Tutup
+                <div class="relative z-10 mt-10">
+                    <button @click="closeModal" class="w-full py-5 bg-gray-900 text-white rounded-2xl hover:bg-black font-black uppercase tracking-[0.2em] text-[10px] transition-all shadow-xl shadow-black/10">
+                        Selesai Meninjau
                     </button>
                 </div>
             </div>
