@@ -192,6 +192,12 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                             leave-to-class="max-h-0 opacity-0 overflow-hidden"
                         >
                             <div v-if="isIsoMenuOpen || isSidebarCollapsed" class="space-y-1.5 lg:space-y-2 overflow-hidden">
+                                <!-- Dashboard ISO -->
+                                <NavLink :href="route('admin.procedures.dashboard')" :active="route().current('admin.procedures.dashboard')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3 text-pail-gold">Dashboard ISO</span>
+                                </NavLink>
+
                                 <!-- 1. Modul Aset -->
                                 <NavLink :href="route('admin.procedures.index', { group: 'aset' })" :active="$page.url.includes('group=aset')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
                                     <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>

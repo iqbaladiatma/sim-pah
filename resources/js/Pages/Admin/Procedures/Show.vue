@@ -11,6 +11,7 @@ import TrashIcon from '@/Components/Icons/TrashIcon.vue';
 import PencilIcon from '@/Components/Icons/EditIcon.vue';
 import PhotographIcon from '@/Components/Icons/SparklesIcon.vue';
 import XIcon from '@/Components/Icons/XIcon.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     type: String,
@@ -347,9 +348,8 @@ const importExcel = (event) => {
 
         <div class="py-6 md:py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- Table Section (Card view on mobile) -->
                 <div class="bg-white dark:bg-gray-800 rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                    <div class="hidden md:block overflow-x-auto">
+                    <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <!-- Row 1 for Specialized & Double Headers -->
@@ -1738,34 +1738,34 @@ const importExcel = (event) => {
 
                                 <!-- Specialized Content for PENDATAAN ASET -->
                                 <template v-else-if="type === 'pendataan-aset'">
-                                    <td class="px-6 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                    <td class="px-6 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
-                                    <td class="px-6 py-6 text-center text-[10px] font-black text-gray-900 dark:text-white">{{ item.stock || 0 }}</td>
-                                    <td class="px-6 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.unit || '-' }}</td>
+                                    <td class="px-6 py-4 text-[10px] font-black text-gray-400 text-center whitespace-nowrap">{{ index + 1 }}</td>
+                                    <td class="px-6 py-4 text-[10px] font-black text-gray-900 dark:text-white uppercase whitespace-nowrap">{{ item.institution?.name || '-' }}</td>
+                                    <td class="px-6 py-4 text-center text-[10px] font-black text-gray-900 dark:text-white whitespace-nowrap">{{ item.stock || 0 }}</td>
+                                    <td class="px-6 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase whitespace-nowrap">{{ item.unit || '-' }}</td>
                                     
                                     <!-- 3 Columns for Condition -->
-                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
+                                    <td class="px-4 py-4 text-center border-l dark:border-gray-700">
                                         <span v-if="item.condition === 'B'" class="text-green-500 font-black">V</span>
                                     </td>
-                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
+                                    <td class="px-4 py-4 text-center border-l dark:border-gray-700">
                                         <span v-if="item.condition === 'KB'" class="text-yellow-500 font-black">V</span>
                                     </td>
-                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
+                                    <td class="px-4 py-4 text-center border-l dark:border-gray-700">
                                         <span v-if="item.condition === 'RB'" class="text-red-500 font-black">V</span>
                                     </td>
 
-                                    <td class="px-6 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ item.updated_at ? new Date(item.updated_at).toLocaleDateString() : '-' }}</td>
-                                    <td class="px-6 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.responsible_person || '-' }}</td>
-                                    <td class="px-6 py-6 text-right text-xs font-mono font-black text-gray-900 dark:text-white">Rp {{ Number(item.price || 0).toLocaleString() }}</td>
-                                    <td class="px-6 py-6 text-[9px] text-gray-400 italic truncate max-w-[150px]">{{ item.note || '-' }}</td>
+                                    <td class="px-6 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ item.updated_at ? new Date(item.updated_at).toLocaleDateString() : '-' }}</td>
+                                    <td class="px-6 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase whitespace-nowrap">{{ item.responsible_person || '-' }}</td>
+                                    <td class="px-6 py-4 text-right text-xs font-mono font-black text-gray-900 dark:text-white whitespace-nowrap">Rp {{ Number(item.price || 0).toLocaleString() }}</td>
+                                    <td class="px-6 py-4 text-[9px] text-gray-400 italic whitespace-nowrap">{{ item.note || '-' }}</td>
                                 </template>
 
                                 <!-- Generic Item Display -->
                                 <template v-else-if="procedure?.model?.includes('Item')">
-                                    <td class="px-8 py-6">
-                                        <div class="flex flex-col">
-                                            <span class="text-sm font-black text-gray-900 dark:text-white uppercase truncate max-w-[200px]">{{ item.name }}</span>
-                                            <span class="text-[9px] text-gray-400 font-bold mt-1 uppercase tracking-widest">{{ item.code || 'NO CODE' }}</span>
+                                    <td class="px-8 py-4 whitespace-nowrap">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xs font-black text-gray-900 dark:text-white uppercase">{{ item.name }}</span>
+                                            <span class="text-[8px] text-gray-400 font-bold uppercase tracking-widest border px-2 py-0.5 rounded-md">{{ item.code || 'NO CODE' }}</span>
                                         </div>
                                     </td>
                                     <td class="px-8 py-6">
@@ -1851,61 +1851,13 @@ const importExcel = (event) => {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-            <!-- Mobile Card View -->
-            <div class="md:hidden divide-y divide-gray-100 dark:divide-gray-700">
-                <div v-for="item in data.data" :key="item.id" class="p-6">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex flex-col">
-                            <span class="text-sm font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.name || item.title }}</span>
-                            <span class="text-[10px] font-bold text-pail-gold mt-1 uppercase tracking-widest" v-if="item.plate_number">{{ item.plate_number }}</span>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
-                            :class="item.status === 'available' || item.status === 'completed' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'">
-                            {{ item.status || 'Active' }}
-                        </span>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Lokasi / Lembaga</p>
-                            <p class="text-[10px] font-bold text-gray-600 dark:text-gray-300 uppercase leading-tight">
-                                {{ item.room?.name || item.location || 'Gudang' }}
-                            </p>
-                            <p class="text-[8px] font-bold text-pail-gold uppercase mt-1" v-if="type === 'pemeliharaan-gedung'">
-                                Gedung: {{ item.subcategory || '-' }}
-                            </p>
-                            <p class="text-[8px] font-bold text-pail-gold uppercase mt-1" v-else>
-                                {{ item.institution?.name || 'Pusat' }}
-                            </p>
-                        </div>
-                        <div>
-                            <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Nilai / Biaya</p>
-                            <p class="text-[10px] font-mono font-black text-gray-900 dark:text-white leading-tight">
-                                Rp {{ Number(item.total_price || item.price || item.cost || 0).toLocaleString() }}
-                            </p>
-                            <p class="text-[8px] font-bold text-pail-gold uppercase mt-1" v-if="type === 'pengajuan-rab'">
-                                {{ item.volume }} {{ item.unit }} @ Rp {{ Number(item.unit_price).toLocaleString() }}
-                            </p>
-                            <p class="text-[8px] font-bold text-gray-400 uppercase mt-1" v-if="type === 'buku-induk'">
-                                Dep: Rp {{ Number(item.depreciation_price || 0).toLocaleString() }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-50 dark:border-gray-700/50">
-                        <button @click="openEditModal(item)" class="flex-1 py-3 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 hover:text-pail-gold">
-                            <PencilIcon class="w-4 h-4 mr-2" /> <span class="text-[9px] font-black uppercase">Edit</span>
-                        </button>
-                        <button @click="deleteItem(item.id)" class="flex-1 py-3 rounded-xl bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
-                            <TrashIcon class="w-4 h-4 mr-2" /> <span class="text-[9px] font-black uppercase">Hapus</span>
-                        </button>
-                    </div>
                 </div>
-                <div v-if="data.data.length === 0" class="p-12 text-center">
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Belum ada data.</p>
+                <!-- Empty State -->
+                <div v-if="data.data.length === 0" class="py-24 text-center">
+                    <div class="flex flex-col items-center text-gray-400">
+                        <PlusIcon class="w-12 h-12 mb-4 opacity-20" />
+                        <p class="text-[10px] font-black uppercase tracking-widest">Belum ada data di sistem.</p>
+                    </div>
                 </div>
             </div>
 
@@ -1918,9 +1870,7 @@ const importExcel = (event) => {
                 />
             </div>
         </div>
-    </div>
-
-        <!-- Create Modal -->
+    </div>     <!-- Create Modal -->
         <Teleport to="body">
             <div v-if="showCreateModal" class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-md">
                 <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/10 max-h-[90vh] overflow-y-auto pb-28 sm:pb-0">
@@ -1960,10 +1910,11 @@ const importExcel = (event) => {
                                         <!-- SATKER always at top for ISO Forms -->
                                         <div class="sm:col-span-2">
                                             <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga) <span class="text-red-500">*Wajib</span></label>
-                                            <select v-model="form.institution_id" required class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                <option value="">Pilih Lembaga</option>
-                                                <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
-                                            </select>
+                                            <SearchableSelect
+                                                v-model="form.institution_id"
+                                                :options="institutions"
+                                                placeholder="Pilih Lembaga"
+                                            />
                                         </div>
 
                                         <div :class="type === 'pendataan-aset' || type === 'kir-ruangan' ? 'sm:col-span-2' : ''">
@@ -1973,10 +1924,11 @@ const importExcel = (event) => {
 
                                         <div v-if="type !== 'pendataan-aset' && type !== 'kir-ruangan'">
                                             <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ruangan / Lokasi</label>
-                                            <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                <option value="">Pilih Ruangan</option>
-                                                <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                            </select>
+                                            <SearchableSelect
+                                                v-model="form.room_id"
+                                                :options="rooms"
+                                                placeholder="Pilih Ruangan"
+                                            />
                                         </div>
 
                                         <template v-if="type === 'pendataan-aset' || type === 'kir-ruangan'">
@@ -2157,10 +2109,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ruangan / Lokasi AC</label>
-                                                <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Ruangan</option>
-                                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.room_id"
+                                                    :options="rooms"
+                                                    placeholder="Pilih Ruangan"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tgl / Bln Pengecekan</label>
@@ -2203,10 +2156,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi / Ruangan</label>
-                                                <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Ruangan</option>
-                                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.room_id"
+                                                    :options="rooms"
+                                                    placeholder="Pilih Ruangan"
+                                                />
                                             </div>
                                             
                                             <div class="sm:col-span-2 py-4">
@@ -2249,10 +2203,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi / Ruangan</label>
-                                                <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Ruangan</option>
-                                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.room_id"
+                                                    :options="rooms"
+                                                    placeholder="Pilih Ruangan"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tipe Kipas</label>
@@ -2451,10 +2406,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi / Ruangan</label>
-                                                <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Ruangan</option>
-                                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.room_id"
+                                                    :options="rooms"
+                                                    placeholder="Pilih Ruangan"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Sebelum</label>
@@ -2489,10 +2445,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi Pemohon</label>
-                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Divisi</option>
-                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Divisi"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Permintaan Perbaikan</label>
@@ -2500,10 +2457,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ruangan (Optional)</label>
-                                                <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Ruangan</option>
-                                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.room_id"
+                                                    :options="rooms"
+                                                    placeholder="Pilih Ruangan"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi Spesifik / Manual</label>
@@ -2619,17 +2577,19 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Peminjam</label>
-                                                <select v-model="form.user_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih User...</option>
-                                                    <option v-for="u in users" :key="u.id" :value="u.id">{{ u.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.user_id"
+                                                    :options="users"
+                                                    placeholder="Pilih User..."
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi/Satker</label>
-                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Divisi...</option>
-                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Divisi..."
+                                                />
                                             </div>
                                             
                                             <!-- Saat Peminjaman -->
@@ -2675,10 +2635,12 @@ const importExcel = (event) => {
                                         <template v-else-if="type === 'pelelangan-aset'">
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Barang (Asset)</label>
-                                                <select v-model="form.item_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Barang...</option>
-                                                    <option v-for="item in items" :key="item.id" :value="item.id">{{ item.name }} ({{ item.code }})</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.item_id"
+                                                    :options="items"
+                                                    placeholder="Pilih Barang..."
+                                                    :customLabel="(opt) => `${opt.name} (${opt.code})`"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah (Unit)</label>
@@ -2698,10 +2660,11 @@ const importExcel = (event) => {
                                         <template v-else-if="type === 'pengadaan-sarpras'">
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga</label>
-                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Lembaga...</option>
-                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Lembaga..."
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tahun Ajaran</label>
@@ -2746,10 +2709,11 @@ const importExcel = (event) => {
                                         <template v-else-if="type === 'analisis-kebutuhan'">
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga</label>
-                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Lembaga...</option>
-                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Lembaga..."
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian</label>
@@ -2962,10 +2926,11 @@ const importExcel = (event) => {
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Area Kerja / Ruangan</label>
-                                                    <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option value="">Pilih Ruangan...</option>
-                                                        <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                    </select>
+                                                    <SearchableSelect
+                                                        v-model="form.room_id"
+                                                        :options="rooms"
+                                                        placeholder="Pilih Ruangan..."
+                                                    />
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Waktu / Jam</label>
@@ -2994,10 +2959,11 @@ const importExcel = (event) => {
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Area Kerja</label>
-                                                    <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option value="">Pilih Ruangan...</option>
-                                                        <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                    </select>
+                                                    <SearchableSelect
+                                                        v-model="form.room_id"
+                                                        :options="rooms"
+                                                        placeholder="Pilih Ruangan..."
+                                                    />
                                                 </div>
                                             </div>
                                             <div class="sm:col-span-2">
@@ -3061,10 +3027,11 @@ const importExcel = (event) => {
                                         <template v-else-if="type === 'penyerahan-barang'">
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi (Lembaga)</label>
-                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Divisi...</option>
-                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Divisi..."
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Barang</label>
@@ -3147,10 +3114,12 @@ const importExcel = (event) => {
                                         <template v-else-if="type === 'berita-acara-pemeriksaan'">
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Aset</label>
-                                                <select v-model="form.item_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Aset...</option>
-                                                    <option v-for="item in items" :key="item.id" :value="item.id">{{ item.name }} ({{ item.code }})</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.item_id"
+                                                    :options="items"
+                                                    placeholder="Pilih Aset..."
+                                                    :customLabel="(opt) => `${opt.name} (${opt.code})`"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah</label>
@@ -3178,10 +3147,11 @@ const importExcel = (event) => {
                                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     <div>
                                                         <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Staff Sarpras</label>
-                                                        <select v-model="form.performed_by" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                            <option value="">Pilih Staff...</option>
-                                                            <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-                                                        </select>
+                                                        <SearchableSelect
+                                                            v-model="form.performed_by"
+                                                            :options="users"
+                                                            placeholder="Pilih Staff..."
+                                                        />
                                                     </div>
                                                     <div>
                                                         <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Koordinator Sarpras</label>
@@ -3199,10 +3169,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi / Ruangan</label>
-                                                <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Ruangan</option>
-                                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.room_id"
+                                                    :options="rooms"
+                                                    placeholder="Pilih Ruangan"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Agenda</label>
@@ -3218,10 +3189,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.performed_by"
+                                                    :options="users"
+                                                    placeholder="Pilih Petugas"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
@@ -3233,10 +3205,11 @@ const importExcel = (event) => {
                                         <template v-else>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga Terkait</label>
-                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Lembaga</option>
-                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Lembaga"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Judul Aktivitas</label>
@@ -3264,10 +3237,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-                                                </select>
+                                                <SearchableSelect
+                                                    v-model="form.performed_by"
+                                                    :options="users"
+                                                    placeholder="Pilih Petugas"
+                                                />
                                             </div>
                                         </template>
                                     </template>
@@ -3276,10 +3250,12 @@ const importExcel = (event) => {
                                 <!-- Common Selectors for Vehicles Only -->
                                 <div v-if="type.includes('kendaraan') && type.includes('pengajuan')">
                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Pilih Kendaraan</label>
-                                    <select v-model="form.vehicle_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                        <option value="">Pilih Armada</option>
-                                        <option v-for="v in vehicles" :key="v.id" :value="v.id">{{ v.name }} - {{ v.plate_number }}</option>
-                                    </select>
+                                    <SearchableSelect
+                                        v-model="form.vehicle_id"
+                                        :options="vehicles"
+                                        placeholder="Pilih Armada"
+                                        :customLabel="(opt) => `${opt.name} - ${opt.plate_number}`"
+                                    />
                                 </div>
                             </div>
 

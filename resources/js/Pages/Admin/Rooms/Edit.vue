@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 
 const props = defineProps({
     room: Object,
@@ -55,10 +56,12 @@ const submit = () => {
                                 <div class="space-y-8">
                                     <div>
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Penempatan Lembaga</label>
-                                        <select v-model="form.institution_id" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6" required>
-                                            <option value="">- Pilih Lembaga -</option>
-                                            <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.code }} - {{ inst.name }}</option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.institution_id"
+                                            :options="institutions"
+                                            placeholder="- Pilih Lembaga -"
+                                            :customLabel="(opt) => `${opt.code} - ${opt.name}`"
+                                        />
                                         <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.institution_id }}</div>
                                     </div>
 

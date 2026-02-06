@@ -8,7 +8,7 @@ import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import SecondaryButton from "@/Components/SecondaryButton.vue";
 import DangerButton from "@/Components/DangerButton.vue";
-import InstitutionSelect from "@/Components/InstitutionSelect.vue";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 
 
 const props = defineProps({
@@ -164,82 +164,74 @@ const filteredRooms = computed(() => {
                     </div>
                 </div>
 
-                <!-- Items Grid -->
-                <div class="hidden md:block space-y-4">
-                    <div v-for="item in items.data" :key="item.id" class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 group">
-                        <div class="flex items-start justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-start gap-6">
-                                    <!-- Icon/Badge -->
-                                    <div class="w-16 h-16 rounded-[1.5rem] bg-pail-gold/10 border-2 border-pail-gold/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                                        <svg class="w-8 h-8 text-pail-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                    </div>
-                                    
-                                    <!-- Content -->
-                                    <div class="flex-1">
-                                        <div class="flex items-start justify-between mb-4">
-                                            <div>
-                                                <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-pail-gold transition-colors">{{ item.name }}</h3>
-                                                <p class="text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">{{ item.brand || 'No Brand' }}</p>
-                                                <span v-if="isAdmin" class="inline-block mt-2 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wider rounded-full">
-                                                    {{ item.institution?.name || '-' }}
-                                                </span>
+                <!-- Items Table -->
+                <div class="hidden md:block bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Barang / Aset</th>
+                                    <th v-if="isAdmin" class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Lembaga</th>
+                                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Stok</th>
+                                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Ruangan</th>
+                                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kondisi</th>
+                                    <th class="px-8 py-5 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                <tr v-for="item in items.data" :key="item.id" class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-all">
+                                    <td class="px-8 py-4">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 rounded-xl bg-pail-gold/10 flex items-center justify-center text-pail-gold shrink-0">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                                             </div>
-                                            <span class="px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm" :class="item.condition === 'Baik' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-orange-50 text-orange-600 border border-orange-100'">
-                                                {{ item.condition }}
+                                            <div>
+                                                <p class="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-pail-gold transition-colors">{{ item.name }}</p>
+                                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{{ item.brand || 'NO BRAND' }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td v-if="isAdmin" class="px-8 py-4">
+                                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[9px] font-black uppercase tracking-wider rounded-lg">
+                                            {{ item.institution?.name || '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-4 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-sm font-black tracking-tighter" :class="item.stock <= item.min_stock ? 'text-red-500' : 'text-gray-900 dark:text-white'">
+                                                {{ item.stock }}
                                             </span>
+                                            <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">{{ item.unit }}</span>
                                         </div>
-                                        
-                                        <!-- Details Grid -->
-                                        <div class="grid grid-cols-3 gap-6 py-4 border-t border-gray-100 dark:border-gray-700">
-                                            <div>
-                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Ruangan</p>
-                                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ item.room?.name || '-' }}</p>
-                                            </div>
-                                            <div>
-                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Stok Tersedia</p>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-2xl font-black tracking-tighter" :class="item.stock <= item.min_stock ? 'text-red-600' : 'text-green-600'">{{ item.stock }}</span>
-                                                    <span class="text-xs font-bold text-gray-400 uppercase">{{ item.unit }}</span>
-                                                </div>
-                                                <p v-if="item.stock <= item.min_stock" class="text-[9px] font-black text-red-500 uppercase tracking-wider mt-1 flex items-center gap-1">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                                                    Stok Rendah
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Min. Stok</p>
-                                                <p class="text-sm font-bold text-gray-600 dark:text-gray-300">{{ item.min_stock }} {{ item.unit }}</p>
-                                            </div>
+                                    </td>
+                                    <td class="px-8 py-4 text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase">{{ item.room?.name || '-' }}</td>
+                                    <td class="px-8 py-4">
+                                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                            :class="item.condition === 'Baik' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-orange-50 text-orange-600 border-orange-100'">
+                                            {{ item.condition }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-4">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="p-2 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-400 hover:text-indigo-500 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                            </button>
+                                            <button @click="openDeleteModal(item)" class="p-2 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-400 hover:text-red-500 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                            </button>
                                         </div>
-                                        
-                                        <!-- Note if exists -->
-                                        <div v-if="item.note" class="mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700">
-                                            <p class="text-xs text-gray-600 dark:text-gray-400 italic">{{ item.note }}</p>
+                                    </td>
+                                </tr>
+                                <tr v-if="items.data.length === 0">
+                                    <td :colspan="isAdmin ? 6 : 5" class="px-8 py-20 text-center">
+                                        <div class="flex flex-col items-center text-gray-400">
+                                            <svg class="w-12 h-12 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                            <p class="text-[10px] font-black uppercase tracking-[0.2em]">Belum Ada Barang</p>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Actions -->
-                            <div class="flex items-center gap-3 ml-6">
-                                <button @click="openEditModal(item)" class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all flex items-center justify-center group/btn">
-                                    <svg class="w-5 h-5 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </button>
-                                <button @click="openDeleteModal(item)" class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all flex items-center justify-center group/btn">
-                                    <svg class="w-5 h-5 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Empty State -->
-                    <div v-if="items.data.length === 0" class="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-20 text-center">
-                        <div class="flex flex-col items-center text-gray-400">
-                            <svg class="w-16 h-16 mb-6 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                            <p class="font-black uppercase tracking-[0.3em] text-sm">Belum Ada Barang</p>
-                            <p class="text-xs text-gray-300 font-bold mt-2 uppercase">Mulai dengan menambahkan barang baru.</p>
-                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -300,9 +292,10 @@ const filteredRooms = computed(() => {
                         <!-- Institution (Admin Only) -->
                         <div v-if="isAdmin">
                             <InputLabel value="Lembaga" />
-                            <InstitutionSelect 
+                            <SearchableSelect 
                                 v-model="form.institution_id" 
-                                :institutions="institutions" 
+                                :options="institutions" 
+                                placeholder="Pilih Lembaga"
                                 class="mt-1" 
                             />
                             <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
@@ -344,12 +337,12 @@ const filteredRooms = computed(() => {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <InputLabel value="Ruangan" />
-                                <select v-model="form.room_id" class="w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white">
-                                    <option value="">-- Pilih Ruangan --</option>
-                                    <option v-for="room in filteredRooms" :key="room.id" :value="room.id">
-                                        {{ room.name }}
-                                    </option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.room_id"
+                                    :options="filteredRooms"
+                                    placeholder="-- Pilih Ruangan --"
+                                    class="mt-1"
+                                />
                                 <div v-if="form.errors.room_id" class="text-red-500 text-xs mt-1">{{ form.errors.room_id }}</div>
                             </div>
                             <div>

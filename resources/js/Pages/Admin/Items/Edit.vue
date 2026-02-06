@@ -3,6 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import { ref, watch, onMounted } from "vue";
 import axios from "axios";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 import LocationIcon from "@/Components/Icons/LocationIcon.vue";
 import PackageIcon from "@/Components/Icons/PackageIcon.vue";
 import CalendarIcon from "@/Components/Icons/CalendarIcon.vue";
@@ -107,20 +108,25 @@ const submit = () => {
                                 <div class="space-y-8 col-span-2 grid grid-cols-1 md:grid-cols-2 gap-x-10">
                                     <div>
                                         <label class="block text-[10px] font-black text-pail-gold uppercase tracking-widest mb-3 ml-1">Lembaga Pemilik Aset</label>
-                                        <select v-model="form.institution_id" class="w-full h-14 border-gray-100 rounded-3xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold focus:border-pail-gold px-6">
-                                            <option value="">- Pilih Lembaga -</option>
-                                            <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.code }} - {{ inst.name }}</option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.institution_id"
+                                            :options="institutions"
+                                            placeholder="- Pilih Lembaga -"
+                                            :customLabel="(opt) => `${opt.code} - ${opt.name}`"
+                                        />
                                         <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.institution_id }}</div>
                                     </div>
                                     <div>
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
                                             <LocationIcon className="w-3 h-3" /> Lokasi / Ruangan Penempatan
                                         </label>
-                                        <select v-model="form.room_id" class="w-full h-14 border-gray-100 rounded-3xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold focus:border-pail-gold px-6" :disabled="!form.institution_id || isLoadingRooms">
-                                            <option value="">- Pilih Ruangan -</option>
-                                            <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.room_id"
+                                            :options="rooms"
+                                            placeholder="- Pilih Ruangan -"
+                                            :disabled="!form.institution_id || isLoadingRooms"
+                                            label-key="name"
+                                        />
                                         <div v-if="form.errors.room_id" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.room_id }}</div>
                                     </div>
                                 </div>

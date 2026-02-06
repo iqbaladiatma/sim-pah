@@ -6,7 +6,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import InstitutionSelect from "@/Components/InstitutionSelect.vue";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 import SparklesIcon from "@/Components/Icons/SparklesIcon.vue";
 import ZapIcon from "@/Components/Icons/ZapIcon.vue";
 import UserIcon from "@/Components/Icons/UserIcon.vue";
@@ -77,9 +77,10 @@ const submit = () => {
                         <span class="text-[7px] sm:text-[9px] font-black text-pail-gold/40 uppercase tracking-widest">Wajib untuk Lembaga-Lembaga</span>
                     </div>
                     
-                    <InstitutionSelect 
+                    <SearchableSelect 
                         v-model="form.institution_id"
-                        :institutions="institutions"
+                        :options="institutions"
+                        placeholder="CARI LEMBAGA..."
                     />
                     <InputError class="mt-2" :message="form.errors.institution_id" />
                     
@@ -105,7 +106,7 @@ const submit = () => {
                         <TextInput
                             id="email"
                             type="email"
-                            class="block w-full bg-white/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 focus:border-pail-gold focus:ring-[10px] focus:ring-pail-gold/5 rounded-full shadow-sm h-14 sm:h-16 pl-14 pr-6 text-sm font-bold transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 border-2"
+                            class="block w-full bg-white/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 focus:border-pail-gold focus:ring-2 focus:ring-pail-gold/5 rounded-full shadow-sm h-14 sm:h-16 pl-14 pr-6 text-sm font-bold transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 border-2"
                             v-model="form.email"
                             required
                             autofocus
@@ -134,7 +135,7 @@ const submit = () => {
                         <TextInput
                             id="password"
                             type="password"
-                            class="block w-full bg-white/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 focus:border-pail-gold focus:ring-[10px] focus:ring-pail-gold/5 rounded-full shadow-sm h-14 sm:h-16 pl-14 pr-6 text-sm font-bold transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 border-2"
+                            class="block w-full bg-white/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 focus:border-pail-gold focus:ring-2 focus:ring-pail-gold/5 rounded-full shadow-sm h-14 sm:h-16 pl-14 pr-6 text-sm font-bold transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 border-2"
                             v-model="form.password"
                             required
                             autocomplete="current-password"

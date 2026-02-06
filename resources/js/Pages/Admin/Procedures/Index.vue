@@ -117,6 +117,13 @@ const filteredProcedures = computed(() => {
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <Link 
+                        :href="route('admin.procedures.dashboard')" 
+                        class="flex items-center gap-2 px-6 py-3 bg-pail-gold text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-all shadow-lg hover:shadow-pail-gold/20 mr-2"
+                    >
+                        <i class="block w-4 h-4 text-white">📊</i>
+                        Dashboard ISO
+                    </Link>
                     <a 
                         :href="route('admin.procedures.export_all')" 
                         target="_blank"

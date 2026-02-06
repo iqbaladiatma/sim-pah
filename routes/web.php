@@ -68,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             // URT ISO Procedures
             Route::prefix('procedures')->name('procedures.')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'index'])->name('index');
+                Route::get('/dashboard', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'dashboard'])->name('dashboard');
                 Route::get('/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'show'])->name('show');
                 Route::post('/store/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'store'])->name('store');
                 Route::put('/update/{type}/{id}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'update'])->name('update');
