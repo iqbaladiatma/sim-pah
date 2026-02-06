@@ -17,18 +17,18 @@
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
 
         <!-- Modal Container -->
-        <div class="flex min-h-full items-center justify-center p-4">
+        <div class="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
           <Transition
-            enter-active-class="transition ease-out duration-200"
-            enter-from-class="opacity-0 scale-95"
-            enter-to-class="opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-150"
-            leave-from-class="opacity-100 scale-100"
-            leave-to-class="opacity-0 scale-95"
+            enter-active-class="transition ease-out duration-300"
+            enter-from-class="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95"
+            enter-to-class="opacity-100 translate-y-0 sm:scale-100"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="opacity-100 translate-y-0 sm:scale-100"
+            leave-to-class="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95"
           >
             <div
               v-if="show"
-              class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all"
+              class="relative w-full max-w-md transform overflow-hidden rounded-t-[2rem] sm:rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all"
               @click.stop
             >
               <!-- Icon -->

@@ -131,6 +131,42 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
 
                     <template v-if="['super admin', 'admin'].includes(user.role)">
                         <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-3 lg:mb-4" v-if="!isSidebarCollapsed">
+                            <p class="text-[9px] lg:text-[10px] font-black uppercase text-pail-gold tracking-[0.25em] lg:tracking-[0.3em]">MODUL ISO URT</p>
+                        </div>
+                        
+                        <!-- 1. Modul Aset -->
+                        <NavLink :href="route('admin.procedures.index', { group: 'aset' })" :active="$page.url.includes('aset')" @click="closeSidebarOnMobile">
+                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Manajemen Aset</span>
+                            </div>
+                        </NavLink>
+
+                        <!-- 2. Modul Sarpras -->
+                        <NavLink :href="route('admin.procedures.index', { group: 'sarpras' })" :active="$page.url.includes('sarpras')" @click="closeSidebarOnMobile">
+                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Sarana & Fasilitas</span>
+                            </div>
+                        </NavLink>
+
+                        <!-- 3. Modul Kendaraan -->
+                        <NavLink :href="route('admin.procedures.index', { group: 'kendaraan' })" :active="$page.url.includes('kendaraan')" @click="closeSidebarOnMobile">
+                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Armada & Parkir</span>
+                            </div>
+                        </NavLink>
+
+                        <!-- 4. Modul Kepatuhan ISO -->
+                        <NavLink :href="route('admin.procedures.show', 'ceklist-iso')" :active="route().current('admin.procedures.show', 'ceklist-iso')" @click="closeSidebarOnMobile">
+                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Audit & Ceklist ISO</span>
+                            </div>
+                        </NavLink>
+
+                        <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-3 lg:mb-4" v-if="!isSidebarCollapsed">
                             <p class="text-[9px] lg:text-[10px] font-black uppercase text-gray-400 tracking-[0.25em] lg:tracking-[0.3em]">Intelijen Sistem</p>
                         </div>
                         <NavLink :href="route('admin.activity_log.index')" :active="route().current('admin.activity_log.*')" @click="closeSidebarOnMobile">

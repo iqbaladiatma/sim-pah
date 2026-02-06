@@ -64,6 +64,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('/online-users/{session}', [\App\Http\Controllers\Admin\OnlineUsersController::class, 'kick'])->name('online_users.kick');
 
             Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+
+            // URT ISO Procedures
+            Route::prefix('procedures')->name('procedures.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'index'])->name('index');
+                Route::get('/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'show'])->name('show');
+                Route::post('/store/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'store'])->name('store');
+                Route::put('/update/{id}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'update'])->name('update');
+                Route::delete('/destroy/{id}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'destroy'])->name('destroy');
+
+                // Excel Import/Export
+                Route::get('/export/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'export'])->name('export');
+                Route::post('/import/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'import'])->name('import');
+
+                // Specific helpers
+                Route::get('/template/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'downloadTemplate'])->name('template');
+            });
         }
     );
 });
