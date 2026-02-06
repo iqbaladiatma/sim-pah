@@ -20,7 +20,11 @@ class BorrowingRecord extends Model
         'expected_return_date',
         'actual_return_date',
         'status',
-        'notes'
+        'notes',
+        'borrow_condition',
+        'borrower_paraf',
+        'return_condition',
+        'returner_paraf'
     ];
 
     protected $casts = [

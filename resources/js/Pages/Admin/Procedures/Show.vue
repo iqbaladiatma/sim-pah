@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 // Use local icons from the project
 import DownloadIcon from '@/Components/Icons/DownloadIcon.vue';
@@ -21,6 +21,39 @@ const props = defineProps({
     items: Array,
     users: Array,
     vehicles: Array,
+});
+
+const grandTotal = computed(() => {
+    return props.data.data.reduce((sum, item) => sum + (parseFloat(item.total_price) || 0), 0);
+});
+
+const tableColspan = computed(() => {
+    const t = props.type;
+    if (t === 'buku-induk') return 20;
+    if (t === 'kir-ruangan') return 14;
+    if (t === 'pendataan-aset') return 12;
+    if (t === 'pemeliharaan-gedung') return 18;
+    if (t === 'pemeliharaan-ac') return 10;
+    if (t === 'pemeliharaan-kamar-mandi') return 16;
+    if (['pemeliharaan-pompa', 'pemeliharaan-air-bersih'].includes(t)) return 42;
+    if (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(t)) return 30;
+    if (t === 'pemeliharaan-kipas') return 8;
+    if (t === 'pemeliharaan-septik') return 10;
+    if (['pengajuan-rab', 'analisis-kebutuhan'].includes(t)) return 7;
+    if (['pengadaan-sarpras', 'berita-acara-pemeriksaan', 'penerimaan-barang'].includes(t)) return 10;
+    if (t === 'penyerahan-barang') return 8;
+    if (t === 'jadwal-token') return 9;
+    if (t === 'pemeliharaan-kebersihan') return 17;
+    if (t === 'jadwal-kebersihan') return 8; // kept for fallback or history
+    if (t === 'detailed-monitoring') return 23; // 4 fixed + 18 dynamic (3 columns * 6 days) + 1 desc
+    if (t === 'detailed-monitoring') return 23; // 4 fixed + 18 dynamic (3 columns * 6 days) + 1 desc
+    if (t === 'weekly-activity') return 9;
+    if (t === 'vehicle-log') return 9;
+    if (t === 'electrical-maintenance') return 17;
+    if (t === 'kelengkapan-alat') return 9;
+    if (t === 'monitoring-kebersihan') return 17;
+    if (t === 'pemilihan-evaluasi') return 6;
+    return 7; // default
 });
 
 const airBersihItems = [
@@ -135,6 +168,18 @@ const form = useForm({
     year: new Date().getFullYear(),
     jul: '', aug: '', sep: '', oct: '', nov: '', dec: '',
     jan: '', feb: '', mar: '', apr: '', may: '', jun: '',
+    // Procurement & Supplier Fields
+    procurement_type: '',
+    supplier_address: '',
+    supplier_contact: '',
+    supplier_product: '',
+    sc_price: 0,
+    sc_quality: 0,
+    sc_delivery: 0,
+    sc_service: 0,
+    sc_legal: 0,
+    sc_total: 0,
+    // Bathroom Fields
     kran_air: '', lampu: '', fiting_lampu: '', saklar_lampu: '',
     ember: '', gayung: '', closet: '', pintu: '', grendel_pintu: '',
     ac_indoor_pc: '', ac_indoor_sw: '', ac_outdoor_freon: '', ac_outdoor_amp: '',
@@ -150,7 +195,50 @@ const form = useForm({
         return acc;
     }, {}),
     performed_by: '',
-    completed_at: new Date().toISOString().split('T')[0]
+    completed_at: new Date().toISOString().split('T')[0],
+    request_date: new Date().toISOString().split('T')[0],
+    damage_type: '',
+    follow_up_date: '',
+    remarks: '',
+    volume: 0,
+    unit: '',
+    unit_price: 0,
+    total_price: 0,
+    budget_amount: 0,
+    actual_amount: 0,
+    attainment_percentage: 0,
+    team_members: '',
+    responsible_person: '',
+    item_id: '',
+    user_id: '',
+    institution_id: '',
+    quantity: 1,
+    borrow_date: new Date().toISOString().split('T')[0],
+    borrow_condition: '',
+    borrower_paraf: '',
+    actual_return_date: '',
+    return_condition: '',
+    returner_paraf: '',
+    value: 0,
+    reason: '',
+    action_date: new Date().toISOString().split('T')[0]
+});
+
+watch([() => form.volume, () => form.unit_price], ([vol, price]) => {
+    form.total_price = parseFloat((vol * price).toFixed(2));
+});
+
+watch([() => form.sc_price, () => form.sc_quality, () => form.sc_delivery, () => form.sc_service, () => form.sc_legal], ([p, q, d, s, l]) => {
+    const total = (Number(p) * 0.25) + (Number(q) * 0.3) + (Number(d) * 0.2) + (Number(s) * 0.15) + (Number(l) * 0.1);
+    form.sc_total = parseFloat(total.toFixed(2));
+});
+
+watch([() => form.budget_amount, () => form.actual_amount], ([budget, actual]) => {
+    if (budget > 0) {
+        form.attainment_percentage = parseFloat(((actual / budget) * 100).toFixed(2));
+    } else {
+        form.attainment_percentage = 0;
+    }
 });
 
 const openCreateModal = () => {
@@ -484,8 +572,333 @@ const importExcel = (event) => {
                             </template>
                         </tr>
 
+                        <!-- specialized for Rekapan Pengajuan Perbaikan (Single Row Header) -->
+                        <tr v-if="type === 'rekapan-pengajuan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tgl Pengajuan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Divisi Pemohon</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Permintaan Perbaikan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Lokasi</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis Kerusakan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tgl di TL</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Ket</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pengajuan RAB -->
+                        <tr v-if="type === 'pengajuan-rab'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Uraian Proyek</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Volume</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Satuan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Harga</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Jumlah</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Laporan Proyek Kegiatan -->
+                        <tr v-if="type === 'laporan-proyek'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Proyek Kegiatan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tgl Pelaksanaan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi Kegiatan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">PJ Jawab</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tim Pelaksana</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Anggaran</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Realisasi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">% Capaian</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Ket</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Peminjaman Barang -->
+                        <template v-if="type === 'peminjaman-barang'">
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Nama Peminjam/Divisi</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Nama Barang</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Kode Barang</th>
+                                <th colspan="3" class="px-4 py-3 text-[8px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Saat Peminjaman</th>
+                                <th colspan="3" class="px-4 py-3 text-[8px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Saat Kembali</th>
+                                <th rowspan="2" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                            </tr>
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-400 font-black uppercase tracking-wider">
+                                <th class="px-4 py-3 border-l border-gray-100 dark:border-gray-700">Kondisi</th>
+                                <th class="px-4 py-3">Hari/Tgl</th>
+                                <th class="px-4 py-3">Paraf</th>
+                                <th class="px-4 py-3 border-l border-gray-100 dark:border-gray-700">Kondisi</th>
+                                <th class="px-4 py-3">Hari/Tgl</th>
+                                <th class="px-4 py-3">Paraf</th>
+                            </tr>
+                        </template>
+
+                        <!-- specialized for Pelelangan Aset -->
+                        <tr v-if="type === 'pelelangan-aset'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kode Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jumlah (Unit)</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tahun Perolehan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Kondisi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Nilai Perkiraan (Rp)</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Berita Acara Pemeriksaan Aset -->
+                        <tr v-if="type === 'berita-acara-pemeriksaan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Aset</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kode Aset</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Merk / Type</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tahun Perolehan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jumlah</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Kondisi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pengadaan Sarpras -->
+                        <template v-if="type === 'pengadaan-sarpras'">
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Uraian</th>
+                                <th colspan="2" class="px-4 py-3 text-[8px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Spesifikasi</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jumlah</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Satuan</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
+                                <th rowspan="2" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                            </tr>
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-400 font-black uppercase tracking-wider">
+                                <th class="px-4 py-3 border-l border-gray-100 dark:border-gray-700">Merk</th>
+                                <th class="px-4 py-3">Ukuran</th>
+                            </tr>
+                        </template>
+
+                        <!-- specialized for Kelengkapan Alat -->
+                        <tr v-if="type === 'kelengkapan-alat'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanggal Pemeriksaan</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Alat dan Bahan</th>
+                            <th colspan="4" class="px-4 py-3 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Kondisi Alat dan Bahan</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th rowspan="2" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+                        <tr v-if="type === 'kelengkapan-alat'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-400 font-black uppercase tracking-wider">
+                            <th class="px-4 py-3 border-l border-gray-100 dark:border-gray-700">Kebutuhan/bln</th>
+                            <th class="px-4 py-3">Stok</th>
+                            <th class="px-4 py-3">Pengadaan</th>
+                            <th class="px-4 py-3">Satuan</th>
+                        </tr>
+
+                        <!-- specialized for Detailed Monitoring (Jadwal Kebersihan new) -->
+                        <tr v-if="type === 'detailed-monitoring'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Nama Petugas</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Area Kerja</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Uraian Pekerjaan</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Standar Pengecekan</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Metode Pengecekan</th>
+                            <th colspan="18" class="px-4 py-3 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Penilaian</th>
+                            <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th rowspan="2" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                        </tr>
+                        <tr v-if="type === 'detailed-monitoring'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-400 font-black uppercase tracking-wider">
+                            <th colspan="3" class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">Senin</th>
+                            <th colspan="3" class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">Selasa</th>
+                            <th colspan="3" class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">Rabu</th>
+                            <th colspan="3" class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">Kamis</th>
+                            <th colspan="3" class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">Jumat</th>
+                            <th colspan="3" class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">Sabtu</th>
+                        </tr>
+
+                        <!-- specialized for Weekly Activity -->
+                        <tr v-if="type === 'weekly-activity'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Pekanan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Nama Petugas</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Area Kegiatan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Uraian Pekerjaan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Waktu</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Ceklist</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Paraf PJ</th>
+                        </tr>
+
+                        <!-- specialized for Vehicle Log -->
+                        <tr v-if="type === 'vehicle-log'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Bln/Tgl/Thn</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Jenis Kendaraan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Waktu Jam</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Unit Kerja</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Tujuan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Kilometer</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Ampere BBM</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Kondisi Kendaraan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Nama PJ</th>
+                        </tr>
+
+                        <!-- specialized for Electrical Maintenance -->
+                        <tr v-if="type === 'electrical-maintenance'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Item Pengecekan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Standard Pengecekan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Metode Pengecekan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Frekuensi</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jul</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Agust</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Sept</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Okt</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Nov</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Des</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jan</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Feb</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Mar</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Apr</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Mei</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Juni</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Aksi</th>
+                        </tr>
+
+                        <!-- specialized for Monitoring Kebersihan -->
+                        <tr v-if="type === 'monitoring-kebersihan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th rowspan="3" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Nama Petugas</th>
+                            <th rowspan="3" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Area Kerja</th>
+                            <th rowspan="3" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Uraian Pekerjaan</th>
+                            <th colspan="12" class="px-4 py-3 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Penilaian</th>
+                            <th rowspan="3" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th rowspan="3" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                        </tr>
+                        <tr v-if="type === 'monitoring-kebersihan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-400 font-black uppercase tracking-wider">
+                            <th colspan="2" class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">Senin</th>
+                            <th colspan="2" class="px-2 py-2 text-center">Selasa</th>
+                            <th colspan="2" class="px-2 py-2 text-center">Rabu</th>
+                            <th colspan="2" class="px-2 py-2 text-center">Kamis</th>
+                            <th colspan="2" class="px-2 py-2 text-center">Jum'at</th>
+                            <th colspan="2" class="px-2 py-2 text-center">Sabtu</th>
+                        </tr>
+                        <tr v-if="type === 'monitoring-kebersihan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-400 font-black uppercase tracking-wider">
+                            <th class="px-2 py-2 border-l border-gray-100 dark:border-gray-700 text-center">S</th><th class="px-2 py-2 text-center">B</th>
+                            <th class="px-2 py-2 text-center">S</th><th class="px-2 py-2 text-center">B</th>
+                            <th class="px-2 py-2 text-center">S</th><th class="px-2 py-2 text-center">B</th>
+                            <th class="px-2 py-2 text-center">S</th><th class="px-2 py-2 text-center">B</th>
+                            <th class="px-2 py-2 text-center">S</th><th class="px-2 py-2 text-center">B</th>
+                            <th class="px-2 py-2 text-center">S</th><th class="px-2 py-2 text-center">B</th>
+                        </tr>
+
+                        <!-- specialized for Jadwal Kebersihan -->
+                        <tr v-if="type === 'jadwal-kebersihan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Hari</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Nama Petugas</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Area Kerja</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Waktu</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Uraian Pekerjaan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Analisis Kebutuhan Sarpras -->
+                        <tr v-if="type === 'analisis-kebutuhan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lembaga</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Uraian</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jumlah</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Satuan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Pengadaan / Penggantian</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pemeliharaan Kebersihan (Timeline) -->
+                        <template v-if="type === 'pemeliharaan-kebersihan'">
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-left">URAIAN PEMELIHARAAN</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">OUTPUT PEMBIAYAAN KEGIATAN</th>
+                                <th colspan="12" class="px-4 py-3 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">TIMELINE KEGIATAN</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                                <th rowspan="2" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                            </tr>
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-400 font-black uppercase tracking-wider">
+                                <th class="px-2 py-3 border-l border-gray-100 dark:border-gray-700">Jul-25</th>
+                                <th class="px-2 py-3">Agu-25</th>
+                                <th class="px-2 py-3">Sep-25</th>
+                                <th class="px-2 py-3">Okt-25</th>
+                                <th class="px-2 py-3">Nov-25</th>
+                                <th class="px-2 py-3">Des-25</th>
+                                <th class="px-2 py-3">Jan-26</th>
+                                <th class="px-2 py-3">Feb-26</th>
+                                <th class="px-2 py-3">Mar-26</th>
+                                <th class="px-2 py-3">Apr-26</th>
+                                <th class="px-2 py-3">Mei-26</th>
+                                <th class="px-2 py-3">Jun-26</th>
+                            </tr>
+                        </template>
+
+                        <!-- specialized for Pengajuan RAB -->
+                        <tr v-if="type === 'pengajuan-rab'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kebutuhan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Volume</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Satuan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Harga Satuan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Jumlah</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Jadwal Token -->
+                        <tr v-if="type === 'jadwal-token'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanggal Pengisian</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Meter / ID Pelanggan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Nominal Token (Rp)</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Nomor Token</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Petugas</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanda Tangan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Penyerahan Barang -->
+                        <tr v-if="type === 'penyerahan-barang'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Spesifikasi Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jumlah</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Satuan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Kondisi barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Penerimaan Barang -->
+                        <tr v-if="type === 'penerimaan-barang'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanggal Penerimaan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Spesifikasi Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jml</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Satuan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Asal Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Penerima</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pemilihan & Evaluasi Supplier -->
+                        <tr v-if="type === 'pemilihan-evaluasi'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kategori Supplier</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Supplier</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Skor Akhir</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
                         <!-- Standard Row for Other Types -->
-                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <!-- Dynamic Headers based on Type -->
                             <template v-if="type.includes('kendaraan')">
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Armada / Plat</th>
@@ -555,8 +968,590 @@ const importExcel = (event) => {
 
                             <!-- Generic Content for Others -->
                             <template v-else>
+                                <!-- Specialized Content for REKAPAN PENGAJUAN -->
+                                <template v-if="type === 'rekapan-pengajuan'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.request_date || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.description || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.room?.name || item.location || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.damage_type || '-' }}</td>
+                                    <td class="px-4 py-6 text-center">
+                                        <span class="inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest" 
+                                              :class="{
+                                                  'bg-yellow-100 text-yellow-600': item.status === 'pending',
+                                                  'bg-blue-100 text-blue-600': (item.status === 'proses' || item.status === 'processing'),
+                                                  'bg-green-100 text-green-600': (item.status === 'selesai' || item.status === 'completed')
+                                              }">
+                                            {{ item.status || 'PENDING' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ item.follow_up_date || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic text-right">{{ item.remarks || '-' }}</td>
+
+                                    <!-- Management Actions for Rekapan Pengajuan -->
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Pengajuan RAB -->
+                                <template v-else-if="type === 'pengajuan-rab'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center">{{ item.volume || 0 }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-right">Rp {{ (parseFloat(item.unit_price) || 0).toLocaleString('id-ID') }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right">Rp {{ (parseFloat(item.total_price) || 0).toLocaleString('id-ID') }}</td>
+
+                                    <!-- Management Actions for Pengajuan RAB -->
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Laporan Proyek Kegiatan -->
+                                <template v-else-if="type === 'laporan-proyek'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center">{{ item.completed_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.room?.name || item.location || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.responsible_person || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase leading-tight">{{ item.team_members || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-right">Rp {{ (parseFloat(item.budget_amount) || 0).toLocaleString('id-ID') }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right">Rp {{ (parseFloat(item.actual_amount) || 0).toLocaleString('id-ID') }}</td>
+                                    <td class="px-4 py-6 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-[10px] font-black text-pail-gold">{{ item.attainment_percentage || 0 }}%</span>
+                                            <div class="w-12 h-1 bg-gray-100 dark:bg-gray-700 rounded-full mt-1 overflow-hidden">
+                                                <div class="h-full bg-pail-gold transition-all" :style="{ width: Math.min(item.attainment_percentage || 0, 100) + '%' }"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic">{{ item.description || '-' }}</td>
+
+                                    <!-- Management Actions for Laporan Proyek -->
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Peminjaman Barang -->
+                                <template v-else-if="type === 'peminjaman-barang'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6">
+                                        <div class="flex flex-col">
+                                            <span class="text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.user?.name || '-' }}</span>
+                                            <span class="text-[9px] text-pail-gold font-bold uppercase tracking-widest mt-1">{{ item.institution?.name || '-' }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.item?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">{{ item.item?.code || '-' }}</td>
+                                    
+                                    <!-- Saat Peminjaman -->
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center border-l border-gray-100 dark:border-gray-700 uppercase">{{ item.borrow_condition || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase">{{ item.borrow_date ? new Date(item.borrow_date).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-center uppercase">{{ item.borrower_paraf || '-' }}</td>
+
+                                    <!-- Saat Kembali -->
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center border-l border-gray-100 dark:border-gray-700 uppercase">{{ item.return_condition || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase">{{ item.actual_return_date ? new Date(item.actual_return_date).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-center uppercase">{{ item.returner_paraf || '-' }}</td>
+
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Pelelangan Aset -->
+                                <template v-else-if="type === 'pelelangan-aset'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.item?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">{{ item.item?.code || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.quantity || 0 }} Unit</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.item?.purchased_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-center">
+                                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                            :class="item.item?.condition === 'B' ? 'bg-green-50 text-green-600 border-green-100' : (item.item?.condition === 'KB' ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-red-50 text-red-600 border-red-100')">
+                                            {{ item.item?.condition || '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-6 text-right text-xs font-mono font-black text-gray-900 dark:text-white">Rp {{ Number(item.value || 0).toLocaleString() }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.reason || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Monitoring Kebersihan -->
+                                <template v-else-if="type === 'monitoring-kebersihan'">
+                                    <td class="px-4 py-6 text-[11px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center border-l border-gray-50 dark:border-gray-800 font-bold text-green-600">{{ item.mon_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.mon_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-green-600">{{ item.tue_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.tue_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-green-600">{{ item.wed_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.wed_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-green-600">{{ item.thu_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.thu_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-green-600">{{ item.fri_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.fri_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-green-600">{{ item.sat_status ? '√' : '' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.sat_status ? '√' : '' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Detailed Monitoring -->
+                                <template v-else-if="type === 'detailed-monitoring'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase">{{ item.standard_check || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase">{{ item.method_check || '-' }}</td>
+                                    
+                                    <!-- Dynamic Ratings -->
+                                    <template v-for="day in ['mon', 'tue', 'wed', 'thu', 'fri', 'sat']" :key="day">
+                                        <td class="px-1 py-6 text-[8px] text-center border-l border-gray-50 dark:border-gray-800" :class="{'bg-green-50': item[day+'_rating'] === 'sangat_bersih'}">
+                                            {{ item[day+'_rating'] === 'sangat_bersih' ? '✓' : '' }}
+                                        </td>
+                                        <td class="px-1 py-6 text-[8px] text-center" :class="{'bg-blue-50': item[day+'_rating'] === 'bersih'}">
+                                            {{ item[day+'_rating'] === 'bersih' ? '✓' : '' }}
+                                        </td>
+                                        <td class="px-1 py-6 text-[8px] text-center" :class="{'bg-red-50': item[day+'_rating'] === 'tidak_bersih'}">
+                                            {{ item[day+'_rating'] === 'tidak_bersih' ? '✓' : '' }}
+                                        </td>
+                                    </template>
+
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Weekly Activity -->
+                                <template v-else-if="type === 'weekly-activity'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.week_name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.scheduled_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-center">
+                                        <span v-if="item.is_checked" class="text-green-600 font-bold text-lg">✓</span>
+                                        <span v-else class="text-gray-300">-</span>
+                                    </td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap text-gray-900 dark:text-white font-bold text-[10px] uppercase">
+                                        {{ item.responsible_person || '-' }}
+                                    </td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Vehicle Log -->
+                                <template v-else-if="type === 'vehicle-log'">
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.request_date ? new Date(item.request_date).toLocaleDateString('id-ID') : '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-pail-gold uppercase">{{ item.vehicle?.name || '-' }} ({{ item.vehicle?.plate_number || '-' }})</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.time_range || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution_name || item.user?.institution?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.destination || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.start_mileage || 0 }} KM</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.fuel_level_before || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.condition_before || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap text-[10px] font-bold uppercase">
+                                        {{ item.responsible_person || '-' }}
+                                    </td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Electrical Maintenance -->
+                                <template v-else-if="type === 'electrical-maintenance'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase">{{ item.standard_check || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase">{{ item.method_check || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-center text-gray-500 uppercase">{{ item.frequency || '-' }}</td>
+                                    
+                                    <!-- Monthly Status -->
+                                    <template v-for="month in ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun']" :key="month">
+                                        <td class="px-2 py-6 text-[10px] font-bold text-center" 
+                                            :class="{
+                                                'text-green-600': item[month+'_status'] === 'V',
+                                                'text-red-600': item[month+'_status'] === 'X'
+                                            }">
+                                            {{ item[month+'_status'] || '-' }}
+                                        </td>
+                                    </template>
+
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Berita Acara Pemeriksaan Aset -->
+                                <template v-else-if="type === 'berita-acara-pemeriksaan'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.item?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest">{{ item.item?.code || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">{{ item.item?.brand || '-' }} / {{ item.item?.specification || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.item?.purchased_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.quantity || 0 }} Unit</td>
+                                    <td class="px-4 py-6 text-center">
+                                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                            :class="{
+                                                'bg-green-50 text-green-600 border-green-100': item.before_condition === 'Baik',
+                                                'bg-yellow-50 text-yellow-600 border-yellow-100': item.before_condition === 'Rusak Ringan',
+                                                'bg-red-50 text-red-600 border-red-100': item.before_condition === 'Rusak Berat',
+                                                'bg-gray-50 text-gray-600 border-gray-100': item.before_condition === 'Hilang'
+                                            }">
+                                            {{ item.before_condition || '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Pemeliharaan Kebersihan (Timeline) -->
+                                <template v-else-if="type === 'pemeliharaan-kebersihan'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-right">
+                                        {{ item.cost ? 'Rp ' + Number(item.cost).toLocaleString() : '-' }}
+                                    </td>
+                                    <td v-for="month in ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun']" :key="month"
+                                        class="px-2 py-6 text-[11px] font-black text-pail-gold text-center border-l border-gray-50 dark:border-gray-800">
+                                        {{ item[month] || '-' }}
+                                    </td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed border-l border-gray-50 dark:border-gray-800">{{ item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Jadwal Kebersihan -->
+                                <template v-else-if="type === 'jadwal-kebersihan'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.subcategory || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.scheduled_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-700 dark:text-gray-300 uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Pengajuan RAB -->
+                                <template v-else-if="type === 'pengajuan-rab'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.volume || 0 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
+                                    <td class="px-4 py-6 text-right">
+                                        <span class="text-xs font-mono font-black text-gray-900 dark:text-white">
+                                            Rp {{ Number(item.unit_price || 0).toLocaleString() }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-6 text-right">
+                                        <span class="text-xs font-mono font-black text-gray-900 dark:text-white">
+                                            Rp {{ Number(item.total_price || 0).toLocaleString() }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Jadwal Token -->
+                                <template v-else-if="type === 'jadwal-token'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">
+                                        {{ item.completed_at ? new Date(item.completed_at).toLocaleDateString('id-ID') : '-' }}
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">
+                                        {{ item.title || '-' }}<br>
+                                        <span class="text-[9px] text-gray-400">{{ item.serial_number || '-' }}</span>
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">
+                                        Rp {{ Number(item.total_price || 0).toLocaleString() }}
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-pail-gold text-center tracking-[0.2em]">
+                                        {{ item.action_taken || '-' }}
+                                    </td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center uppercase italic">TERLAMPIR</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Penyerahan Barang -->
+                                <template v-else-if="type === 'penyerahan-barang'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">
+                                        {{ item.brand || '-' }} {{ item.size ? '/ ' + item.size : '' }}
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.quantity || 0 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">
+                                        <span class="px-2 py-1 rounded text-[10px]" :class="item.after_condition === 'B' || item.after_condition === 'Baik' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'">
+                                            {{ item.after_condition || '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Penerimaan Barang -->
+                                <template v-else-if="type === 'penerimaan-barang'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">
+                                        {{ item.completed_at ? new Date(item.completed_at).toLocaleDateString('id-ID') : '-' }}
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">
+                                        {{ item.brand || '-' }} {{ item.size ? '/ ' + item.size : '' }}
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.quantity || 0 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">{{ item.source || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Pengadaan Sarpras -->
+                                <template v-else-if="type === 'pengadaan-sarpras'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">{{ item.brand || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">{{ item.size || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.quantity || 0 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                    <td class="px-4 py-6 text-center">
+                                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                            :class="{
+                                                'bg-yellow-50 text-yellow-600 border-yellow-100': item.status === 'pending',
+                                                'bg-blue-50 text-blue-600 border-blue-100': item.status === 'ongoing',
+                                                'bg-green-50 text-green-600 border-green-100': item.status === 'completed',
+                                                'bg-red-50 text-red-600 border-red-100': item.status === 'cancelled'
+                                            }">
+                                            {{ item.status || 'pending' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Analisis Kebutuhan Sarpras -->
+                                <template v-else-if="type === 'analisis-kebutuhan'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.institution?.name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.quantity || 0 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
+                                    <td class="px-4 py-6 text-center">
+                                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                            :class="{
+                                                'bg-indigo-50 text-indigo-600 border-indigo-100': item.procurement_type === 'Pengadaan',
+                                                'bg-purple-50 text-purple-600 border-purple-100': item.procurement_type === 'Penggantian'
+                                            }">
+                                            {{ item.procurement_type || '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for Pemilihan & Evaluasi Supplier -->
+                                <template v-else-if="type === 'pemilihan-evaluasi'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.subcategory || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center">
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-sm font-black">{{ item.sc_total }}%</span>
+                                            <span class="text-[8px] uppercase tracking-widest text-gray-400">Total Skor</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-6 text-center">
+                                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                            :class="{
+                                                'bg-green-50 text-green-600 border-green-100': item.status === 'Terpilih',
+                                                'bg-yellow-50 text-yellow-600 border-yellow-100': item.status === 'Cadangan',
+                                                'bg-red-50 text-red-600 border-red-100': item.status === 'Tidak Terpilih'
+                                            }">
+                                            {{ item.status || '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
                                 <!-- Specialized Content for BUKU INDUK -->
-                                <template v-if="type === 'buku-induk'">
+                                <template v-else-if="type === 'buku-induk'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400">{{ index + 1 }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase">{{ item.room?.name || 'Gudang' }}</td>
@@ -833,9 +1828,14 @@ const importExcel = (event) => {
                             </td>
                         </tr>
                         <tr v-if="data.data.length === 0">
-                            <td :colspan="type === 'buku-induk' ? 20 : (type === 'kir-ruangan' ? 14 : (type === 'pendataan-aset' ? 12 : (type === 'pemeliharaan-gedung' ? 18 : (type === 'pemeliharaan-ac' ? 10 : (type === 'pemeliharaan-kamar-mandi' ? 16 : (['pemeliharaan-pompa', 'pemeliharaan-air-bersih'].includes(type) ? 42 : (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type) ? 30 : (type === 'pemeliharaan-kipas' ? 8 : (type === 'pemeliharaan-septik' ? 10 : 7)))))))))" class="px-8 py-24 text-center">
+                            <td :colspan="tableColspan" class="px-8 py-24 text-center">
                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Belum ada data di sistem.</p>
                             </td>
+                        </tr>
+                        <tr v-if="type === 'pengajuan-rab' && data.data.length > 0" class="bg-gray-900 text-white font-black">
+                            <td colspan="5" class="px-4 py-8 text-[12px] uppercase tracking-widest text-right">TOTAL</td>
+                            <td class="px-4 py-8 text-[12px] text-pail-gold text-right">Rp {{ grandTotal.toLocaleString('id-ID') }}</td>
+                            <td></td>
                         </tr>
                     </tbody>
                 </table>
@@ -884,7 +1884,10 @@ const importExcel = (event) => {
                         <div>
                             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">Nilai / Biaya</p>
                             <p class="text-[10px] font-mono font-black text-gray-900 dark:text-white leading-tight">
-                                Rp {{ Number(item.price || item.cost || 0).toLocaleString() }}
+                                Rp {{ Number(item.total_price || item.price || item.cost || 0).toLocaleString() }}
+                            </p>
+                            <p class="text-[8px] font-bold text-pail-gold uppercase mt-1" v-if="type === 'pengajuan-rab'">
+                                {{ item.volume }} {{ item.unit }} @ Rp {{ Number(item.unit_price).toLocaleString() }}
                             </p>
                             <p class="text-[8px] font-bold text-gray-400 uppercase mt-1" v-if="type === 'buku-induk'">
                                 Dep: Rp {{ Number(item.depreciation_price || 0).toLocaleString() }}
@@ -1475,6 +2478,716 @@ const importExcel = (event) => {
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
                                                 <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Rekapan Pengajuan Perbaikan -->
+                                        <template v-else-if="type === 'rekapan-pengajuan'">
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tgl Pengajuan</label>
+                                                <input v-model="form.request_date" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi Pemohon</label>
+                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Divisi</option>
+                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Permintaan Perbaikan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail permintaan perbaikan..."></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ruangan (Optional)</label>
+                                                <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Ruangan</option>
+                                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi Spesifik / Manual</label>
+                                                <input v-model="form.location" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Depan Kantor">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jenis Kerusakan</label>
+                                                <select v-model="form.damage_type" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Jenis</option>
+                                                    <option value="Ringan">Ringan</option>
+                                                    <option value="Sedang">Sedang</option>
+                                                    <option value="Berat">Berat</option>
+                                                    <option value="Darurat">Darurat</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Status Progres</label>
+                                                <select v-model="form.status" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="pending">Pending</option>
+                                                    <option value="proses">Proses</option>
+                                                    <option value="selesai">Selesai</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tgl di TL (Tindak Lanjut)</label>
+                                                <input v-model="form.follow_up_date" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Perbaikan</label>
+                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Petugas</option>
+                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan (Ket)</label>
+                                                <textarea v-model="form.remarks" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Catatan akhir..."></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Pengajuan RAB -->
+                                        <template v-else-if="type === 'pengajuan-rab'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Proyek</label>
+                                                <textarea v-model="form.title" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail uraian proyek / pekerjaan..."></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Volume</label>
+                                                <input v-model="form.volume" type="number" step="any" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
+                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: M2 / Ls / Unit">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Harga Satuan (Rp)</label>
+                                                <input v-model="form.unit_price" type="number" step="any" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah Total (Auto)</label>
+                                                <input v-model="form.total_price" type="number" disabled class="w-full bg-gray-100 dark:bg-gray-700/50 border-0 rounded-2xl px-6 py-4 text-sm text-pail-gold font-black">
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Laporan Proyek Kegiatan -->
+                                        <template v-else-if="type === 'laporan-proyek'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Proyek Kegiatan</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama proyek/kegiatan...">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Pelaksanaan</label>
+                                                <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi Kegiatan</label>
+                                                <input v-model="form.location" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Gedung SAR">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Penanggung Jawab</label>
+                                                <input v-model="form.responsible_person" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama PJ...">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tim Pelaksana (Satu per baris)</label>
+                                                <textarea v-model="form.team_members" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Nama tim..."></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Anggaran (Rp)</label>
+                                                <input v-model="form.budget_amount" type="number" step="any" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Realisasi (Rp)</label>
+                                                <input v-model="form.actual_amount" type="number" step="any" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">% Capaian (Auto)</label>
+                                                <input v-model="form.attainment_percentage" type="number" disabled class="w-full bg-gray-100 dark:bg-gray-700/50 border-0 rounded-2xl px-6 py-4 text-sm text-pail-gold font-black">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Catatan tambahan..."></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Peminjaman Barang -->
+                                        <template v-else-if="type === 'peminjaman-barang'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Barang (Asset)</label>
+                                                <select v-model="form.item_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Barang...</option>
+                                                    <option v-for="item in items" :key="item.id" :value="item.id">{{ item.name }} ({{ item.code }})</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Peminjam</label>
+                                                <select v-model="form.user_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih User...</option>
+                                                    <option v-for="u in users" :key="u.id" :value="u.id">{{ u.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi/Satker</label>
+                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Divisi...</option>
+                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- Saat Peminjaman -->
+                                            <div class="sm:col-span-2 mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                <h4 class="text-[10px] font-black text-pail-gold uppercase tracking-widest mb-4">Detail Peminjaman</h4>
+                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Barang</label>
+                                                        <input v-model="form.borrow_condition" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Baik">
+                                                    </div>
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Hari/Tanggal</label>
+                                                        <input v-model="form.borrow_date" type="date" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    </div>
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Paraf (Nama)</label>
+                                                        <input v-model="form.borrower_paraf" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama PJ">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Saat Kembali -->
+                                            <div class="sm:col-span-2 mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                <h4 class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-4">Detail Pengembalian</h4>
+                                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Kembali</label>
+                                                        <input v-model="form.return_condition" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500" placeholder="Contoh: Baik">
+                                                    </div>
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Hari/Tanggal</label>
+                                                        <input v-model="form.actual_return_date" type="date" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500">
+                                                    </div>
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Paraf (Nama)</label>
+                                                        <input v-model="form.returner_paraf" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500" placeholder="Nama Penerima">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Pelelangan Aset -->
+                                        <template v-else-if="type === 'pelelangan-aset'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Barang (Asset)</label>
+                                                <select v-model="form.item_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Barang...</option>
+                                                    <option v-for="item in items" :key="item.id" :value="item.id">{{ item.name }} ({{ item.code }})</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah (Unit)</label>
+                                                <input v-model="form.quantity" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nilai Perkiraan (Rp)</label>
+                                                <input v-model="form.value" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.reason" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail keterangan lelang..."></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Pengadaan Sarpras -->
+                                        <template v-else-if="type === 'pengadaan-sarpras'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga</label>
+                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Lembaga...</option>
+                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tahun Ajaran</label>
+                                                <input v-model="form.year" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: 2025/2026">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Status</label>
+                                                <select v-model="form.status" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="pending">Pending</option>
+                                                    <option value="ongoing">Ongoing</option>
+                                                    <option value="completed">Completed</option>
+                                                    <option value="cancelled">Cancelled</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Barang</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama barang yang diajukan">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Merk</label>
+                                                <input v-model="form.brand" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ukuran</label>
+                                                <input v-model="form.size" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah</label>
+                                                <input v-model="form.quantity" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
+                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit, Pcs, dll">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail tambahan..."></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Analisis Kebutuhan Sarpras -->
+                                        <template v-else-if="type === 'analisis-kebutuhan'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga</label>
+                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Lembaga...</option>
+                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Uraian kebutuhan">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah</label>
+                                                <input v-model="form.quantity" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
+                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit, Pcs, dll">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Pengadaan / Penggantian</label>
+                                                <select v-model="form.procurement_type" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="Pengadaan">Pengadaan</option>
+                                                    <option value="Penggantian">Penggantian</option>
+                                                </select>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Pemilihan & Evaluasi Supplier -->
+                                        <template v-else-if="type === 'pemilihan-evaluasi'">
+                                            <div class="sm:col-span-2 space-y-4">
+                                                <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border border-gray-100 dark:border-gray-700">
+                                                    <h4 class="text-[10px] font-black uppercase tracking-widest text-pail-gold mb-6">Section 1: Informasi Supplier</h4>
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div class="sm:col-span-2">
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kategori Supplier</label>
+                                                            <input v-model="form.subcategory" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Bengkel Las">
+                                                        </div>
+                                                        <div class="sm:col-span-2">
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Supplier</label>
+                                                            <input v-model="form.title" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama perusahaan/supplier">
+                                                        </div>
+                                                        <div class="sm:col-span-2">
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Alamat</label>
+                                                            <input v-model="form.supplier_address" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        </div>
+                                                        <div>
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kontak</label>
+                                                            <input v-model="form.supplier_contact" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        </div>
+                                                        <div>
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Produk/Jasa</label>
+                                                            <input v-model="form.supplier_product" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border border-gray-100 dark:border-gray-700">
+                                                    <h4 class="text-[10px] font-black uppercase tracking-widest text-pail-gold mb-6">Section 2: Penilaian (Skala 10-100)</h4>
+                                                    <div class="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Harga (25%)</label>
+                                                            <input v-model="form.sc_price" type="number" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" min="0" max="100">
+                                                        </div>
+                                                        <div>
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kualitas (30%)</label>
+                                                            <input v-model="form.sc_quality" type="number" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" min="0" max="100">
+                                                        </div>
+                                                        <div>
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ketepatan Waktu (20%)</label>
+                                                            <input v-model="form.sc_delivery" type="number" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" min="0" max="100">
+                                                        </div>
+                                                        <div>
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Layanan (15%)</label>
+                                                            <input v-model="form.sc_service" type="number" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" min="0" max="100">
+                                                        </div>
+                                                        <div>
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Legalitas (10%)</label>
+                                                            <input v-model="form.sc_legal" type="number" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" min="0" max="100">
+                                                        </div>
+                                                        <div class="flex items-end">
+                                                            <div class="w-full p-4 bg-pail-gold/10 rounded-2xl border border-pail-gold/20">
+                                                                <p class="text-[9px] font-black text-pail-gold uppercase tracking-widest mb-1">Skor Akhir</p>
+                                                                <p class="text-xl font-black text-gray-900 dark:text-white">{{ form.sc_total }}%</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="p-6 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] border border-gray-100 dark:border-gray-700">
+                                                    <h4 class="text-[10px] font-black uppercase tracking-widest text-pail-gold mb-6">Section 3: Keputusan</h4>
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div class="sm:col-span-2">
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Status Pemilihan</label>
+                                                            <select v-model="form.status" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                                <option value="Terpilih">Terpilih</option>
+                                                                <option value="Cadangan">Cadangan</option>
+                                                                <option value="Tidak Terpilih">Tidak Terpilih</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="sm:col-span-2">
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Catatan</label>
+                                                            <textarea v-model="form.description" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Pengajuan RAB -->
+                                        <template v-else-if="type === 'pengajuan-rab'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kebutuhan Proyek</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Pembelian Semen Gresik">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Volume</label>
+                                                <input v-model="form.volume" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
+                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Zak, Lonjor, Pcs, dll">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Harga Satuan</label>
+                                                <input v-model="form.unit_price" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div class="flex items-end">
+                                                <div class="w-full p-4 bg-gray-900 rounded-2xl border border-gray-800">
+                                                    <p class="text-[9px] font-black text-pail-gold uppercase tracking-widest mb-1">Total (Jumlah)</p>
+                                                    <p class="text-xl font-black text-white">Rp {{ Number(form.total_price).toLocaleString() }}</p>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Pemeliharaan Kebersihan (Timeline) -->
+                                        <template v-else-if="type === 'pemeliharaan-kebersihan'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Pemeliharaan</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Pembersihan AC Tahunan">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Output Pembiayaan Kegiatan</label>
+                                                <input v-model="form.cost" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div class="sm:col-span-2 border-t border-gray-100 dark:border-gray-800 pt-6 mt-2">
+                                                <label class="text-[9px] font-black text-pail-gold uppercase tracking-widest mb-4 block text-center">Timeline Kegiatan</label>
+                                                <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                                                    <div v-for="month in ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun']" :key="month">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block text-center uppercase">{{ month }}</label>
+                                                        <select v-model="form[month]" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-xl px-2 py-3 text-[10px] text-center focus:ring-2 focus:ring-pail-gold">
+                                                            <option value="">-</option>
+                                                            <option value="√">√</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Jadwal Token -->
+                                        <template v-else-if="type === 'jadwal-token'">
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Pengisian</label>
+                                                <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas (Staff URT)</label>
+                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Petugas...</option>
+                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Meter / ID Pelanggan</label>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama Meter">
+                                                    <input v-model="form.serial_number" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="ID Pelanggan (11-12 digit)">
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nominal Token (Rp)</label>
+                                                <input v-model="form.total_price" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nomor Token (20 Digit)</label>
+                                                <input v-model="form.action_taken" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm font-mono tracking-widest focus:ring-2 focus:ring-pail-gold" maxlength="20">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Jadwal Kebersihan -->
+                                        <template v-else-if="type === 'jadwal-kebersihan'">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Hari</label>
+                                                    <select v-model="form.subcategory" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option value="">Pilih Hari...</option>
+                                                        <option v-for="day in ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']" :key="day" :value="day">{{ day }}</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
+                                                    <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option value="">Pilih Petugas...</option>
+                                                        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Area Kerja / Ruangan</label>
+                                                    <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option value="">Pilih Ruangan...</option>
+                                                        <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Waktu / Jam</label>
+                                                    <input v-model="form.scheduled_at" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: 07:00 - 08:00">
+                                                </div>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Pekerjaan</label>
+                                                <textarea v-model="form.title" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Monitoring Kebersihan -->
+                                        <template v-else-if="type === 'monitoring-kebersihan'">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
+                                                    <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option value="">Pilih Petugas...</option>
+                                                        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Area Kerja</label>
+                                                    <select v-model="form.room_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option value="">Pilih Ruangan...</option>
+                                                        <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Pekerjaan</label>
+                                                <textarea v-model="form.title" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                            <div class="sm:col-span-2 border-t border-gray-100 dark:border-gray-800 pt-6 mt-2">
+                                                <label class="text-[9px] font-black text-pail-gold uppercase tracking-widest mb-4 block text-center">Penilaian Harian (SUDAH / BELUM)</label>
+                                                <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                                                    <div class="text-center">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Senin</label>
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <input type="checkbox" v-model="form.mon_status" class="w-5 h-5 text-pail-gold rounded focus:ring-pail-gold border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                                            <span class="text-[10px] font-bold text-gray-500">{{ form.mon_status ? 'SUDAH' : 'BELUM' }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Selasa</label>
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <input type="checkbox" v-model="form.tue_status" class="w-5 h-5 text-pail-gold rounded focus:ring-pail-gold border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                                            <span class="text-[10px] font-bold text-gray-500">{{ form.tue_status ? 'SUDAH' : 'BELUM' }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Rabu</label>
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <input type="checkbox" v-model="form.wed_status" class="w-5 h-5 text-pail-gold rounded focus:ring-pail-gold border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                                            <span class="text-[10px] font-bold text-gray-500">{{ form.wed_status ? 'SUDAH' : 'BELUM' }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kamis</label>
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <input type="checkbox" v-model="form.thu_status" class="w-5 h-5 text-pail-gold rounded focus:ring-pail-gold border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                                            <span class="text-[10px] font-bold text-gray-500">{{ form.thu_status ? 'SUDAH' : 'BELUM' }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumat</label>
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <input type="checkbox" v-model="form.fri_status" class="w-5 h-5 text-pail-gold rounded focus:ring-pail-gold border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                                            <span class="text-[10px] font-bold text-gray-500">{{ form.fri_status ? 'SUDAH' : 'BELUM' }}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Sabtu</label>
+                                                        <div class="flex items-center justify-center gap-2">
+                                                            <input type="checkbox" v-model="form.sat_status" class="w-5 h-5 text-pail-gold rounded focus:ring-pail-gold border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                                                            <span class="text-[10px] font-bold text-gray-500">{{ form.sat_status ? 'SUDAH' : 'BELUM' }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Penyerahan Barang -->
+                                        <template v-else-if="type === 'penyerahan-barang'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi (Lembaga)</label>
+                                                <select v-model="form.institution_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Divisi...</option>
+                                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Barang</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Merk</label>
+                                                <input v-model="form.brand" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ukuran</label>
+                                                <input v-model="form.size" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah</label>
+                                                <input v-model="form.quantity" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
+                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Barang</label>
+                                                <select v-model="form.after_condition" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="Baik">Baik</option>
+                                                    <option value="Rusak Ringan">Rusak Ringan</option>
+                                                    <option value="Rusak Berat">Rusak Berat</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Penerimaan Barang -->
+                                        <template v-else-if="type === 'penerimaan-barang'">
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Penerimaan</label>
+                                                <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Penerima (Staff URT)</label>
+                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Penerima...</option>
+                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Barang</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama barang yang diterima">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Merk</label>
+                                                <input v-model="form.brand" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ukuran</label>
+                                                <input v-model="form.size" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah</label>
+                                                <input v-model="form.quantity" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
+                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit, Pcs, dll">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Asal Barang</label>
+                                                <input v-model="form.source" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Toko, Supplier, atau Donatur">
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail tambahan..."></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Berita Acara Pemeriksaan Aset -->
+                                        <template v-else-if="type === 'berita-acara-pemeriksaan'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Aset</label>
+                                                <select v-model="form.item_id" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Aset...</option>
+                                                    <option v-for="item in items" :key="item.id" :value="item.id">{{ item.name }} ({{ item.code }})</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah</label>
+                                                <input v-model="form.quantity" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi</label>
+                                                <select v-model="form.before_condition" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="Baik">Baik</option>
+                                                    <option value="Rusak Ringan">Rusak Ringan</option>
+                                                    <option value="Rusak Berat">Rusak Berat</option>
+                                                    <option value="Hilang">Hilang</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail hasil pemeriksaan..."></textarea>
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Hari / Tanggal</label>
+                                                <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div class="sm:col-span-2 mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800">
+                                                <h4 class="text-[10px] font-black text-pail-gold uppercase tracking-widest mb-4">Tim Pemeriksa</h4>
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Staff Sarpras</label>
+                                                        <select v-model="form.performed_by" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                            <option value="">Pilih Staff...</option>
+                                                            <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Koordinator Sarpras</label>
+                                                        <input v-model="form.responsible_person" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama Koordinator">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </template>
 

@@ -12,9 +12,13 @@ class MaintenanceLog extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = [
+        'item_id',
+        'quantity',
         'type',
         'category',
         'subcategory',
+        'brand',
+        'size',
         'serial_number',
         'fan_type',
         'st_baik',
@@ -37,6 +41,16 @@ class MaintenanceLog extends Model
         'photo_after',
         'performed_by',
         'status',
+        'procurement_type',
+        'supplier_address',
+        'supplier_contact',
+        'supplier_product',
+        'sc_price',
+        'sc_quality',
+        'sc_delivery',
+        'sc_service',
+        'sc_legal',
+        'sc_total',
         // Periodic Checklist Fields
         'check_standard',
         'check_method',
@@ -110,11 +124,67 @@ class MaintenanceLog extends Model
         'jun_putra',
         'jun_putri',
         'jun_lawata',
+        'request_date',
+        'damage_type',
+        'follow_up_date',
+        'remarks',
+        'volume',
+        'unit',
+        'unit_price',
+        'total_price',
+        'budget_amount',
+        'actual_amount',
+        'attainment_percentage',
+        'team_members',
+        'responsible_person',
+        'source',
+        'mon_status',
+        'tue_status',
+        'wed_status',
+        'thu_status',
+        'fri_status',
+        'sat_status',
+        'standard_check',
+        'method_check',
+        'mon_rating',
+        'tue_rating',
+        'wed_rating',
+        'thu_rating',
+        'fri_rating',
+        'sat_rating',
+        'week_name',
+        'is_checked',
+        'frequency',
+        'jul_status',
+        'aug_status',
+        'sep_status',
+        'oct_status',
+        'nov_status',
+        'dec_status',
+        'jan_status',
+        'feb_status',
+        'mar_status',
+        'apr_status',
+        'may_status',
+        'jun_status',
     ];
 
     protected $casts = [
-        'scheduled_at' => 'datetime',
+        'is_checked' => 'boolean',
+        'mon_status' => 'boolean',
+        'tue_status' => 'boolean',
+        'wed_status' => 'boolean',
+        'thu_status' => 'boolean',
+        'fri_status' => 'boolean',
+        'sat_status' => 'boolean',
         'completed_at' => 'datetime',
+        'request_date' => 'date',
+        'follow_up_date' => 'date',
+        'volume' => 'float',
+        'unit_price' => 'decimal:2',
+        'total_price' => 'decimal:2',
+        'budget_amount' => 'decimal:2',
+        'actual_amount' => 'decimal:2',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -139,6 +209,10 @@ class MaintenanceLog extends Model
     }
     public function performer()
     {
-        return $this->belongsTo(User::class, 'performed_by');
+        return $this->belongsTo(User::class , 'performed_by');
+    }
+    public function item()
+    {
+        return $this->belongsTo(Item::class);
     }
 }

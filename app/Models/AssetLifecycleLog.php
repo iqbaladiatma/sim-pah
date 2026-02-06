@@ -13,6 +13,7 @@ class AssetLifecycleLog extends Model
 
     protected $fillable = [
         'item_id',
+        'quantity',
         'type',
         'action_date',
         'value',

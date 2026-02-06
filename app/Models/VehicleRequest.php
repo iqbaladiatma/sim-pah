@@ -21,7 +21,13 @@ class VehicleRequest extends Model
         'start_mileage',
         'end_mileage',
         'status',
-        'admin_note'
+        'admin_note',
+        'request_date',
+        'time_range',
+        'institution_name',
+        'fuel_level_before',
+        'condition_before',
+        'responsible_person',
     ];
 
     protected $casts = [
