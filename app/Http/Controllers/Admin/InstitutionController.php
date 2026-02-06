@@ -9,7 +9,7 @@ class InstitutionController extends Controller
 {
     public function index()
     {
-        $institutions = \App\Models\Institution::latest()->paginate(50);
+        $institutions = \App\Models\Institution::latest()->paginate(10);
         return inertia('Admin/Institutions/Index', [
             'institutions' => $institutions,
             'stats' => [

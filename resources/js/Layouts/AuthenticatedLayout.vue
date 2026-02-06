@@ -179,6 +179,10 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                     </button>
 
+                    <div class="flex items-center gap-3 mr-4">
+                        <ApplicationLogo class="w-8 h-8" />
+                    </div>
+
                     <nav class="hidden sm:flex items-center gap-3">
                         <span class="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">Status</span>
                         <div class="px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800 text-[8px] font-black text-green-600 dark:text-green-500 uppercase tracking-[0.2em] flex items-center gap-2">
