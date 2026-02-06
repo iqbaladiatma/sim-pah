@@ -246,9 +246,9 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('J' . $currentRow, $item->responsible_person);
                     } elseif (str_contains($sheetName, 'FORM PEMELIHARAAN JARINGAN LIST')) {
                         $sheet->setCellValue('B' . $currentRow, $item->title);
-                        $sheet->setCellValue('C' . $currentRow, $item->standard_check);
-                        $sheet->setCellValue('D' . $currentRow, $item->method_check);
-                        $sheet->setCellValue('E' . $currentRow, $item->frequency);
+                        $sheet->setCellValue('C' . $currentRow, $item->check_standard);
+                        $sheet->setCellValue('D' . $currentRow, $item->check_method);
+                        $sheet->setCellValue('E' . $currentRow, $item->check_frequency);
                         
                         // Months
                         // Jul -> offset 0 -> F (5)

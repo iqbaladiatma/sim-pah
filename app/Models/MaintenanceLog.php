@@ -167,6 +167,8 @@ class MaintenanceLog extends Model
         'apr_status',
         'may_status',
         'jun_status',
+        'condition',
+        'condition_notes',
     ];
 
     protected $casts = [

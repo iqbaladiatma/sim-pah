@@ -149,6 +149,7 @@ const form = useForm({
     source: '',
     price: 0,
     condition: 'B',
+    condition_notes: '',
     before_condition: '',
     after_condition: '',
     action_taken: '',
@@ -195,6 +196,12 @@ const form = useForm({
         ['putra', 'putri', 'lawata'].forEach(a => acc[`${m}_${a}`] = '');
         return acc;
     }, {}),
+    check_standard: '',
+    check_method: '',
+    check_frequency: '',
+    year: new Date().getFullYear(),
+    jul_status: '', aug_status: '', sep_status: '', oct_status: '', nov_status: '', dec_status: '',
+    jan_status: '', feb_status: '', mar_status: '', apr_status: '', may_status: '', jun_status: '',
     performed_by: '',
     completed_at: new Date().toISOString().split('T')[0],
     request_date: new Date().toISOString().split('T')[0],
@@ -353,7 +360,7 @@ const importExcel = (event) => {
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <!-- Row 1 for Specialized & Double Headers -->
-                        <tr v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'agenda-perbaikan'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <tr v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'agenda-perbaikan', 'monitoring-aset', 'electrical-maintenance'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <template v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)">
                                 <th rowspan="2" v-if="!['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">No.</th>
                             </template>
@@ -474,6 +481,26 @@ const importExcel = (event) => {
                                 </div>
                             </th>
 
+                            <template v-if="type === 'monitoring-aset'">
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No.</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">JENIS BARANG / MERK</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">LOKASI / RUANGAN</th>
+                                <th colspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">KONDISI</th>
+                                <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                            </template>
+
+                            <template v-if="type === 'electrical-maintenance'">
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No.</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Item Pengecekan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Standard</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Metode</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Frekuensi</th>
+                                <th v-for="month in ['Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun']" :key="month" class="px-2 py-4 text-[9px] font-black text-gray-400 uppercase tracking-tighter text-center border-l dark:border-gray-700">
+                                    {{ month }}
+                                </th>
+                                <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Aksi</th>
+                            </template>
+
                             <template v-if="type === 'pendataan-aset'">
                                 <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tanggal Pengecekan</th>
                                 <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Petugas Pemeriksa</th>
@@ -485,10 +512,15 @@ const importExcel = (event) => {
                             <!-- Manajemen Alignment -->
                             <th v-if="type === 'pemeliharaan-ac'" rowspan="3" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                             <th v-else-if="type === 'pemeliharaan-kamar-mandi'" rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
-                            <th v-else-if="!['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)" rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                            <th v-else-if="!['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'electrical-maintenance'].includes(type)" rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                         </tr>
                         <!-- Row 2 for Specialized Double Headers / Bathroom -->
-                        <tr v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'agenda-perbaikan'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <tr v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'agenda-perbaikan', 'monitoring-aset', 'electrical-maintenance'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                             <template v-if="type === 'monitoring-aset'">
+                                <th class="px-2 py-4 text-[9px] font-black text-gray-400 uppercase tracking-tighter text-center border-l dark:border-gray-700">B</th>
+                                <th class="px-2 py-4 text-[9px] font-black text-gray-400 uppercase tracking-tighter text-center border-l dark:border-gray-700">KB</th>
+                                <th class="px-2 py-4 text-[9px] font-black text-gray-400 uppercase tracking-tighter text-center border-l dark:border-gray-700">R</th>
+                            </template>
                              <template v-if="type === 'pemeliharaan-septik'">
                                 <th class="px-2 py-4 text-[9px] font-black text-gray-400 uppercase tracking-tighter text-center border-l dark:border-gray-700">Baik</th>
                                 <th class="px-2 py-4 text-[9px] font-black text-gray-400 uppercase tracking-tighter text-center border-l dark:border-gray-700">Penuh</th>
@@ -898,7 +930,7 @@ const importExcel = (event) => {
                         </tr>
 
                         <!-- Standard Row for Other Types -->
-                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance', 'monitoring-aset'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <!-- Dynamic Headers based on Type -->
                             <template v-if="type.includes('kendaraan')">
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Armada / Plat</th>
@@ -1592,6 +1624,55 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center">{{ item.performer?.name || 'Staff URT' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center">{{ item.action_taken || '-' }}</td>
                                     <td class="px-4 py-6 text-[9px] text-gray-400 italic truncate max-w-[100px]">{{ item.description || '-' }}</td>
+                                </template>
+
+                                <!-- Specialized Content for MONITORING ASET -->
+                                <template v-else-if="type === 'monitoring-aset'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">
+                                        {{ item.title || '-' }}
+                                        <span class="block text-[9px] text-gray-400 mt-1">{{ item.brand || '-' }}</span>
+                                    </td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.location || '-' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center border-l border-gray-100 dark:border-gray-700 font-bold" :class="item.condition === 'B' ? 'text-green-600' : 'text-gray-200'">{{ item.condition === 'B' ? '✓' : '-' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center border-l border-gray-100 dark:border-gray-700 font-bold" :class="item.condition === 'KB' ? 'text-yellow-600' : 'text-gray-200'">{{ item.condition === 'KB' ? '✓' : '-' }}</td>
+                                    <td class="px-2 py-6 text-[10px] text-center border-l border-gray-100 dark:border-gray-700 font-bold" :class="item.condition === 'R' ? 'text-red-600' : 'text-gray-200'">{{ item.condition === 'R' ? '✓' : '-' }}</td>
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for ELECTRICAL MAINTENANCE -->
+                                <template v-else-if="type === 'electrical-maintenance'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.check_standard || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.check_method || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.check_frequency || '-' }}</td>
+                                    
+                                    <td v-for="month in ['jul_status', 'aug_status', 'sep_status', 'oct_status', 'nov_status', 'dec_status', 'jan_status', 'feb_status', 'mar_status', 'apr_status', 'may_status', 'jun_status']" :key="month" class="px-1 py-6 text-center border-l dark:border-gray-700">
+                                        <span v-if="item[month] === 'V'" class="text-green-500 font-black text-[10px]">V</span>
+                                        <span v-else-if="item[month] === 'X'" class="text-red-500 font-black text-[10px]">X</span>
+                                        <span v-else class="text-gray-200 dark:text-gray-700">-</span>
+                                    </td>
+                                    
+                                    <td class="px-8 py-6 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for PEMELIHARAAN AC -->
@@ -2523,6 +2604,98 @@ const importExcel = (event) => {
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jumlah Total (Auto)</label>
                                                 <input v-model="form.total_price" type="number" disabled class="w-full bg-gray-100 dark:bg-gray-700/50 border-0 rounded-2xl px-6 py-4 text-sm text-pail-gold font-black">
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Monitoring Aset -->
+                                        <template v-else-if="type === 'monitoring-aset'">
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tgl Pemeriksaan</label>
+                                                <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
+                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Petugas...</option>
+                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jenis Barang</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Kursi / Meja">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Merk (Optional)</label>
+                                                <input v-model="form.brand" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Ikea">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi / Ruangan</label>
+                                                <input v-model="form.location" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Kantor Utama">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi (Kantor)</label>
+                                                <select v-model="form.condition" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Kondisi</option>
+                                                    <option value="B">B (Baik)</option>
+                                                    <option value="KB">KB (Kurang Baik)</option>
+                                                    <option value="R">R (Rusak)</option>
+                                                </select>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Catatan / Keterangan</label>
+                                                <textarea v-model="form.condition_notes" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Electrical Maintenance -->
+                                        <template v-else-if="type === 'electrical-maintenance'">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tahun</label>
+                                                    <input v-model="form.year" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="2025">
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi</label>
+                                                    <input v-model="form.location" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Panel Utama">
+                                                </div>
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Item Pengecekan</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Pemeriksaan Instalasi">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Standard Pengecekan</label>
+                                                <input v-model="form.check_standard" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Metode Pengecekan</label>
+                                                <input v-model="form.check_method" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Frekuensi</label>
+                                                <input v-model="form.check_frequency" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            
+                                            <div class="sm:col-span-2 border-t border-gray-100 dark:border-gray-800 pt-6 mt-2">
+                                                <label class="text-[9px] font-black text-pail-gold uppercase tracking-widest mb-4 block text-center">Status Bulanan (V = OK, X = NG)</label>
+                                                <div class="grid grid-cols-4 md:grid-cols-6 gap-4">
+                                                    <div v-for="month in ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun']" :key="month">
+                                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block text-center uppercase">{{ month }}</label>
+                                                        <select v-model="form[`${month}_status`]" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-xl px-2 py-3 text-[10px] text-center focus:ring-2 focus:ring-pail-gold">
+                                                            <option value="">-</option>
+                                                            <option value="V">V</option>
+                                                            <option value="X">X</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </template>
 
