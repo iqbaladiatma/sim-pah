@@ -16,7 +16,7 @@ defineProps({
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-bold leading-tight text-gray-800 dark:text-gray-200">
-                Unit Dashboard
+                Dashboard Unit
             </h2>
         </template>
 
@@ -85,7 +85,7 @@ defineProps({
                                             'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400': req.status === 'approved',
                                             'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400': req.status === 'rejected'
                                         }" class="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase">
-                                            {{ req.status }}
+                                            Menunggu
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-sm text-right font-mono font-semibold text-gray-700 dark:text-gray-300">

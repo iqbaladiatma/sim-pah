@@ -78,7 +78,7 @@ const handleImport = () => {
                         <h3 class="text-gray-400 font-black uppercase tracking-[0.2em] text-[10px] mb-3 relative z-10">Total Unit</h3>
                         <div class="flex items-end gap-2 relative z-10">
                             <div class="text-5xl font-black text-gray-900 dark:text-white tracking-tighter leading-none">{{ stats.total_items }}</div>
-                            <span class="text-[10px] font-black text-gray-300 uppercase mb-1">SKUs</span>
+                             <span class="text-[10px] font-black text-gray-300 uppercase mb-1">SKU</span>
                         </div>
                     </div>
 
@@ -175,9 +175,9 @@ const handleImport = () => {
                                 </tr>
                                 <tr v-if="items.data.length === 0">
                                     <td colspan="6" class="px-6 py-40 text-center">
-                                        <div class="flex flex-col items-center">
-                                            <div class="text-6xl mb-6 grayscale opacity-20">📦</div>
-                                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-sm">Gudang Aset Kosong</p>
+                                        <div class="flex flex-col items-center text-gray-400">
+                                            <PackageIcon className="w-16 h-16 mb-6 opacity-20" />
+                                            <p class="font-black uppercase tracking-[0.3em] text-sm">Gudang Aset Kosong</p>
                                             <p class="text-xs text-gray-300 font-bold mt-2">Daftarkan barang inventaris untuk memulai tracking.</p>
                                         </div>
                                     </td>
@@ -214,7 +214,7 @@ const handleImport = () => {
                                     <span class="text-[9px] font-black text-gray-400 uppercase block mb-2 tracking-widest">Kapasitas Stok</span>
                                     <div class="flex items-end gap-2">
                                         <span class="text-3xl font-black font-mono tracking-tighter" :class="item.stock <= item.min_stock ? 'text-red-500' : 'text-gray-900 dark:text-white'">{{ item.stock }}</span>
-                                        <span class="text-[9px] font-black text-gray-300 uppercase mb-1.5">Pcs</span>
+                                         <span class="text-[9px] font-black text-gray-300 uppercase mb-1.5">Item</span>
                                     </div>
                                 </div>
                                 <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
@@ -250,7 +250,7 @@ const handleImport = () => {
         <div v-if="isImportModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-2xl w-full max-w-md p-10 border border-gray-100 dark:border-gray-700">
                 <h3 class="text-xl font-bold mb-6 text-gray-900 dark:text-white text-center flex items-center justify-center gap-2">
-                    <RocketIcon className="w-5 h-5 text-pail-gold" /> Import Inventory
+                    <RocketIcon className="w-5 h-5 text-pail-gold" /> Impor Inventaris
                 </h3>
                 <form @submit.prevent="handleImport">
                     <div class="mb-6">

@@ -124,10 +124,10 @@ const reject = (id) => {
                                     <td class="px-8 py-6 text-right">
                                         <div class="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-500">
                                             <button @click="approve(req.id)" class="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-600/20 font-black text-[10px] uppercase tracking-widest">
-                                                Approve
+                                                Setujui
                                             </button>
                                             <button @click="reject(req.id)" class="px-6 py-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition font-black text-[10px] uppercase tracking-widest">
-                                                Reject
+                                                Tolak
                                             </button>
                                         </div>
                                     </td>

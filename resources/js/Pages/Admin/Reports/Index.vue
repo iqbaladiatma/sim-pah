@@ -65,7 +65,7 @@ defineProps({
                                 </span>
                                 <div v-if="inst.pending_requests > 0" class="flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
-                                    <span class="text-[9px] font-black text-red-500 uppercase tracking-widest">{{ inst.pending_requests }} PENDING</span>
+                                    <span class="text-[9px] font-black text-red-500 uppercase tracking-widest">{{ inst.pending_requests }} MENUNGGU</span>
                                 </div>
                             </div>
                             <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight line-clamp-2 min-h-[3.5rem]">{{ inst.name }}</h3>

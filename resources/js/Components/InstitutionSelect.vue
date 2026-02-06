@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 
+import SearchIcon from "@/Components/Icons/SearchIcon.vue";
+
 const props = defineProps({
     institutions: {
         type: Array,
@@ -56,39 +58,48 @@ const toggle = () => {
 </script>
 
 <template>
-    <div class="relative w-full">
+    <div class="relative w-full font-sans">
         <div 
             @click="toggle"
-            class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-pail-gold focus:border-pail-gold block p-2.5 cursor-pointer flex justify-between items-center"
+            class="w-full bg-white dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white text-sm rounded-full block p-4 cursor-pointer flex justify-between items-center transition-all hover:bg-gray-50 dark:hover:bg-gray-800 shadow-sm"
         >
-            <span>{{ selectedInstitution ? `${selectedInstitution.name} (${selectedInstitution.code})` : 'Pilih Lembaga' }}</span>
-            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            <span class="font-bold truncate pr-4">
+                {{ selectedInstitution ? `${selectedInstitution.name} (${selectedInstitution.code})` : 'Pilih Unit Kerja / Lembaga' }}
+            </span>
+            <svg class="w-5 h-5 text-pail-gold shrink-0 transition-transform duration-300" :class="isOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
             </svg>
         </div>
 
-        <div v-if="isOpen" class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-xl overflow-hidden">
-            <div class="p-2 border-b border-gray-200 dark:border-gray-700">
-                <input 
-                    v-model="searchQuery"
-                    type="text" 
-                    placeholder="Cari lembaga..."
-                    class="w-full p-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white border-none rounded focus:ring-pail-gold"
-                    autofocus
-                />
+        <div v-if="isOpen" class="absolute z-[100] w-full mt-3 bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl border border-gray-100 dark:border-gray-700 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] overflow-hidden transition-all animate-in fade-in slide-in-from-top-2 duration-300">
+            <div class="p-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/30">
+                <div class="relative">
+                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input 
+                        v-model="searchQuery"
+                        type="text" 
+                        placeholder="Cari lembaga atau kode..."
+                        class="w-full pl-10 pr-4 py-3 text-xs font-black uppercase tracking-widest bg-white dark:bg-gray-800 dark:text-white border-gray-100 dark:border-gray-700 rounded-full focus:ring-pail-gold focus:border-pail-gold shadow-sm"
+                        autofocus
+                    />
+                </div>
             </div>
-            <ul class="max-h-60 overflow-y-auto">
+            <ul class="max-h-64 overflow-y-auto scrollbar-hide py-2">
                 <li 
                     v-for="institution in filteredInstitutions" 
                     :key="institution.id"
                     @click="select(institution)"
-                    class="p-2.5 text-sm text-gray-900 dark:text-gray-200 hover:bg-pail-gold hover:text-white cursor-pointer transition flex items-center justify-between"
+                    class="mx-2 px-4 py-3.5 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-pail-gold hover:text-white rounded-xl cursor-pointer transition-all flex items-center justify-between group"
+                    :class="selectedInstitution?.id === institution.id ? 'bg-pail-gold/10 text-pail-gold' : ''"
                 >
-                    <span>{{ institution.name }}</span>
-                    <span class="text-xs opacity-60">{{ institution.code }}</span>
+                    <span class="truncate">{{ institution.name }}</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-40 group-hover:text-white/80 shrink-0 ml-4">{{ institution.code }}</span>
                 </li>
-                <li v-if="filteredInstitutions.length === 0" class="p-2.5 text-sm text-gray-500 text-center">
-                    Lembaga tidak ditemukan
+                <li v-if="filteredInstitutions.length === 0" class="p-8 text-center">
+                    <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest leading-relaxed">
+                        Lembaga tidak ditemukan<br/>
+                        <span class="opacity-50">Cek kembali kata kunci Anda</span>
+                    </p>
                 </li>
             </ul>
         </div>

@@ -140,10 +140,10 @@ const getRelativeTime = (lastActivity) => {
                                         <td class="px-6 py-4 text-right">
                                             <button v-if="!session.is_current" 
                                                 @click="kickSession(session.id)"
-                                                class="px-3 py-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition shadow-sm font-bold text-xs">
-                                                🚫 Kick
+                                                class="px-3 py-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition shadow-sm font-bold text-xs">
+                                                🚫 Keluarkan
                                             </button>
-                                            <span v-else class="text-xs text-gray-400 italic">Current Session</span>
+                                            <span v-else class="text-xs text-gray-400 italic">Sesi Saat Ini</span>
                                         </td>
                                     </tr>
                                     <tr v-if="sessions.length === 0">
@@ -207,11 +207,11 @@ const getRelativeTime = (lastActivity) => {
                                 
                                 <button v-if="!session.is_current" 
                                     @click="kickSession(session.id)"
-                                    class="w-full py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition font-bold text-sm shadow-md">
-                                    🚫 Kick Session
+                                    class="w-full py-2.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition font-bold text-sm shadow-md">
+                                    🚫 Keluarkan Sesi
                                 </button>
-                                <div v-else class="w-full py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-xl text-center text-sm italic">
-                                    Current Session
+                                <div v-else class="w-full py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-full text-center text-sm italic">
+                                    Sesi Saat Ini
                                 </div>
                             </div>
                             <div v-if="sessions.length === 0" class="p-16 text-center text-gray-400 italic font-medium">Tidak ada user yang sedang online.</div>

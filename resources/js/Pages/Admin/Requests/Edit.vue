@@ -4,6 +4,10 @@ import { Head, useForm, Link } from "@inertiajs/vue3";
 import { computed } from "vue";
 import { formatRupiah, parseRupiah } from "@/Utils/format";
 import SearchableSelect from "@/Components/SearchableSelect.vue";
+import IconSelect from "@/Components/IconSelect.vue";
+import ClockIcon from "@/Components/Icons/ClockIcon.vue";
+import CheckCircleIcon from "@/Components/Icons/CheckCircleIcon.vue";
+import XIcon from "@/Components/Icons/XIcon.vue";
 
 const props = defineProps({
     request: Object,
@@ -47,6 +51,12 @@ const getStatusColor = (status) => {
             return "bg-gray-100 text-gray-800";
     }
 };
+
+const statusOptions = [
+    { value: 'pending', label: 'Pendampingan', icon: ClockIcon, iconClass: 'text-yellow-500' },
+    { value: 'approved', label: 'Disetujui', icon: CheckCircleIcon, iconClass: 'text-green-500' },
+    { value: 'rejected', label: 'Ditolak', icon: XIcon, iconClass: 'text-red-500' }
+];
 </script>
 
 <template>
@@ -163,11 +173,10 @@ const getStatusColor = (status) => {
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                                 <div>
                                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Status Keputusan</label>
-                                                    <select v-model="form.status" class="w-full h-16 border-gray-100 rounded-3xl bg-gray-50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold focus:border-pail-gold px-6">
-                                                        <option value="pending">🟡 Pendampingan</option>
-                                                        <option value="approved">🟢 Disetujui</option>
-                                                        <option value="rejected">🔴 Ditolak</option>
-                                                    </select>
+                                                    <IconSelect 
+                                                        v-model="form.status" 
+                                                        :options="statusOptions"
+                                                    />
                                                 </div>
                                                 <div>
                                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Catatan Verifikasi</label>

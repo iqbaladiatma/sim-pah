@@ -76,7 +76,7 @@ const handleImport = () => {
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                     <div class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-                        <h3 class="text-gray-400 font-black uppercase tracking-[0.3em] text-[10px] mb-3 relative z-10">Room Capacity</h3>
+                        <h3 class="text-gray-400 font-black uppercase tracking-[0.3em] text-[10px] mb-3 relative z-10">Kapasitas Ruangan</h3>
                         <div class="flex items-end gap-2 relative z-10 text-blue-600">
                             <div class="text-5xl font-black tracking-tighter leading-none">{{ stats.total }}</div>
                             <span class="text-[10px] font-black text-blue-200 uppercase mb-1">Total</span>
@@ -85,7 +85,7 @@ const handleImport = () => {
 
                     <div class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-gray-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-                        <h3 class="text-gray-400 font-black uppercase tracking-[0.3em] text-[10px] mb-3 relative z-10">Recent Activity</h3>
+                        <h3 class="text-gray-400 font-black uppercase tracking-[0.3em] text-[10px] mb-3 relative z-10">Aktivitas Terkini</h3>
                         <div class="text-xl font-black text-gray-900 dark:text-white truncate uppercase tracking-tighter relative z-10 h-12 flex items-center leading-tight">
                             {{ stats.latest }}
                         </div>
@@ -96,7 +96,7 @@ const handleImport = () => {
                         <div class="flex items-center justify-between h-full relative z-10">
                             <div>
                                 <h3 class="text-white/70 font-black uppercase tracking-[0.3em] text-[10px] mb-3">Asset Mapping</h3>
-                                <div class="text-3xl font-black text-white uppercase tracking-tighter leading-none">Unified Geography</div>
+                                <div class="text-3xl font-black text-white uppercase tracking-tighter leading-none">Pemetaan Geografis</div>
                             </div>
                             <div class="w-16 h-16 bg-white/20 rounded-[1.5rem] flex items-center justify-center backdrop-blur-md border border-white/30 shadow-xl group-hover:-rotate-12 transition-transform">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
@@ -112,10 +112,10 @@ const handleImport = () => {
                         <table class="min-w-full border-separate border-spacing-y-4">
                             <thead>
                                 <tr class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">
-                                    <th class="px-8 py-4 text-center">Ref</th>
-                                    <th class="px-8 py-4 text-left">Unit Owner</th>
+                                    <th class="px-8 py-4 text-center">No</th>
+                                    <th class="px-8 py-4 text-left">Lembaga Pemilik</th>
                                     <th class="px-8 py-4 text-left">Nama Ruangan / Area</th>
-                                    <th class="px-8 py-4 text-left">Geographic Detail</th>
+                                    <th class="px-8 py-4 text-left">Detail Geografis</th>
                                     <th class="px-8 py-4 text-right">Manajemen</th>
                                 </tr>
                             </thead>
@@ -134,18 +134,18 @@ const handleImport = () => {
                                         <div class="font-black text-gray-900 dark:text-white uppercase tracking-tighter text-sm">{{ room.name }}</div>
                                     </td>
                                     <td class="px-8 py-6 bg-gray-50/50 dark:bg-gray-900/40 border-y border-gray-50 dark:border-gray-800/50">
-                                        <div class="text-[11px] text-gray-400 font-bold italic line-clamp-1 max-w-xs">{{ room.description || "Location notes not provided." }}</div>
+                                        <div class="text-[11px] text-gray-400 font-bold italic line-clamp-1 max-w-xs">{{ room.description || "Catatan lokasi belum tersedia." }}</div>
                                     </td>
                                     <td class="px-8 py-6 bg-gray-50/50 dark:bg-gray-900/40 rounded-r-[2rem] border-y border-r border-gray-50 dark:border-gray-800/50 text-right">
                                         <div class="flex items-center justify-end gap-3">
-                                            <Link :href="route('admin.rooms.edit', room.id)" class="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-pail-gold transition-all shadow-xl font-black text-[10px] uppercase tracking-widest">Update</Link>
-                                            <button @click="deleteRoom(room.id)" class="px-6 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest border border-red-100">Hapus</button>
+                                            <Link :href="route('admin.rooms.edit', room.id)" class="px-6 py-3 bg-gray-900 text-white rounded-full hover:bg-pail-gold transition-all shadow-xl font-black text-[10px] uppercase tracking-widest">Edit</Link>
+                                            <button @click="deleteRoom(room.id)" class="px-6 py-3 bg-red-50 text-red-600 rounded-full hover:bg-red-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest border border-red-100">Hapus</button>
                                         </div>
                                     </td>
                                 </tr>
                                 <tr v-if="rooms.data.length === 0">
                                     <td colspan="5" class="px-8 py-32 text-center text-gray-300 font-black uppercase tracking-[0.3em] text-xs">
-                                        No Physical infrastructure mapped.
+                                        Belum ada infrastruktur fisik yang terdaftar.
                                     </td>
                                 </tr>
                             </tbody>
@@ -166,14 +166,14 @@ const handleImport = () => {
 
                             <div class="mb-8">
                                 <h3 class="font-black text-gray-900 dark:text-white text-2xl leading-tight mb-2 uppercase tracking-tighter">{{ room.name }}</h3>
-                                <p class="text-xs text-gray-500 font-bold italic leading-relaxed">{{ room.description || "Location details are pending documentation." }}</p>
+                                <p class="text-xs text-gray-500 font-bold italic leading-relaxed">{{ room.description || "Detail lokasi sedang dalam proses pendokumentasian." }}</p>
                             </div>
 
                             <div class="flex gap-4 pt-4">
-                                <Link :href="route('admin.rooms.edit', room.id)" class="flex-1 py-5 bg-pail-gold text-white rounded-[1.5rem] transition-all text-center font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-pail-gold/20">
-                                    Edit area
+                                <Link :href="route('admin.rooms.edit', room.id)" class="flex-1 py-5 bg-pail-gold text-white rounded-full transition-all text-center font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-pail-gold/20">
+                                    Edit Area
                                 </Link>
-                                <button @click="deleteRoom(room.id)" class="flex-1 py-5 bg-red-50 text-red-600 rounded-[1.5rem] transition-all text-center font-black text-[10px] uppercase tracking-[0.2em] border border-red-100">
+                                <button @click="deleteRoom(room.id)" class="flex-1 py-5 bg-red-50 text-red-600 rounded-full transition-all text-center font-black text-[10px] uppercase tracking-[0.2em] border border-red-100">
                                     Delete
                                 </button>
                             </div>
@@ -187,8 +187,8 @@ const handleImport = () => {
                             <div class="w-24 h-24 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-8 border border-gray-100 dark:border-gray-700 shadow-inner">
                                 <svg class="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
                             </div>
-                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-sm italic">Infrastructure Hub Empty</p>
-                            <p class="text-[10px] text-gray-300 font-bold mt-2 uppercase">Define areas to organize assets.</p>
+                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-sm italic">Pusat Infrastruktur Kosong</p>
+                            <p class="text-[10px] text-gray-300 font-bold mt-2 uppercase">Definisikan area untuk mengorganisir aset.</p>
                         </div>
                     </div>
                 </div>

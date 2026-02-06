@@ -148,7 +148,7 @@ const filteredRooms = computed(() => {
                 <div class="mb-6 flex gap-4">
                     <TextInput
                         v-model="search"
-                        placeholder="Cari barang..."
+                        placeholder="Cari item..."
                         class="w-full md:w-1/3"
                     />
                 </div>
@@ -193,10 +193,10 @@ const filteredRooms = computed(() => {
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                        <button @click="openEditModal(item)" class="text-indigo-600 hover:text-indigo-900 font-bold bg-indigo-50 px-3 py-1 rounded-lg transition hover:bg-indigo-100">
+                                        <button @click="openEditModal(item)" class="text-indigo-600 hover:text-indigo-900 font-bold bg-indigo-50 px-3 py-1 rounded-full transition hover:bg-indigo-100">
                                             Edit
                                         </button>
-                                        <button @click="openDeleteModal(item)" class="text-red-600 hover:text-red-900 font-bold bg-red-50 px-3 py-1 rounded-lg transition hover:bg-red-100">
+                                        <button @click="openDeleteModal(item)" class="text-red-600 hover:text-red-900 font-bold bg-red-50 px-3 py-1 rounded-full transition hover:bg-red-100">
                                             Hapus
                                         </button>
                                     </td>
@@ -341,7 +341,7 @@ const filteredRooms = computed(() => {
                     <div class="mt-6 flex justify-end gap-3">
                         <SecondaryButton @click="isCreateModalOpen = false; isEditModalOpen = false">Batal</SecondaryButton>
                         <PrimaryButton :disabled="form.processing" class="bg-pail-gold hover:bg-yellow-600 border-none">
-                            {{ isCreateModalOpen ? 'Simpan Data' : 'Update Data' }}
+                            {{ isCreateModalOpen ? 'Simpan Data' : 'Perbarui Data' }}
                         </PrimaryButton>
                     </div>
                 </form>

@@ -49,7 +49,7 @@ const submit = () => {
                                     Isi detail pengajuan baru (Utilitas, B7, Darurat).
                                 </p>
                             </div>
-                            <Link :href="route('requests.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
+                            <Link :href="route('requests.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 font-bold text-sm transition-all">
                                 &larr; Kembali
                             </Link>
                         </header>

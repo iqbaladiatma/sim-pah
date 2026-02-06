@@ -7,6 +7,10 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import InstitutionSelect from "@/Components/InstitutionSelect.vue";
+import SparklesIcon from "@/Components/Icons/SparklesIcon.vue";
+import ZapIcon from "@/Components/Icons/ZapIcon.vue";
+import UserIcon from "@/Components/Icons/UserIcon.vue";
+import DiamondIcon from "@/Components/Icons/DiamondIcon.vue";
 
 const props = defineProps({
     canResetPassword: {
@@ -20,8 +24,6 @@ const props = defineProps({
         default: () => []
     }
 });
-
-console.log('Login Props Institutions:', props.institutions);
 
 const form = useForm({
     email: "",
@@ -39,91 +41,140 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Masuk | SIM PAH" />
+        <Head title="Akses Terotorisasi | SIM PAH" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <div v-if="status" class="mb-8 p-6 bg-green-500/10 border border-green-500/20 rounded-[2rem] text-[10px] font-black text-green-600 uppercase tracking-[0.2em] text-center backdrop-blur-md">
             {{ status }}
         </div>
 
-        <div class="mb-10 text-center">
-            <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                SIM <span class="text-pail-gold font-black italic">URT</span> PAH
+        <!-- Intelligence Hub Header -->
+        <div class="mb-12 relative text-center">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 opacity-20">
+                <div class="w-20 h-[1px] bg-pail-gold"></div>
+                <DiamondIcon className="w-3 h-3 text-pail-gold" />
+                <div class="w-20 h-[1px] bg-pail-gold"></div>
+            </div>
+            
+            <h2 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-tight">
+                Gerbang <span class="text-pail-gold">Autentikasi</span>
             </h2>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Pondok Pesantren Abu Hurairah - Mataram
-            </p>
-        </div>
-
-        <form @submit.prevent="submit" class="space-y-6">
-            <div class="bg-gray-50/50 dark:bg-gray-700/30 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
-                <InputLabel for="institution" value="Pilih Lembaga / Unit Kerja" class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-2" />
-                <InstitutionSelect 
-                    v-model="form.institution_id"
-                    :institutions="institutions"
-                />
-                <InputError class="mt-2" :message="form.errors.institution_id" />
-                <p class="mt-2 text-[10px] text-gray-500 italic leading-tight">
-                    * User Lembaga wajib memilih unit yang sesuai. Admin biarkan kosong. ({{ institutions.length }} Lembaga tersedia)
+            <div class="mt-4 flex items-center justify-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">
+                    Protokol Keamanan Aktif
                 </p>
             </div>
+        </div>
 
-            <div>
-                <InputLabel for="email" value="Email Address" class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-1" />
-                <TextInput
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full border-gray-200 focus:border-pail-gold focus:ring-pail-gold rounded-lg shadow-sm"
-                    v-model="form.email"
-                    required
-                    autofocus
-                    autocomplete="username"
-                    placeholder="nama@abu-hurairah.com"
-                />
-                <InputError class="mt-2" :message="form.errors.email" />
-            </div>
-
-            <div class="mt-4">
-                <div class="flex items-center justify-between">
-                    <InputLabel for="password" value="Password" class="text-xs uppercase tracking-wider font-bold text-gray-500 mb-1" />
-                    <Link
-                        v-if="canResetPassword"
-                        :href="route('password.request')"
-                        class="text-xs text-pail-gold hover:text-yellow-600 font-medium"
-                    >
-                        Lupa?
-                    </Link>
+        <form @submit.prevent="submit" class="space-y-10">
+            <!-- Institution Selection Hub -->
+            <div class="bg-gray-50/80 dark:bg-gray-900/40 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 relative group transition-all duration-700 hover:border-pail-gold/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+                <div class="absolute -right-8 -top-8 w-32 h-32 bg-pail-gold opacity-[0.03] rounded-full blur-3xl group-hover:opacity-10 transition-opacity"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-4 px-1">
+                        <InputLabel for="institution" value="Identitas Lembaga" class="text-[10px] uppercase tracking-[0.3em] font-black text-gray-400" />
+                        <span class="text-[9px] font-black text-pail-gold/40 uppercase tracking-widest">Wajib untuk Karyawan</span>
+                    </div>
+                    
+                    <InstitutionSelect 
+                        v-model="form.institution_id"
+                        :institutions="institutions"
+                    />
+                    <InputError class="mt-2" :message="form.errors.institution_id" />
+                    
+                    <div class="mt-5 flex items-start gap-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-gray-100/50 dark:border-gray-700/50">
+                        <div class="w-8 h-8 rounded-xl bg-pail-gold/10 flex items-center justify-center shrink-0">
+                            <SparklesIcon className="w-4 h-4 text-pail-gold" />
+                        </div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tight leading-relaxed">
+                            Personil yang terasosiasi dengan lembaga tertentu wajib mengidentifikasi <span class="text-pail-gold">Node Institusi</span> mereka. Akun administrator melewati protokol ini.
+                        </p>
+                    </div>
                 </div>
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full border-gray-200 focus:border-pail-gold focus:ring-pail-gold rounded-lg shadow-sm"
-                    v-model="form.password"
-                    required
-                    autocomplete="current-password"
-                    placeholder="••••••••"
-                />
-                <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="flex items-center justify-between">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" class="text-pail-gold focus:ring-pail-gold h-4 w-4 rounded" />
-                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Ingat sesi saya</span>
+            <!-- Credentials Block -->
+            <div class="space-y-6">
+                <div class="group relative">
+                    <InputLabel for="email" value="Identitas Akses (Email)" class="text-[10px] uppercase tracking-[0.3em] font-black text-gray-400 mb-3 px-2" />
+                    <div class="relative">
+                        <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 transition-colors group-focus-within:text-pail-gold">
+                            <UserIcon className="w-5 h-5" />
+                        </div>
+                        <TextInput
+                            id="email"
+                            type="email"
+                            class="block w-full bg-white/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 focus:border-pail-gold focus:ring-[10px] focus:ring-pail-gold/5 rounded-full shadow-sm h-16 pl-14 pr-6 text-sm font-bold transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 border-2"
+                            v-model="form.email"
+                            required
+                            autofocus
+                            autocomplete="username"
+                            placeholder="credential@abu-hurairah.id"
+                        />
+                    </div>
+                    <InputError class="mt-2" :message="form.errors.email" />
+                </div>
+
+                <div class="group relative">
+                    <div class="flex items-center justify-between mb-3 px-2">
+                        <InputLabel for="password" value="Kunci Keamanan Terenkripsi" class="text-[10px] uppercase tracking-[0.3em] font-black text-gray-400" />
+                        <Link
+                            v-if="canResetPassword"
+                            :href="route('password.request')"
+                            class="text-[9px] font-black text-pail-gold hover:text-yellow-600 uppercase tracking-widest transition-colors decoration-2 underline-offset-4 hover:underline"
+                        >
+                            Lupa Kunci?
+                        </Link>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 transition-colors group-focus-within:text-pail-gold">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <TextInput
+                            id="password"
+                            type="password"
+                            class="block w-full bg-white/50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700 focus:border-pail-gold focus:ring-[10px] focus:ring-pail-gold/5 rounded-full shadow-sm h-16 pl-14 pr-6 text-sm font-bold transition-all placeholder:text-gray-300 dark:placeholder:text-gray-600 border-2"
+                            v-model="form.password"
+                            required
+                            autocomplete="current-password"
+                            placeholder="••••••••••••"
+                        />
+                    </div>
+                    <InputError class="mt-2" :message="form.errors.password" />
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between px-2">
+                <label class="flex items-center group cursor-pointer">
+                    <div class="relative flex items-center">
+                        <Checkbox name="remember" v-model:checked="form.remember" class="w-6 h-6 rounded-full border-gray-200 dark:border-gray-700 text-pail-gold focus:ring-pail-gold/20 transition-all group-hover:border-pail-gold/50 cursor-pointer" />
+                    </div>
+                    <span class="ms-4 text-[11px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Pertahankan Sesi Aktif</span>
                 </label>
             </div>
 
-            <div class="pt-2">
+            <div class="pt-6">
                 <PrimaryButton
-                    class="w-full py-3 bg-pail-gold hover:bg-yellow-600 focus:bg-yellow-600 active:bg-yellow-700 text-white font-bold rounded-lg shadow-lg shadow-pail-gold/20 transform transition active:scale-95 disabled:opacity-50 flex justify-center text-sm uppercase tracking-widest"
+                    class="w-full h-20 bg-gray-900 dark:bg-black hover:bg-black dark:hover:bg-gray-900 text-pail-gold font-black rounded-full shadow-2xl shadow-black/20 transform transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center text-xs uppercase tracking-[0.4em] border border-pail-gold/20 group/btn overflow-hidden relative"
                     :disabled="form.processing"
                 >
-                    {{ form.processing ? 'Memproses...' : 'Masuk Ke Sistem' }}
+                    <div class="absolute inset-0 bg-pail-gold opacity-0 group-hover/btn:opacity-5 transition-opacity"></div>
+                    <span v-if="form.processing" class="flex items-center gap-4">
+                        <svg class="animate-spin h-5 w-5 text-pail-gold" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        Memverifikasi...
+                    </span>
+                    <span v-else class="flex items-center gap-4 text-pail-gold">
+                        Inisialisasi Pusat Akses
+                        <ZapIcon className="w-5 h-5 group-hover/btn:scale-125 transition-transform" />
+                    </span>
                 </PrimaryButton>
             </div>
 
-            <div class="text-center pt-2">
-                <p class="text-xs text-gray-500">
-                    Belum punya akses? Hubungi Admin URT Mataram.
+            <div class="text-center pt-6">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] leading-relaxed">
+                    Akses Ditolak? <br/>
+                    <span class="text-pail-gold/60">Hubungi Pusat Intelijen URT.</span>
                 </p>
             </div>
         </form>

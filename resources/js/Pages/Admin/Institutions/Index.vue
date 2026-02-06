@@ -36,7 +36,7 @@ const importForm = useForm({
                         @click="openImportModal"
                         class="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 font-black text-xs uppercase tracking-widest flex items-center gap-2"
                     >
-                        <FolderIcon className="w-4 h-4" /> Import Excel
+                        <FolderIcon className="w-4 h-4" /> Impor Excel
                     </button>
                     <Link
                         :href="route('admin.institutions.create')"
@@ -76,7 +76,7 @@ const importForm = useForm({
                         <div class="flex items-center justify-between h-full relative z-10">
                             <div>
                                 <h3 class="text-white/70 font-black uppercase tracking-[0.3em] text-[10px] mb-3">System Core Status</h3>
-                                <div class="text-3xl font-black text-white uppercase tracking-tighter">Operational Excellence</div>
+                                <div class="text-3xl font-black text-white uppercase tracking-tighter">Keunggulan Operasional</div>
                             </div>
                             <div class="w-16 h-16 bg-white/20 rounded-[1.5rem] flex items-center justify-center backdrop-blur-md border border-white/30 shadow-xl group-hover:rotate-12 transition-transform">
                                 <CheckIcon className="w-8 h-8 text-white" />
@@ -122,7 +122,7 @@ const importForm = useForm({
                                                 :href="route('admin.institutions.edit', inst.id)"
                                                 class="px-6 py-3 bg-gray-900 text-white rounded-xl hover:bg-pail-gold transition-all shadow-xl font-black text-[10px] uppercase tracking-widest"
                                             >
-                                                Edit Profile
+                                                Edit Profil
                                             </Link>
                                             <button
                                                 @click="deleteInstitution(inst.id)"
@@ -159,7 +159,7 @@ const importForm = useForm({
                                     Edit unit
                                 </Link>
                                 <button @click="deleteInstitution(inst.id)" class="flex-1 py-5 bg-red-50 text-red-600 rounded-[1.5rem] transition-all text-center font-black text-[10px] uppercase tracking-[0.2em] border border-red-100">
-                                    Remove
+                                    Hapus
                                 </button>
                             </div>
                         </div>
@@ -172,8 +172,8 @@ const importForm = useForm({
                             <div class="w-24 h-24 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-8 border border-gray-100 dark:border-gray-700 shadow-inner">
                                 <FolderIcon className="w-10 h-10 text-gray-200" />
                             </div>
-                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-sm italic">Institutional Data Empty</p>
-                            <p class="text-[10px] text-gray-300 font-bold mt-2 uppercase">Please initialize units to proceed.</p>
+                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-sm italic">Data Lembaga Kosong</p>
+                            <p class="text-[10px] text-gray-300 font-bold mt-2 uppercase">Silakan inisialisasi unit untuk melanjutkan.</p>
                         </div>
                     </div>
                 </div>

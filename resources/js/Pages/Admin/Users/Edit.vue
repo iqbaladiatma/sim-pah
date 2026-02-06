@@ -1,7 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
-
+import { computed } from "vue";
 
 const props = defineProps({
     user: Object,
@@ -15,6 +16,15 @@ const form = useForm({
     role: props.user.role,
     institution_id: props.user.institution_id || "",
     phone: props.user.phone || "",
+});
+
+// Format institutions untuk SearchableSelect
+const institutionOptions = computed(() => {
+    return props.institutions.map(inst => ({
+        id: inst.id,
+        name: inst.name,
+        code: inst.code,
+    }));
 });
 
 const submit = () => {
@@ -95,19 +105,21 @@ const submit = () => {
                                         <select v-model="form.role" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6">
                                             <option value="super admin">Super Admin (IT)</option>
                                             <option value="admin">Admin (URT)</option>
-                                            <option value="lembaga">Karyawan Lembaga</option>
+                                            <option value="lembaga">Lembaga</option>
                                         </select>
                                         <div v-if="form.errors.role" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.role }}</div>
                                     </div>
                                     
                                     <div v-if="form.role === 'lembaga'">
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Penempatan Lembaga</label>
-                                        <select v-model="form.institution_id" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6">
-                                            <option value="">- Pilih Lembaga -</option>
-                                            <option v-for="inst in institutions" :key="inst.id" :value="inst.id">
-                                                {{ inst.code }} - {{ inst.name }}
-                                            </option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.institution_id"
+                                            :options="institutionOptions"
+                                            placeholder="- Pilih Lembaga -"
+                                            value-key="id"
+                                            label-key="name"
+                                            :custom-label="(option) => `${option.code} - ${option.name}`"
+                                        />
                                         <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.institution_id }}</div>
                                     </div>
 

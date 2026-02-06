@@ -3,6 +3,8 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 import { formatRupiah } from "@/Utils/format";
 import PlusIcon from "@/Components/Icons/PlusIcon.vue";
+import InboxIcon from "@/Components/Icons/InboxIcon.vue";
+import ZapIcon from "@/Components/Icons/ZapIcon.vue";
 
 const props = defineProps({
     requests: Object,
@@ -93,9 +95,9 @@ const getStatusColor = (status) => {
                 <div class="flex items-center justify-between px-4">
                     <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter">Daftar Pengajuan Masuk</h3>
                     <div class="flex items-center gap-2">
-                        <button class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-colors">
-                            <span class="text-lg">⚡</span>
-                        </button>
+                        <div class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center justify-center">
+                            <ZapIcon className="w-5 h-5 text-pail-gold" />
+                        </div>
                     </div>
                 </div>
 
@@ -149,7 +151,7 @@ const getStatusColor = (status) => {
                                         :class="req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100 dark:bg-yellow-900/10 dark:text-yellow-500' : 
                                                 req.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100 dark:bg-green-900/10 dark:text-green-500' : 
                                                 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-500'">
-                                        {{ req.status }}
+                                        Menunggu
                                     </span>
                                     <p v-if="req.status !== 'pending'" class="text-[9px] font-bold text-gray-400 mt-2 italic uppercase tracking-widest">Selesai Diproses</p>
                                 </td>
@@ -162,15 +164,15 @@ const getStatusColor = (status) => {
                                             :href="route('admin.requests.edit', req.id)"
                                             class="h-12 px-6 bg-gray-900 text-white rounded-2xl hover:bg-pail-gold transition-all shadow-xl shadow-black/10 font-black text-[10px] uppercase tracking-[0.2em] flex items-center"
                                         >
-                                            {{ req.status === 'pending' ? 'Proses Review' : 'Lihat Detail' }}
+                                            {{ req.status === 'pending' ? 'Proses Tinjauan' : 'Lihat Detail' }}
                                         </Link>
                                     </div>
                                 </td>
                             </tr>
                             <tr v-if="requests.data.length === 0">
                                 <td colspan="5" class="px-8 py-40 text-center">
-                                    <div class="max-w-xs mx-auto">
-                                        <div class="text-4xl mb-4">📭</div>
+                                    <div class="max-w-xs mx-auto flex flex-col items-center">
+                                        <InboxIcon className="w-16 h-16 mb-4 text-gray-300 opacity-30" />
                                         <p class="text-gray-400 font-black uppercase tracking-widest text-xs italic leading-loose">Antrian pengajuan kosong. Seluruh permohonan telah selesai ditinjau.</p>
                                     </div>
                                 </td>
@@ -191,14 +193,14 @@ const getStatusColor = (status) => {
                                     :class="req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : 
                                             req.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100' : 
                                             'bg-red-50 text-red-700 border-red-100'">
-                                    {{ req.status }}
+                                    Menunggu
                                 </span>
                             </div>
 
                             <div class="mb-10">
                                 <div class="flex items-center gap-2 mb-2">
                                     <span class="text-[9px] uppercase font-black text-pail-gold tracking-[0.3em] block">{{ req.type }}</span>
-                                    <span v-if="req.photo_evidence" class="text-[9px] font-black text-blue-500 uppercase tracking-widest">📸 IMAGE</span>
+                                    <span v-if="req.photo_evidence" class="text-[9px] font-black text-blue-500 uppercase tracking-widest">📸 GAMBAR</span>
                                 </div>
                                 <h3 class="font-black text-gray-900 dark:text-white text-2xl leading-tight mb-4 tracking-tighter">{{ req.title }}</h3>
                                 <p class="text-xs text-gray-500 font-medium line-clamp-3 leading-relaxed italic mb-8 border-l-2 border-gray-100 dark:border-gray-700 pl-4">{{ req.description }}</p>
@@ -226,7 +228,7 @@ const getStatusColor = (status) => {
                                     :href="route('admin.requests.edit', req.id)"
                                     class="flex-1 py-5 bg-gray-900 text-white rounded-2xl text-center font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 group hover:bg-pail-gold transition-all flex items-center justify-center gap-2"
                                 >
-                                    {{ req.status === 'pending' ? 'Review Pengajuan' : 'Detail Lengkap' }}
+                                    {{ req.status === 'pending' ? 'Tinjau Pengajuan' : 'Detail Lengkap' }}
                                     <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                                 </Link>
                             </div>

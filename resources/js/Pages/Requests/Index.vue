@@ -57,7 +57,7 @@ const getStatusColor = (status) => {
                                 <tr class="text-[10px] font-black uppercase text-gray-400 tracking-wider bg-gray-50/50 dark:bg-gray-900/50 rounded-xl">
                                     <th class="px-6 py-4 text-left first:rounded-l-xl">Tipe</th>
                                     <th class="px-6 py-4 text-left">Judul & Deskripsi</th>
-                                    <th class="px-6 py-4 text-left">Est. Biaya</th>
+                                    <th class="px-6 py-4 text-left font-black uppercase tracking-widest text-[10px] text-gray-400">Estimasi</th>
                                     <th class="px-6 py-4 text-left">Status</th>
                                     <th class="px-6 py-4 text-right last:rounded-r-xl">Aksi</th>
                                 </tr>
@@ -76,7 +76,8 @@ const getStatusColor = (status) => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-3 py-1 inline-flex text-[10px] leading-5 font-black rounded-lg uppercase tracking-wider shadow-sm" :class="getStatusColor(req.status)">
-                                            {{ req.status }}
+                                            {{ req.status === 'pending' ? 'Tinjauan' : 
+                                               req.status === 'approved' ? 'Disetujui' : 'Ditolak' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
@@ -87,7 +88,7 @@ const getStatusColor = (status) => {
                                             <Link 
                                                 v-if="req.status === 'pending'"
                                                 :href="route('requests.edit', req.id)"
-                                                class="px-3 py-1 bg-pail-gold text-white rounded-lg hover:bg-yellow-600 transition shadow-sm font-bold text-[10px] uppercase tracking-wider"
+                                                class="px-3 py-1 bg-pail-gold text-white rounded-full hover:bg-yellow-600 transition shadow-sm font-bold text-[10px] uppercase tracking-wider"
                                             >
                                                 Edit
                                             </Link>

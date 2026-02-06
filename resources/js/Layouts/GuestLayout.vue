@@ -4,33 +4,56 @@ import { Link } from "@inertiajs/vue3";
 </script>
 
 <template>
-    <div
-        class="flex min-h-screen flex-col items-center justify-center bg-pail-ivory pt-6 sm:pt-0 dark:bg-gray-900 font-sans text-gray-900 antialiased"
-    >
-        <div class="mb-6 flex flex-col items-center">
-            <Link href="/" class="flex flex-col items-center">
-                <ApplicationLogo
-                    class="h-20 w-20 fill-current text-pail-gold mb-2 drop-shadow-sm"
-                />
-                <span
-                    class="text-2xl font-bold tracking-wider text-gray-800 dark:text-gray-100"
-                    >SIM <span class="text-pail-gold">PAH</span></span
-                >
-                <span
-                    class="text-xs text-gray-500 tracking-widest uppercase mt-1"
-                    >Sistem Informasi Manajemen</span
-                >
-            </Link>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-500">
+        <!-- Dashboard-style Background Pattern -->
+        <div class="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05] z-0 overflow-hidden">
+            <div class="absolute inset-0" style="background-image: radial-gradient(#000 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
         </div>
 
-        <div
-            class="w-full overflow-hidden bg-white px-8 py-8 shadow-xl border border-gray-100 sm:max-w-md sm:rounded-2xl dark:bg-gray-800 dark:border-gray-700"
-        >
-            <slot />
-        </div>
+        <!-- Premium Background Blobs -->
+        <div class="absolute -top-20 -left-20 w-80 h-80 bg-pail-gold opacity-10 rounded-full blur-[120px]"></div>
+        <div class="absolute -bottom-20 -right-20 w-96 h-96 bg-pail-gold opacity-10 rounded-full blur-[140px]"></div>
 
-        <div class="mt-8 text-center text-xs text-gray-400">
-            &copy; {{ new Date().getFullYear() }} Pondok Pesantren Abu Hurairah
+        <div class="w-full max-w-md relative z-10 flex flex-col items-center">
+            <!-- Branding Header -->
+            <div class="mb-12 text-center group">
+                <Link href="/" class="flex flex-col items-center gap-4">
+                    <div class="w-20 h-20 flex items-center justify-center bg-gray-900 dark:bg-black rounded-[2.5rem] shadow-2xl relative overflow-hidden transform hover:scale-105 transition-all duration-500">
+                        <ApplicationLogo class="h-10 w-10 fill-current text-pail-gold" />
+                        <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+                    <div class="flex flex-col items-center mt-2">
+                        <span class="text-4xl font-black tracking-tighter text-gray-900 dark:text-white leading-none">
+                            SIM <span class="text-pail-gold">PAH</span>
+                        </span>
+                        <span class="text-[10px] font-black text-pail-gold uppercase tracking-[0.4em] mt-2 opacity-60">
+                            Edisi Mataram
+                        </span>
+                    </div>
+                </Link>
+            </div>
+
+            <!-- Login Card (Glassmorphism) -->
+            <div class="w-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-2xl px-10 py-12 rounded-[3rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.15)] border border-white dark:border-gray-700/50">
+                <slot />
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-12 text-center">
+                <p class="text-[10px] font-black uppercase text-gray-400 dark:text-gray-500 tracking-[0.3em] leading-relaxed">
+                    &copy; {{ new Date().getFullYear() }} Pondok Pesantren Abu Hurairah<br/>
+                    <span class="opacity-50">Keamanan Logistik & Infrastruktur</span>
+                </p>
+            </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+.bg-pail-gold {
+    background-color: #C9A658;
+}
+.text-pail-gold {
+    color: #C9A658;
+}
+</style>

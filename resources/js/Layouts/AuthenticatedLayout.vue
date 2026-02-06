@@ -5,6 +5,10 @@ import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
 import NavLink from "@/Components/NavLink.vue";
 import { Link, usePage } from "@inertiajs/vue3";
+import SettingsIcon from "@/Components/Icons/SettingsIcon.vue";
+import LogOutIcon from "@/Components/Icons/LogOutIcon.vue";
+import CheckCircleIcon from "@/Components/Icons/CheckCircleIcon.vue";
+import XCircleIcon from "@/Components/Icons/XCircleIcon.vue";
 
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
@@ -46,15 +50,11 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
             <div class="h-full flex flex-col overflow-hidden">
                 <!-- Sidebar Branding -->
                 <div class="h-24 flex items-center px-8 shrink-0 relative overflow-hidden">
-                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-pail-gold opacity-5 rounded-full blur-3xl"></div>
-                    <Link :href="dashboardUrl" class="flex items-center gap-4 group">
-                        <div class="w-12 h-12 flex items-center justify-center bg-gray-900 rounded-2xl shadow-xl group-hover:bg-pail-gold transition-all duration-500 relative overflow-hidden">
-                            <ApplicationLogo class="h-6 w-6 fill-current text-pail-gold group-hover:text-white transition-colors duration-500" />
-                            <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        </div>
-                        <div v-if="!isSidebarCollapsed" class="flex flex-col transition-all duration-500 delay-100">
+                    <Link :href="dashboardUrl" class="flex items-center gap-4">
+                        <ApplicationLogo class="h-12 w-12" />
+                        <div v-if="!isSidebarCollapsed" class="flex flex-col">
                             <span class="font-black text-2xl text-gray-900 dark:text-white tracking-tighter leading-none mb-1">SIM PAH</span>
-                            <span class="text-[9px] font-black text-pail-gold uppercase tracking-[0.3em] opacity-60">Mataram Edition</span>
+                            <span class="text-[9px] font-black text-pail-gold uppercase tracking-[0.3em] opacity-60">Edisi Mataram</span>
                         </div>
                     </Link>
                 </div>
@@ -62,20 +62,20 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                 <!-- Navigation Links -->
                 <nav class="flex-1 px-4 py-8 space-y-2 overflow-y-auto scrollbar-hide lg:pb-32">
                     <div class="px-5 mb-4" v-if="!isSidebarCollapsed">
-                        <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Core Console</p>
+                        <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Konsol Utama</p>
                     </div>
 
                     <NavLink :href="dashboardUrl" :active="route().current('dashboard') || route().current('admin.dashboard')">
                         <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1'">
                             <svg class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-sm uppercase">Dashboard</span>
+                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-sm uppercase">Beranda</span>
                         </div>
                     </NavLink>
 
                     <!-- Admin Management Section -->
                     <template v-if="['super admin', 'admin'].includes(user.role)">
                         <div class="px-5 mt-10 mb-4" v-if="!isSidebarCollapsed">
-                            <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Institutional Hub</p>
+                            <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Pusat Institusi</p>
                         </div>
                         <NavLink :href="route('admin.institutions.index')" :active="route().current('admin.institutions.*')">
                             <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1'">
@@ -98,7 +98,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                     </template>
 
                     <div class="px-5 mt-10 mb-4" v-if="!isSidebarCollapsed">
-                        <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Logistics Engine</p>
+                        <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Mesin Logistik</p>
                     </div>
 
                     <NavLink :href="itemsUrl" :active="route().current('items.*') || route().current('admin.items.*')">
@@ -124,7 +124,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
 
                     <template v-if="['super admin', 'admin'].includes(user.role)">
                         <div class="px-5 mt-10 mb-4" v-if="!isSidebarCollapsed">
-                            <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">System Intelligence</p>
+                            <p class="text-[10px] font-black uppercase text-gray-400 tracking-[0.3em]">Intelijen Sistem</p>
                         </div>
                         <NavLink :href="route('admin.activity_log.index')" :active="route().current('admin.activity_log.*')">
                             <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1'">
@@ -183,7 +183,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                         <span class="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">Status</span>
                         <div class="px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800 text-[8px] font-black text-green-600 dark:text-green-500 uppercase tracking-[0.2em] flex items-center gap-2">
                             <span class="w-1 h-1 rounded-full bg-green-500 animate-ping"></span>
-                            Live Node Active
+                            Node Aktif
                         </div>
                     </nav>
                 </div>
@@ -203,19 +203,19 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                         </template>
                         <template #content>
                             <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Signed in as</p>
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Masuk sebagai</p>
                                 <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ user.email }}</p>
                             </div>
                             <DropdownLink :href="route('profile.edit')">
                                 <div class="flex items-center gap-3 py-1">
-                                    <span>⚙️</span>
+                                    <SettingsIcon className="w-4 h-4 text-gray-400 group-hover:text-pail-gold" />
                                     <span>Konfigurasi Profil</span>
                                 </div>
                             </DropdownLink>
                             <div class="border-t border-gray-100 dark:border-gray-700"></div>
                             <DropdownLink :href="route('logout')" method="post" as="button" class="text-red-500 font-bold">
                                 <div class="flex items-center gap-3 py-1">
-                                    <span>🚪</span>
+                                    <LogOutIcon className="w-4 h-4 text-red-400 group-hover:text-red-600" />
                                     <span>Keluar Sistem</span>
                                 </div>
                             </DropdownLink>
@@ -249,7 +249,9 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                 >
                     <div v-if="$page.props.flash.success" key="success" class="mb-10 p-6 bg-white dark:bg-gray-800 border-l-[6px] border-green-500 rounded-3xl shadow-xl shadow-green-500/5 flex items-center justify-between group">
                         <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-2xl bg-green-50 flex items-center justify-center text-xl">✅</div>
+                            <div class="w-10 h-10 rounded-2xl bg-green-50 flex items-center justify-center">
+                                <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                            </div>
                             <div>
                                 <p class="text-[10px] font-black text-green-600 uppercase tracking-widest mb-0.5">Operasi Berhasil</p>
                                 <p class="text-sm text-gray-900 dark:text-white font-bold">{{ $page.props.flash.success }}</p>
@@ -260,7 +262,9 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
 
                     <div v-if="$page.props.flash.error" key="error" class="mb-10 p-6 bg-white dark:bg-gray-800 border-l-[6px] border-red-500 rounded-3xl shadow-xl shadow-red-500/5 flex items-center justify-between group">
                         <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center text-xl">❌</div>
+                            <div class="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center">
+                                <XCircleIcon className="w-6 h-6 text-red-500" />
+                            </div>
                             <div>
                                 <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-0.5">Gagal Sistem</p>
                                 <p class="text-sm text-gray-900 dark:text-white font-bold">{{ $page.props.flash.error }}</p>
@@ -282,7 +286,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
             <Link :href="dashboardUrl" class="flex flex-col items-center justify-center w-full h-full transition-all duration-500 rounded-3xl group" :class="route().current('dashboard') || route().current('admin.dashboard') ? 'text-pail-gold relative' : 'text-gray-400'">
                 <div v-if="route().current('dashboard') || route().current('admin.dashboard')" class="absolute top-0 w-8 h-1 bg-pail-gold rounded-full"></div>
                 <svg class="w-6 h-6 transform group-active:scale-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                <span class="text-[8px] font-black uppercase mt-1 tracking-widest">Home</span>
+                <span class="text-[8px] font-black uppercase mt-1 tracking-widest">Beranda</span>
             </Link>
 
             <Link :href="itemsUrl" class="flex flex-col items-center justify-center w-full h-full transition-all duration-500 rounded-3xl group" :class="route().current('items.*') || route().current('admin.items.*') ? 'text-pail-gold relative' : 'text-gray-400'">

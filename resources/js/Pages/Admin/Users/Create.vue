@@ -1,6 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
+import { computed } from "vue";
 
 const props = defineProps({
     institutions: Array,
@@ -13,6 +15,15 @@ const form = useForm({
     role: "lembaga",
     institution_id: "",
     phone: "",
+});
+
+// Format institutions untuk SearchableSelect
+const institutionOptions = computed(() => {
+    return props.institutions.map(inst => ({
+        id: inst.id,
+        name: inst.name,
+        code: inst.code,
+    }));
 });
 
 const submit = () => {
@@ -53,23 +64,23 @@ const submit = () => {
                                     <div>
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Nama Lengkap</label>
                                         <input v-model="form.name" type="text" 
-                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            class="w-full h-14 border-gray-100 rounded-full bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
                                             placeholder="Masukkan nama lengkap..." required autofocus />
                                         <div v-if="form.errors.name" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.name }}</div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Email Address</label>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Alamat Email</label>
                                         <input v-model="form.email" type="email" 
-                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            class="w-full h-14 border-gray-100 rounded-full bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
                                             placeholder="user@example.com" required />
                                         <div v-if="form.errors.email" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.email }}</div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Password</label>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Kata Sandi</label>
                                         <input v-model="form.password" type="password" 
-                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            class="w-full h-14 border-gray-100 rounded-full bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
                                             placeholder="Minimal 8 karakter..." required />
                                         <div v-if="form.errors.password" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.password }}</div>
                                     </div>
@@ -78,29 +89,31 @@ const submit = () => {
                                 <div class="space-y-6">
                                     <div>
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Akses Role</label>
-                                        <select v-model="form.role" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6">
+                                        <select v-model="form.role" class="w-full h-14 border-gray-100 rounded-full bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6">
                                             <option value="super admin">Super Admin (IT)</option>
                                             <option value="admin">Admin (URT)</option>
-                                            <option value="lembaga">Karyawan Lembaga</option>
+                                            <option value="lembaga">Lembaga</option>
                                         </select>
                                         <div v-if="form.errors.role" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.role }}</div>
                                     </div>
                                     
                                     <div v-if="form.role === 'lembaga'">
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Penempatan Lembaga</label>
-                                        <select v-model="form.institution_id" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-black uppercase tracking-widest focus:ring-pail-gold px-6">
-                                            <option value="">- Pilih Lembaga -</option>
-                                            <option v-for="inst in institutions" :key="inst.id" :value="inst.id">
-                                                {{ inst.code }} - {{ inst.name }}
-                                            </option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.institution_id"
+                                            :options="institutionOptions"
+                                            placeholder="- Pilih Lembaga -"
+                                            value-key="id"
+                                            label-key="name"
+                                            :custom-label="(option) => `${option.code} - ${option.name}`"
+                                        />
                                         <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.institution_id }}</div>
                                     </div>
 
                                     <div>
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">WhatsApp / No. HP</label>
                                         <input v-model="form.phone" type="text" 
-                                            class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
+                                            class="w-full h-14 border-gray-100 rounded-full bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-6" 
                                             placeholder="6281..." />
                                         <div v-if="form.errors.phone" class="text-red-500 text-[10px] font-black uppercase tracking-widest mt-2 ml-1">{{ form.errors.phone }}</div>
                                     </div>

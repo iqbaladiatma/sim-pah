@@ -193,9 +193,9 @@ const getEventIcon = (event) => {
                                         <button v-if="activity.properties && Object.keys(activity.properties).length > 0"
                                             @click="viewDetails(activity)"
                                             class="px-5 py-2 bg-gray-900 text-white rounded-xl hover:bg-black transition-all shadow-lg font-black text-[9px] uppercase tracking-widest">
-                                            View Detail
+                                            Lihat Detail
                                         </button>
-                                        <span v-else class="text-[10px] font-black text-gray-200 uppercase tracking-widest">No Meta</span>
+                                        <span v-else class="text-[10px] font-black text-gray-200 uppercase tracking-widest">Tanpa Meta</span>
                                     </td>
                                 </tr>
                                 <tr v-if="activities.data.length === 0">
@@ -256,7 +256,7 @@ const getEventIcon = (event) => {
                 
                 <header class="relative z-10 flex items-center justify-between mb-10">
                     <div>
-                        <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-1">Audit Log Meta</h3>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-1">Log Audit Meta</h3>
                         <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest italic">Rincian parameter perubahan objek sistem.</p>
                     </div>
                     <button @click="closeModal" class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 hover:text-red-500 transition-all border border-gray-100 dark:border-gray-700">
