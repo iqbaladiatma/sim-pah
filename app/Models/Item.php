@@ -15,7 +15,7 @@ class Item extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'stock', 'unit', 'room', 'brand', 'purchase_date', 'source', 'condition', 'responsible_person', 'note'])
+            ->logOnly(['name', 'code', 'brand', 'specification', 'serial_number', 'size', 'material', 'purchased_at', 'received_at', 'stock', 'unit', 'source', 'price', 'condition', 'note', 'no_urut_satker', 'no_urut_pondok', 'depreciation_price', 'responsible_person'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Item has been {$eventName}");
     }
@@ -24,16 +24,26 @@ class Item extends Model
         'institution_id',
         'room_id',
         'name',
+        'code',
         'brand',
-        'purchase_date',
+        'specification',
+        'serial_number',
+        'size',
+        'material',
+        'purchased_at',
         'stock',
         'unit',
         'source',
+        'price',
         'condition',
         'responsible_person',
         'note',
         'min_stock',
         'is_active',
+        'no_urut_satker',
+        'no_urut_pondok',
+        'depreciation_price',
+        'received_at',
     ];
 
     public function institution()

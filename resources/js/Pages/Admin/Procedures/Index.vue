@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 // Use local icons from the project
 import LibraryIcon from '@/Components/Icons/PackageIcon.vue';
@@ -21,11 +21,54 @@ import ChipIcon from '@/Components/Icons/ZapIcon.vue';
 import IdentificationIcon from '@/Components/Icons/UserIcon.vue';
 import MapPinIcon from '@/Components/Icons/LocationIcon.vue';
 
+// Safe mapping for missing icons
+import DocumentIcon from '@/Components/Icons/DocumentIcon.vue';
+import FolderIcon from '@/Components/Icons/FolderIcon.vue';
+import CalendarIcon from '@/Components/Icons/CalendarIcon.vue';
+import ClockIcon from '@/Components/Icons/ClockIcon.vue';
+import SearchIcon from '@/Components/Icons/SearchIcon.vue';
+import InboxIcon from '@/Components/Icons/InboxIcon.vue';
+
 const icons = {
-    LibraryIcon, ClipboardCheckIcon, ToolsIcon, ExclamationIcon, 
-    OfficeBuildingIcon, SwitchHorizontalIcon, CashIcon, TrashIcon,
-    ShoppingCartIcon, LightningBoltIcon, SparklesIcon, SunIcon,
-    TruckIcon, ChipIcon, IdentificationIcon, MapPinIcon
+    LibraryIcon, 
+    ClipboardCheckIcon, 
+    ToolsIcon, 
+    ExclamationIcon, 
+    OfficeBuildingIcon, 
+    SwitchHorizontalIcon, 
+    CashIcon, 
+    TrashIcon,
+    ShoppingCartIcon, 
+    LightningBoltIcon, 
+    SparklesIcon, 
+    SunIcon: SparklesIcon,
+    TruckIcon, 
+    ChipIcon, 
+    IdentificationIcon, 
+    MapPinIcon,
+    BookOpenIcon: DocumentIcon, 
+    HomeIcon: FolderIcon, 
+    CalendarIcon, 
+    CollectionIcon: FolderIcon,
+    DocumentTextIcon: DocumentIcon, 
+    CubeIcon: LibraryIcon, 
+    UserGroupIcon: IdentificationIcon, 
+    EyeIcon: SearchIcon,
+    ClockIcon, 
+    DesktopComputerIcon: ToolsIcon, 
+    TagIcon: CashIcon, 
+    ShieldCheckIcon: ClipboardCheckIcon,
+    BoxIcon: LibraryIcon, 
+    ArchiveIcon: InboxIcon,
+    WindIcon: SparklesIcon,
+    ColorSwatchIcon: SparklesIcon,
+    FilterIcon: SparklesIcon,
+    BeakerIcon: SparklesIcon,
+    RefreshIcon: SparklesIcon,
+    ScaleIcon: SparklesIcon,
+    KeyIcon: ToolsIcon,
+    DocumentReportIcon: DocumentIcon,
+    PresentationChartLineIcon: ToolsIcon,
 };
 
 const props = defineProps({
@@ -37,12 +80,25 @@ const getGroupTitle = (group) => {
     const titles = {
         'aset': 'Manajemen Aset & Inventaris',
         'sarpras': 'Sarana, Prasarana & Fasilitas',
-        'kendaraan': 'Armada & Parkir Area',
-        'logistik': 'Logistik & Peminjaman',
-        'iso': 'Kepatuhan & Audit ISO'
+        'proyek': 'Perbaikan & Proyek Kegiatan',
+        'logistik': 'Logistik & Pengadaan',
+        'kebersihan': 'Pemeliharaan Kebersihan',
+        'lainnya': 'Kendaraan & Lainnya'
     };
     return titles[group] || 'Seluruh Prosedur ISO URT';
 };
+
+const searchQuery = ref('');
+
+const filteredProcedures = computed(() => {
+    if (!searchQuery.value) return props.procedures;
+    
+    const query = searchQuery.value.toLowerCase();
+    return props.procedures.filter(proc => 
+        proc.title.toLowerCase().includes(query) || 
+        (proc.category && proc.category.toLowerCase().includes(query))
+    );
+});
 </script>
 
 <template>
@@ -60,6 +116,16 @@ const getGroupTitle = (group) => {
                         <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
                     </div>
                 </div>
+                <div class="flex items-center gap-2">
+                    <a 
+                        :href="route('admin.procedures.export_all')" 
+                        target="_blank"
+                        class="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-pail-gold transition-all shadow-lg hover:shadow-pail-gold/20"
+                    >
+                        <DocumentIcon class="w-4 h-4" />
+                        Export Seluruh ISO
+                    </a>
+                </div>
             </div>
         </template>
 
@@ -72,18 +138,42 @@ const getGroupTitle = (group) => {
                             MODUL: {{ currentGroup }}
                         </div>
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-tight italic">
-                            Menampilkan {{ procedures.length }} prosedur kerja terotorisasi.
+                            Menampilkan {{ filteredProcedures.length }} prosedur kerja terotorisasi.
                         </span>
                     </div>
-                    <Link :href="route('admin.procedures.index')" class="text-[10px] font-black text-pail-gold uppercase tracking-widest hover:underline md:text-right">
-                        Lihat Semua Prosedur &rarr;
-                    </Link>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="relative min-w-[250px]">
+                            <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input 
+                                v-model="searchQuery"
+                                type="text" 
+                                placeholder="CARI PROSEDUR..."
+                                class="w-full bg-gray-50 dark:bg-gray-900/50 border-0 rounded-full pl-12 pr-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white focus:ring-2 focus:ring-pail-gold"
+                            />
+                        </div>
+                        <Link :href="route('admin.procedures.index')" class="flex items-center text-[10px] font-black text-pail-gold uppercase tracking-widest hover:underline md:text-right">
+                            Lihat Semua Prosedur &rarr;
+                        </Link>
+                    </div>
+                </div>
+
+                <!-- Search box when no currentGroup (on all procedures page) -->
+                <div v-else class="mb-10 flex justify-end">
+                    <div class="relative w-full md:w-1/3">
+                        <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input 
+                            v-model="searchQuery"
+                            type="text" 
+                            placeholder="CARI PROSEDUR ISO..."
+                            class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full pl-12 pr-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-pail-gold transition-all"
+                        />
+                    </div>
                 </div>
 
                 <!-- Procedures Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                     <Link 
-                        v-for="(proc, key) in procedures" 
+                        v-for="(proc, key) in filteredProcedures" 
                         :key="key"
                         :href="proc.url"
                         class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col items-center text-center"
@@ -94,7 +184,7 @@ const getGroupTitle = (group) => {
                         </div>
 
                         <div class="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 mb-6 shadow-inner border border-gray-100 dark:border-gray-700 relative z-10">
-                            <component :is="icons[proc.icon]" class="w-8 h-8" />
+                            <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-8 h-8" />
                         </div>
                         
                         <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-3 relative z-10 leading-tight group-hover:text-pail-gold transition-colors">

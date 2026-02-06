@@ -23,31 +23,57 @@ use Maatwebsite\Excel\Facades\Excel;
 class UrtProcedureController extends Controller
 {
     protected $procedures = [
-        // ASET GROUP
-        'pendataan-aset' => ['title' => 'Pendataan Aset PAH Mataram', 'model' => Item::class, 'icon' => 'LibraryIcon', 'group' => 'aset'],
-        'pelelangan-aset' => ['title' => 'Pelelangan Aset', 'model' => AssetLifecycleLog::class, 'type' => 'auction', 'icon' => 'CashIcon', 'group' => 'aset'],
-        'penghapusan-aset' => ['title' => 'Penghapusan Aset', 'model' => AssetLifecycleLog::class, 'type' => 'disposal', 'icon' => 'TrashIcon', 'group' => 'aset'],
-        'pengadaan' => ['title' => 'Pengadaan Sarana Prasarana', 'model' => Item::class, 'icon' => 'ShoppingCartIcon', 'group' => 'aset'],
+        // GROUP ASET
+        'pendataan-aset' => ['title' => 'Pendataan Aset PAH Mataram', 'model' => Item::class, 'icon' => 'LibraryIcon', 'group' => 'aset', 'sheet' => 'FORMULIR LAPORAN ASET PAH MATAR'],
+        'buku-induk' => ['title' => 'Buku Induk Inventaris Barang', 'model' => Item::class, 'icon' => 'BookOpenIcon', 'group' => 'aset', 'sheet' => 'BUKU INDUK INVENTARIS BARANG'],
+        'kir-ruangan' => ['title' => 'Kartu Inventaris Ruangan (KIR)', 'model' => Item::class, 'icon' => 'HomeIcon', 'group' => 'aset', 'sheet' => 'KARTU INVENTARIS RUANGAN (KIR)'],
+        'monitoring-aset' => ['title' => 'Monitoring Aset', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Aset', 'icon' => 'DesktopComputerIcon', 'group' => 'aset', 'sheet' => 'FORMULIR MONITORING ASET'],
+        'pelelangan-aset' => ['title' => 'Daftar Aset Dilelang', 'model' => AssetLifecycleLog::class, 'type' => 'auction', 'icon' => 'CashIcon', 'group' => 'aset', 'sheet' => ' DAFTAR ASET YANG AKAN DILELANG'],
+        'penjualan-bekas' => ['title' => 'Penjualan Barang Bekas', 'model' => AssetLifecycleLog::class, 'type' => 'disposal', 'icon' => 'TagIcon', 'group' => 'aset', 'sheet' => 'FORMULIR PENJUALAN BARANG BEKAS'],
+        'berita-acara-pemeriksaan' => ['title' => 'Berita Acara Pemeriksaan Aset', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Pemeriksaan', 'icon' => 'ShieldCheckIcon', 'group' => 'aset', 'sheet' => 'BERITA ACARA PEMERIKSAAN ASET'],
 
-        // SARPRAS GROUP
-        'pemeliharaan-sarpras' => ['title' => 'Pemeliharaan Sarpras', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'icon' => 'ToolsIcon', 'group' => 'sarpras'],
-        'perbaikan-sarpras' => ['title' => 'Perbaikan Sarpras', 'model' => MaintenanceLog::class, 'type' => 'repair', 'icon' => 'ExclamationIcon', 'group' => 'sarpras'],
-        'proyek-sarpras' => ['title' => 'Proyek Kegiatan Sarpras', 'model' => MaintenanceLog::class, 'type' => 'project', 'icon' => 'OfficeBuildingIcon', 'group' => 'sarpras'],
-        'listrik-padam' => ['title' => 'Penanganan Listrik Padam', 'model' => MaintenanceLog::class, 'type' => 'power_outage', 'icon' => 'LightningBoltIcon', 'group' => 'sarpras'],
-        'kebersihan' => ['title' => 'Pemeliharaan Kebersihan', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'SparklesIcon', 'group' => 'sarpras'],
-        'pertamanan' => ['title' => 'Pemeliharaan Pertamanan', 'model' => MaintenanceLog::class, 'type' => 'garden', 'icon' => 'SunIcon', 'group' => 'sarpras'],
+        // GROUP PEMELIHARAAN (SARPRAS)
+        'pemeliharaan-gedung' => ['title' => 'Pemeliharaan Gedung', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Gedung', 'icon' => 'OfficeBuildingIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN GEDUNG'],
+        'pemeliharaan-kamar-mandi' => ['title' => 'Pemeliharaan Kamar Mandi', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Kamar Mandi', 'icon' => 'SparklesIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN KAMAR MAN'],
+        'pemeliharaan-ac' => ['title' => 'Pemeliharaan AC', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'AC', 'icon' => 'WindIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN AC'],
+        'pemeliharaan-pompa' => ['title' => 'Pemeliharaan Pompa/Filter', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Pompa', 'icon' => 'ColorSwatchIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR CEKLIST PEMELIHARAAN P'],
+        'pemeliharaan-air-bersih' => ['title' => 'Pemeliharaan Air Bersih', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Air Bersih', 'icon' => 'FilterIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN AIR BERSI'],
+        'pemeliharaan-air-minum' => ['title' => 'Pemeliharaan Air Minum', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Air Minum', 'icon' => 'BeakerIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN AIR MINUM'],
+        'pemeliharaan-genset' => ['title' => 'Pemeliharaan Genset', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Genset', 'icon' => 'LightningBoltIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN GENSET'],
+        'pemeliharaan-kipas' => ['title' => 'Pemeliharaan Kipas Angin', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Kipas Angin', 'icon' => 'RefreshIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN KIPAS ANG'],
+        'pemeliharaan-septik' => ['title' => 'FORMULIR PEMELIHARAAN SEPTIK TANK', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Septik Tank', 'icon' => 'ScaleIcon', 'group' => 'sarpras', 'sheet' => 'FORMULIR PEMELIHARAAN SEPTIK TA'],
+        'pemeliharaan-sarpras' => ['title' => 'FORMULIR LAPORAN PEMELIHARAAN SARANA PRASARANA', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Sarpras', 'icon' => 'SparklesIcon', 'group' => 'sarpras', 'sheet' => 'LAPORAN PEMELIHARAAN SARPRAS'],
+        'pemeliharaan-listrik' => ['title' => 'Pemeliharaan Jaringan Listrik', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Listrik', 'icon' => 'LightningBoltIcon', 'group' => 'sarpras', 'sheet' => 'FORM PEMELIHARAAN JARINGAN LIST'],
 
-        // KENDARAAN GROUP
-        'registrasi-kendaraan' => ['title' => 'Registrasi Kendaraan', 'model' => Vehicle::class, 'icon' => 'IdentificationIcon', 'group' => 'kendaraan'],
-        'pengajuan-kendaraan' => ['title' => 'Pengajuan Kendaraan', 'model' => VehicleRequest::class, 'icon' => 'TruckIcon', 'group' => 'kendaraan'],
-        'perawatan-kendaraan' => ['title' => 'Perawatan Kendaraan', 'model' => MaintenanceLog::class, 'type' => 'vehicle', 'icon' => 'ChipIcon', 'group' => 'kendaraan'],
-        'parkir-area' => ['title' => 'Parkir Area PAH Mataram', 'model' => ParkingLog::class, 'icon' => 'MapPinIcon', 'group' => 'kendaraan'],
+        // GROUP PERBAIKAN & PROYEK
+        'agenda-perbaikan' => ['title' => 'JADWAL AGENDA PERBAIKAN SARPRAS', 'model' => MaintenanceLog::class, 'type' => 'repair', 'icon' => 'CalendarIcon', 'group' => 'proyek', 'sheet' => 'JADWAL AGENDA PERBAIKAN SARPRAS'],
+        'rekapan-pengajuan' => ['title' => 'Rekapan Pengajuan Perbaikan', 'model' => MaintenanceLog::class, 'type' => 'repair', 'icon' => 'CollectionIcon', 'group' => 'proyek', 'sheet' => 'REKAPAN PENGAJUAN PERBAIKAN SAR'],
+        'pengajuan-rab' => ['title' => 'Pengajuan RAB', 'model' => MaintenanceLog::class, 'type' => 'project', 'icon' => 'DocumentTextIcon', 'group' => 'proyek', 'sheet' => 'FORMULIR PENGAJUAN RAB'],
+        'laporan-proyek' => ['title' => 'Laporan Proyek Kegiatan', 'model' => MaintenanceLog::class, 'type' => 'project', 'icon' => 'CubeIcon', 'group' => 'proyek', 'sheet' => 'LAPORAN PROYEK KEGIATAN'],
 
-        // LOGISTIK GROUP
-        'peminjaman-barang' => ['title' => 'Peminjaman Barang URT', 'model' => BorrowingRecord::class, 'icon' => 'SwitchHorizontalIcon', 'group' => 'logistik'],
+        // GROUP LOGISTIK & PENGADAAN
+        'peminjaman-barang' => ['title' => 'Buku Besar Peminjaman Barang', 'model' => BorrowingRecord::class, 'icon' => 'SwitchHorizontalIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR BUKU BESAR PEMINJAMAN '],
+        'pengadaan-sarpras' => ['title' => 'Pengajuan Pengadaan Sarpras', 'model' => Item::class, 'icon' => 'ShoppingCartIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PENGAJUAN PENGADAAN SA'],
+        'analisis-kebutuhan' => ['title' => 'Analisis Kebutuhan Sarpras', 'model' => Item::class, 'icon' => 'PresentationChartLineIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR ANALISIS KEBUTUHAN SAR'],
+        'pemilihan-evaluasi' => ['title' => 'Pemilihan & Evaluasi Vendor', 'model' => User::class, 'icon' => 'UserGroupIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PEMILIHAN DAN EVALUASI'],
+        'penerimaan-barang' => ['title' => 'Penerimaan Barang', 'model' => Item::class, 'icon' => 'DownloadIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PENERIMAAN BARANG'],
+        'penyerahan-barang' => ['title' => 'Penyerahan Barang', 'model' => Item::class, 'icon' => 'UploadIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PENYERAHAN BARANG'],
+        'jadwal-token' => ['title' => 'Jadwal Pengisian Token', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Token', 'icon' => 'KeyIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR JADWAL PENGISIAN TOKEN'],
 
-        // ISO GROUP (Audit)
-        'ceklist-iso' => ['title' => 'Ceklist Prosedur ISO URT', 'model' => IsoChecklist::class, 'icon' => 'ClipboardCheckIcon', 'group' => 'iso'],
+        // GROUP KEBERSIHAN
+        'timeline-kebersihan' => ['title' => 'Timeline Pemeliharaan Kebersihan', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'ClockIcon', 'group' => 'kebersihan', 'sheet' => 'TIMELINE PEMELIHARAAN KEBERSIHA'],
+        'jadwal-kebersihan' => ['title' => 'Jadwal Pemeliharaan Kebersihan', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'CalendarIcon', 'group' => 'kebersihan', 'sheet' => 'FORM JADWAL PEMELIHARAAN KEBERS'],
+        'kelengkapan-alat' => ['title' => 'Kelengkapan Alat & Bahan', 'model' => Item::class, 'icon' => 'ArchiveIcon', 'group' => 'kebersihan', 'sheet' => 'FORM KELENGKAPAN ALAT DAN BAHAN'],
+        'pemeliharaan-kebersihan' => ['title' => 'Pemeliharaan Kebersihan PAH', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'SparklesIcon', 'group' => 'kebersihan', 'sheet' => 'FORM PEMELIHARAAN KEBERSIHAN PA'],
+        'monitoring-kebersihan' => ['title' => 'Monitoring Kebersihan PAH', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'EyeIcon', 'group' => 'kebersihan', 'sheet' => 'FORM MONITORING KEBERSIHAN PAH '],
+        'kegiatan-pekanan' => ['title' => 'Kegiatan Pekanan Petugas', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'UserGroupIcon', 'group' => 'kebersihan', 'sheet' => 'FORM KEGIATAN PEKANAN PETUGAS K'],
+        'laporan-kebersihan' => ['title' => 'Laporan Pemeliharaan Kebersihan', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'DocumentReportIcon', 'group' => 'kebersihan', 'sheet' => 'FORM LAPORAN PEMELIHARAAN KEBERS'],
+
+        // GROUP KENDARAAN & LAINNYA
+        'parkir-area' => ['title' => 'Parkir Area PAH Mataram', 'model' => ParkingLog::class, 'icon' => 'MapPinIcon', 'group' => 'lainnya', 'sheet' => 'FORMULIR PARKIR AREA'], // Custom mapping
+        'penggunaan-kendaraan' => ['title' => 'Logbook Penggunaan Kendaraan', 'model' => VehicleRequest::class, 'icon' => 'TruckIcon', 'group' => 'lainnya', 'sheet' => 'LOGBOOK PENGAJUAN PENGGUNAAN KE'],
+        'registrasi-kendaraan' => ['title' => 'Master Registrasi Kendaraan', 'model' => Vehicle::class, 'icon' => 'TruckIcon', 'group' => 'lainnya', 'sheet' => 'REGISTRASI KENDARAAN'],
+        'ceklist-iso' => ['title' => 'Master Ceklist ISO', 'model' => IsoChecklist::class, 'icon' => 'ClipboardCheckIcon', 'group' => 'lainnya', 'sheet' => 'CEKLIST AUDIT INTERNAL ISO'],
     ];
 
     public function index(Request $request)
@@ -81,7 +107,11 @@ class UrtProcedureController extends Controller
             $query->where('type', $procedure['type']);
         }
 
-        $data = $query->latest()->paginate(10);
+        if (isset($procedure['category'])) {
+            $query->where('category', $procedure['category']);
+        }
+
+        $data = $query->with(['institution', 'room', 'vehicle', 'performer'])->latest()->paginate(20);
 
         // Additional data for forms
         $rooms = Room::all();
@@ -113,6 +143,10 @@ class UrtProcedureController extends Controller
             $data['type'] = $procedure['type'];
         }
 
+        if (isset($procedure['category'])) {
+            $data['category'] = $procedure['category'];
+        }
+
         // Handle photo uploads
         if ($request->hasFile('photo_evidence')) {
             $data['photo_evidence'] = $request->file('photo_evidence')->store('reports', 'public');
@@ -129,12 +163,35 @@ class UrtProcedureController extends Controller
         return back()->with('success', 'Data prosedur berhasil ditambahkan.');
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $type, $id)
     {
-        // This is a generic update, we need to know the type or find the model
-        // For simplicity, we'll pass the model type in the request or use a mapping if needed.
-        // But for now, let's assume we handle it via the Show page's specific update logic.
-        return back()->with('error', 'Update logic requires specific model handling.');
+        if (!isset($this->procedures[$type]))
+            abort(404);
+        $procedure = $this->procedures[$type];
+        $model = $procedure['model']::findOrFail($id);
+
+        $data = $request->all();
+
+        // Handle photo uploads
+        if ($request->hasFile('photo_evidence')) {
+            if ($model->photo_evidence)
+                Storage::disk('public')->delete($model->photo_evidence);
+            $data['photo_evidence'] = $request->file('photo_evidence')->store('reports', 'public');
+        }
+        if ($request->hasFile('photo_before')) {
+            if ($model->photo_before)
+                Storage::disk('public')->delete($model->photo_before);
+            $data['photo_before'] = $request->file('photo_before')->store('reports', 'public');
+        }
+        if ($request->hasFile('photo_after')) {
+            if ($model->photo_after)
+                Storage::disk('public')->delete($model->photo_after);
+            $data['photo_after'] = $request->file('photo_after')->store('reports', 'public');
+        }
+
+        $model->update($data);
+
+        return back()->with('success', 'Data prosedur berhasil diperbarui.');
     }
 
     public function destroy($type, $id)
@@ -150,17 +207,13 @@ class UrtProcedureController extends Controller
     {
         if (!isset($this->procedures[$type]))
             abort(404);
-        $procedure = $this->procedures[$type];
 
-        if ($procedure['model'] === MaintenanceLog::class) {
-            return Excel::download(new \App\Exports\MaintenanceLogExport($procedure['type'] ?? null), "prosedur-{$type}.xlsx");
-        }
+        return \App\Exports\IsoProcedureExport::download($type, $this->procedures[$type]);
+    }
 
-        if ($procedure['model'] === Vehicle::class) {
-            return Excel::download(new \App\Exports\VehicleExport(), "pendaftaran-kendaraan.xlsx");
-        }
-
-        return back()->with('error', 'Fitur Export Excel untuk ' . $type . ' belum tersedia.');
+    public function exportAll()
+    {
+        return \App\Exports\IsoProcedureExport::downloadAll();
     }
 
     public function import(Request $request, $type)
@@ -176,6 +229,11 @@ class UrtProcedureController extends Controller
         if ($procedure['model'] === MaintenanceLog::class) {
             Excel::import(new \App\Imports\MaintenanceLogImport($procedure['type'] ?? null), $request->file('file'));
             return back()->with('success', "Data prosedur {$type} berhasil di-import.");
+        }
+
+        if ($procedure['model'] === Item::class) {
+            Excel::import(new \App\Imports\ItemImport(), $request->file('file'));
+            return back()->with('success', "Data aset {$type} berhasil di-import.");
         }
 
         return back()->with('error', 'Fitur Import Excel untuk ' . $type . ' belum tersedia.');

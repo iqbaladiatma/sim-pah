@@ -15,6 +15,13 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
     <!-- Scripts -->
+    <script>
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
     @routes
     @vite(['resources/js/app.js'])
     @inertiaHead

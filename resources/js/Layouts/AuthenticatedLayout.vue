@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
@@ -12,6 +12,7 @@ import XCircleIcon from "@/Components/Icons/XCircleIcon.vue";
 
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
+const isDarkMode = ref(false);
 
 // Auto-close sidebar on mobile when navigating
 const closeSidebarOnMobile = () => {
@@ -20,16 +21,37 @@ const closeSidebarOnMobile = () => {
     }
 };
 
+const toggleDarkMode = () => {
+    isDarkMode.value = !isDarkMode.value;
+    if (isDarkMode.value) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+    }
+};
+
+onMounted(() => {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        isDarkMode.value = true;
+        document.documentElement.classList.add('dark');
+    } else {
+        isDarkMode.value = false;
+        document.documentElement.classList.remove('dark');
+    }
+});
+
 const dashboardUrl = computed(() => {
-    return ['super admin', 'admin'].includes(user.value.role)
+    return ['super admin', 'admin'].includes(user.value?.role)
         ? route('admin.dashboard')
         : route('dashboard');
 });
 
 const user = computed(() => usePage().props.auth.user);
 
-const itemsUrl = computed(() => ['super admin', 'admin'].includes(user.value.role) ? route('admin.items.index') : route('items.index'));
-const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.role) ? route('admin.requests.index') : route('requests.index'));
+const itemsUrl = computed(() => ['super admin', 'admin'].includes(user.value?.role) ? route('admin.items.index') : route('items.index'));
+const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?.role) ? route('admin.requests.index') : route('requests.index'));
 </script>
 
 <template>
@@ -56,14 +78,36 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
         >
             <div class="h-full flex flex-col overflow-hidden">
                 <!-- Sidebar Branding -->
-                <div class="h-20 lg:h-24 flex items-center px-4 lg:px-8 shrink-0 relative overflow-hidden">
+                <div 
+                    class="lg:h-24 flex items-center shrink-0 relative overflow-hidden transition-all duration-500"
+                    :class="[
+                        isSidebarCollapsed ? 'flex-col justify-center gap-4 h-32' : 'h-20 justify-between px-4 lg:px-8'
+                    ]"
+                >
                     <Link :href="dashboardUrl" class="flex items-center gap-3">
-                        <ApplicationLogo class="h-10 w-10 lg:h-12 lg:w-12" />
+                        <ApplicationLogo class="h-10 w-10 lg:h-12 lg:w-12 transition-all duration-500" />
                         <div v-if="!isSidebarCollapsed" class="flex flex-col">
                             <span class="font-black text-lg lg:text-2xl text-gray-900 dark:text-white tracking-tighter leading-none mb-0.5 lg:mb-1">SIM PAH</span>
                             <span class="text-[8px] lg:text-[9px] font-black text-pail-gold uppercase tracking-[0.25em] lg:tracking-[0.3em] opacity-60">Edisi Mataram</span>
                         </div>
                     </Link>
+
+                    <!-- Header Theme Toggle -->
+                    <button 
+                        @click="toggleDarkMode" 
+                        class="flex flex-col items-center gap-1 group transition-all"
+                        :title="isDarkMode ? 'Mode Terang' : 'Mode Gelap'"
+                    >
+                        <div class="w-9 h-9 rounded-xl bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-center text-gray-400 group-hover:text-pail-gold border border-gray-100 dark:border-gray-700/50 shadow-sm transition-all duration-300">
+                             <svg v-if="!isDarkMode" class="w-4 h-4 transition-all duration-500 group-hover:rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                            </svg>
+                            <svg v-else class="w-4 h-4 transition-all duration-500 group-hover:rotate-90 text-pail-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="text-[8px] font-black uppercase text-gray-400 tracking-widest group-hover:text-pail-gold transition-colors">Tema</span>
+                    </button>
                 </div>
 
                 <!-- Navigation Links -->
@@ -78,6 +122,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                             <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Beranda</span>
                         </div>
                     </NavLink>
+
 
                     <!-- Admin Management Section -->
                     <template v-if="['super admin', 'admin'].includes(user.role)">
@@ -131,38 +176,62 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
 
                     <template v-if="['super admin', 'admin'].includes(user.role)">
                         <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-3 lg:mb-4" v-if="!isSidebarCollapsed">
-                            <p class="text-[9px] lg:text-[10px] font-black uppercase text-pail-gold tracking-[0.25em] lg:tracking-[0.3em]">MODUL ISO URT</p>
+                            <p class="text-[9px] lg:text-[10px] font-black uppercase text-pail-gold tracking-[0.25em] lg:tracking-[0.3em]">PROSEDUR ISO URT</p>
                         </div>
                         
                         <!-- 1. Modul Aset -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'aset' })" :active="$page.url.includes('aset')" @click="closeSidebarOnMobile">
+                        <NavLink :href="route('admin.procedures.index', { group: 'aset' })" :active="$page.url.includes('group=aset')" @click="closeSidebarOnMobile">
                             <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Manajemen Aset</span>
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Aset</span>
                             </div>
                         </NavLink>
 
                         <!-- 2. Modul Sarpras -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'sarpras' })" :active="$page.url.includes('sarpras')" @click="closeSidebarOnMobile">
+                        <NavLink :href="route('admin.procedures.index', { group: 'sarpras' })" :active="$page.url.includes('group=sarpras')" @click="closeSidebarOnMobile">
                             <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Sarana & Fasilitas</span>
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Sarpras</span>
                             </div>
                         </NavLink>
 
-                        <!-- 3. Modul Kendaraan -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'kendaraan' })" :active="$page.url.includes('kendaraan')" @click="closeSidebarOnMobile">
+                        <!-- 3. Modul Proyek -->
+                        <NavLink :href="route('admin.procedures.index', { group: 'proyek' })" :active="$page.url.includes('group=proyek')" @click="closeSidebarOnMobile">
+                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Proyek</span>
+                            </div>
+                        </NavLink>
+
+                        <!-- 4. Modul Logistik -->
+                        <NavLink :href="route('admin.procedures.index', { group: 'logistik' })" :active="$page.url.includes('group=logistik')" @click="closeSidebarOnMobile">
+                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Logistik</span>
+                            </div>
+                        </NavLink>
+
+                        <!-- 5. Modul Kebersihan -->
+                        <NavLink :href="route('admin.procedures.index', { group: 'kebersihan' })" :active="$page.url.includes('group=kebersihan')" @click="closeSidebarOnMobile">
+                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
+                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Kebersihan</span>
+                            </div>
+                        </NavLink>
+
+                        <!-- 6. Modul Kendaraan & Lainnya -->
+                        <NavLink :href="route('admin.procedures.index', { group: 'lainnya' })" :active="$page.url.includes('group=lainnya')" @click="closeSidebarOnMobile">
                             <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
                                 <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Armada & Parkir</span>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Lainnya</span>
                             </div>
                         </NavLink>
 
-                        <!-- 4. Modul Kepatuhan ISO -->
+                        <!-- 7. Modul Audit ISO Master -->
                         <NavLink :href="route('admin.procedures.show', 'ceklist-iso')" :active="route().current('admin.procedures.show', 'ceklist-iso')" @click="closeSidebarOnMobile">
                             <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
                                 <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Audit & Ceklist ISO</span>
+                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Master Ceklist ISO</span>
                             </div>
                         </NavLink>
 
@@ -251,14 +320,14 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                             </div>
                             <DropdownLink :href="route('profile.edit')">
                                 <div class="flex items-center gap-3 py-1">
-                                    <SettingsIcon className="w-4 h-4 text-gray-400 group-hover:text-pail-gold" />
+                                    <SettingsIcon class="w-4 h-4 text-gray-400 group-hover:text-pail-gold" />
                                     <span>Konfigurasi Profil</span>
                                 </div>
                             </DropdownLink>
                             <div class="border-t border-gray-100 dark:border-gray-700"></div>
                             <DropdownLink :href="route('logout')" method="post" as="button" class="text-red-500 font-bold">
                                 <div class="flex items-center gap-3 py-1">
-                                    <LogOutIcon className="w-4 h-4 text-red-400 group-hover:text-red-600" />
+                                    <LogOutIcon class="w-4 h-4 text-red-400 group-hover:text-red-600" />
                                     <span>Keluar Sistem</span>
                                 </div>
                             </DropdownLink>
@@ -293,7 +362,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                     <div v-if="$page.props.flash.success" key="success" class="mb-6 sm:mb-10 p-4 sm:p-6 bg-white dark:bg-gray-800 border-l-[6px] border-green-500 rounded-2xl sm:rounded-3xl shadow-xl shadow-green-500/5 flex items-center justify-between group">
                         <div class="flex items-center gap-3 sm:gap-4">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
-                                <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+                                <CheckCircleIcon class="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                             </div>
                             <div class="min-w-0">
                                 <p class="text-[8px] sm:text-[10px] font-black text-green-600 uppercase tracking-widest mb-0.5">Operasi Berhasil</p>
@@ -306,7 +375,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                     <div v-if="$page.props.flash.error" key="error" class="mb-6 sm:mb-10 p-4 sm:p-6 bg-white dark:bg-gray-800 border-l-[6px] border-red-500 rounded-2xl sm:rounded-3xl shadow-xl shadow-red-500/5 flex items-center justify-between group">
                         <div class="flex items-center gap-3 sm:gap-4">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                                <XCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+                                <XCircleIcon class="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
                             </div>
                             <div class="min-w-0">
                                 <p class="text-[8px] sm:text-[10px] font-black text-red-600 uppercase tracking-widest mb-0.5">Gagal Sistem</p>
