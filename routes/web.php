@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // Rooms
             Route::get('/rooms-data/{institution}', [\App\Http\Controllers\Admin\RoomController::class, 'getByInstitution'])->name('rooms.by_institution');
+            Route::get('/rooms/import', [\App\Http\Controllers\Admin\RoomController::class, 'showImport'])->name('rooms.import_page');
             Route::post('/rooms/import', [\App\Http\Controllers\Admin\RoomController::class, 'import'])->name('rooms.import');
             Route::get('/rooms/template', [\App\Http\Controllers\Admin\RoomController::class, 'downloadTemplate'])->name('rooms.template');
             Route::resource('rooms', \App\Http\Controllers\Admin\RoomController::class);

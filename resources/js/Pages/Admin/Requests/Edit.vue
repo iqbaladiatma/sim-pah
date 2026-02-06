@@ -64,11 +64,11 @@ const statusOptions = [
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 font-sans">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter text-center sm:text-left">
                     Proses Pengajuan
                 </h2>
-                <Link :href="route('admin.requests.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                <Link :href="route('admin.requests.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all text-center sm:text-right">
                     &larr; Batalkan
                 </Link>
             </div>
@@ -76,17 +76,17 @@ const statusOptions = [
 
         <div class="pt-6 pb-12">
             <div class="mx-auto max-w-6xl sm:px-6 lg:px-8 space-y-8">
-                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <div class="p-12">
-                        <header class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[2.5rem] sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6 sm:p-12">
+                        <header class="mb-8 sm:mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                             <div>
-                                <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Detail Pengajuan</h3>
-                                <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
+                                <h3 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Detail Pengajuan</h3>
+                                <p class="text-xs sm:text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
                                     Tinjau dokumen, verifikasi estimasi biaya, dan berikan keputusan akhir untuk pengajuan operasional ini.
                                 </p>
                             </div>
                             <div class="flex items-center gap-4">
-                                <span class="px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-sm"
+                                <span class="px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl sm:rounded-2xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest border shadow-sm"
                                     :class="request.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : 
                                             request.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100' : 
                                             'bg-red-50 text-red-700 border-red-100'">
@@ -95,32 +95,32 @@ const statusOptions = [
                             </div>
                         </header>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12">
                             <!-- Left: Content Info -->
-                            <div class="lg:col-span-5 space-y-8">
-                                <div class="bg-gray-50 dark:bg-gray-900/50 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800/50">
+                            <div class="lg:col-span-5 space-y-6 sm:space-y-8">
+                                <div class="bg-gray-50 dark:bg-gray-900/50 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-800/50">
                                     <div class="mb-6">
-                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white dark:bg-gray-800 text-gray-500 border border-gray-100 dark:border-gray-700 mb-4 inline-block">
+                                        <span class="px-3 py-1.5 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest bg-white dark:bg-gray-800 text-gray-500 border border-gray-100 dark:border-gray-700 mb-4 inline-block">
                                             Lembaga: {{ request.user?.institution?.code || 'URT' }}
                                         </span>
-                                        <h4 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-3 uppercase leading-none">{{ request.title }}</h4>
-                                        <p class="text-sm text-gray-500 font-medium leading-[1.8]">{{ request.description }}</p>
+                                        <h4 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-3 uppercase leading-none">{{ request.title }}</h4>
+                                        <p class="text-[10px] sm:text-sm text-gray-500 font-medium leading-[1.8]">{{ request.description }}</p>
                                     </div>
 
                                     <div class="space-y-4 pt-6 border-t border-gray-200/50 dark:border-gray-700">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-[9px] uppercase font-black text-gray-400 tracking-widest">Jenis</span>
-                                            <span class="px-4 py-2 bg-white dark:bg-gray-800 rounded-xl text-xs font-black text-pail-gold border border-gray-100 dark:border-gray-700 uppercase tracking-widest">{{ request.type }}</span>
+                                        <div class="flex justify-between items-center gap-2">
+                                            <span class="text-[8px] sm:text-[9px] uppercase font-black text-gray-400 tracking-widest shrink-0">Jenis</span>
+                                            <span class="px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-gray-800 rounded-xl text-[9px] sm:text-xs font-black text-pail-gold border border-gray-100 dark:border-gray-700 uppercase tracking-widest truncate">{{ request.type }}</span>
                                         </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-[9px] uppercase font-black text-gray-400 tracking-widest">Estimasi Biaya</span>
-                                            <span class="text-xl font-black font-mono text-gray-900 dark:text-white tracking-tighter">{{ formatRupiah(request.estimated_cost) }}</span>
+                                        <div class="flex justify-between items-center gap-2">
+                                            <span class="text-[8px] sm:text-[9px] uppercase font-black text-gray-400 tracking-widest shrink-0">Estimasi Biaya</span>
+                                            <span class="text-lg sm:text-xl font-black font-mono text-gray-900 dark:text-white tracking-tighter">{{ formatRupiah(request.estimated_cost) }}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div v-if="request.photo_evidence" class="bg-gray-50 dark:bg-gray-900/50 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-800/50">
-                                    <h5 class="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-6">Bukti Dokumentasi</h5>
+                                <div v-if="request.photo_evidence" class="bg-gray-50 dark:bg-gray-900/50 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-800/50">
+                                    <h5 class="text-[8px] sm:text-[10px] uppercase font-black text-gray-400 tracking-widest mb-6">Bukti Dokumentasi</h5>
                                     <div class="group relative overflow-hidden rounded-[2rem] border border-gray-200 dark:border-gray-700">
                                         <img :src="`/storage/${request.photo_evidence}`" alt="Bukti Foto" class="w-full h-auto grayscale-[50%] group-hover:grayscale-0 transition-all duration-500 scale-105 group-hover:scale-100" />
                                         <a :href="`/storage/${request.photo_evidence}`" target="_blank" class="absolute inset-0 bg-pail-gold/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all font-black text-[10px] text-white uppercase tracking-widest">
@@ -186,10 +186,10 @@ const statusOptions = [
                                         </div>
                                     </div>
 
-                                    <div class="flex items-center gap-4 mt-8 pt-8">
+                                    <div class="flex items-center gap-4 mt-8 pt-8 border-t border-gray-50 dark:border-gray-800">
                                         <button 
                                             type="submit" 
-                                            class="w-full py-5 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-xs" 
+                                            class="w-full py-4 sm:py-5 bg-pail-gold text-white rounded-full sm:rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-[10px] sm:text-xs" 
                                             :disabled="form.processing"
                                         >
                                             Simpan Keputusan Final

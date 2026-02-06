@@ -65,20 +65,20 @@ const handleImport = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-0 font-sans">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter text-center sm:text-left">
                     Gudang Inventaris
                 </h2>
-                <div class="flex items-center gap-4">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                     <button
                         @click="openImportModal"
-                        class="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 font-black text-xs uppercase tracking-widest flex items-center gap-2"
+                        class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2"
                     >
                         <FolderIcon className="w-4 h-4" /> Import
                     </button>
                     <Link
                         :href="route('admin.items.create')"
-                        class="px-6 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-xs uppercase tracking-widest flex items-center gap-2"
+                        class="px-6 py-3 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2"
                     >
                         <PlusIcon className="w-4 h-4" /> Tambah Barang
                     </Link>
@@ -90,38 +90,38 @@ const handleImport = () => {
             <div class="mx-auto max-w-[95%] sm:px-6 lg:px-8 space-y-10">
                 
                 <!-- Stats Dynamic Carousel -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                    <div class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-gray-50 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-                        <h3 class="text-gray-400 font-black uppercase tracking-[0.2em] text-[10px] mb-3 relative z-10">Total Unit</h3>
+                        <h3 class="text-gray-400 font-black uppercase tracking-[0.2em] text-[8px] sm:text-[10px] mb-3 relative z-10">Total Unit</h3>
                         <div class="flex items-end gap-2 relative z-10">
-                            <div class="text-5xl font-black text-gray-900 dark:text-white tracking-tighter leading-none">{{ stats.total_items }}</div>
-                             <span class="text-[10px] font-black text-gray-300 uppercase mb-1">SKU</span>
+                            <div class="text-3xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tighter leading-none">{{ stats.total_items }}</div>
+                             <span class="text-[8px] sm:text-[10px] font-black text-gray-300 uppercase mb-1">SKU</span>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50/50 rounded-full group-hover:scale-110 transition-transform"></div>
-                        <h3 class="text-gray-400 font-black uppercase tracking-[0.2em] text-[10px] mb-3 relative z-10">Stok Fisik</h3>
+                        <h3 class="text-gray-400 font-black uppercase tracking-[0.2em] text-[8px] sm:text-[10px] mb-3 relative z-10">Stok Fisik</h3>
                         <div class="flex items-end gap-2 relative z-10 text-blue-600">
-                            <div class="text-5xl font-black tracking-tighter leading-none">{{ stats.total_stock }}</div>
-                            <span class="text-[10px] font-black text-blue-200 uppercase mb-1">Items</span>
+                            <div class="text-3xl sm:text-5xl font-black tracking-tighter leading-none">{{ stats.total_stock }}</div>
+                            <span class="text-[8px] sm:text-[10px] font-black text-blue-200 uppercase mb-1">Items</span>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-red-50/50 rounded-full group-hover:scale-110 transition-transform"></div>
-                        <h3 class="text-gray-400 font-black uppercase tracking-[0.2em] text-[10px] mb-3 relative z-10 text-red-500">Kritis</h3>
+                        <h3 class="text-gray-400 font-black uppercase tracking-[0.2em] text-[8px] sm:text-[10px] mb-3 relative z-10 text-red-500">Kritis</h3>
                         <div class="flex items-end gap-2 relative z-10 text-red-600">
-                            <div class="text-5xl font-black tracking-tighter leading-none">{{ stats.low_stock }}</div>
-                            <span class="text-[10px] font-black text-red-200 uppercase mb-1">Low</span>
+                            <div class="text-3xl sm:text-5xl font-black tracking-tighter leading-none">{{ stats.low_stock }}</div>
+                            <span class="text-[8px] sm:text-[10px] font-black text-red-200 uppercase mb-1">Low</span>
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-[#D4B876] via-pail-gold to-[#B89648] p-10 rounded-[3rem] shadow-2xl shadow-pail-gold/30 relative overflow-hidden group hover:-translate-y-1 transition-all duration-500">
+                    <div class="bg-gradient-to-br from-[#D4B876] via-pail-gold to-[#B89648] p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] shadow-2xl shadow-pail-gold/30 relative overflow-hidden group hover:-translate-y-1 transition-all duration-500">
                         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <h3 class="text-white/70 font-black uppercase tracking-[0.2em] text-[10px] mb-3 relative z-10">Kapitalitas Aset</h3>
-                        <div class="text-2xl font-black text-white font-mono tracking-tighter relative z-10">{{ formatRupiah(stats.total_value) }}</div>
+                        <h3 class="text-white/70 font-black uppercase tracking-[0.2em] text-[8px] sm:text-[10px] mb-3 relative z-10">Kapitalitas Aset</h3>
+                        <div class="text-xl sm:text-2xl font-black text-white font-mono tracking-tighter relative z-10">{{ formatRupiah(stats.total_value) }}</div>
                     </div>
                 </div>
 
@@ -206,53 +206,53 @@ const handleImport = () => {
                 </div>
 
                 <!-- Mobile Premium Card Engine -->
-                <div class="lg:hidden space-y-8">
-                    <div v-for="item in items.data" :key="item.id" class="bg-white dark:bg-gray-800 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden group">
-                        <div class="p-10">
-                            <div class="flex items-center justify-between mb-8">
-                                <div class="px-4 py-2 rounded-2xl bg-gray-900 text-pail-gold text-[10px] font-black uppercase tracking-widest shadow-lg">
+                <div class="lg:hidden space-y-6">
+                    <div v-for="item in items.data" :key="item.id" class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden group">
+                        <div class="p-6 sm:p-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="px-3 py-1.5 rounded-xl bg-gray-900 text-pail-gold text-[8px] sm:text-[10px] font-black uppercase tracking-widest shadow-lg">
                                     {{ item.institution?.code || '-' }}
                                 </div>
-                                <span class="px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border shadow-sm"
+                                <span class="px-3 py-1.5 rounded-xl text-[8px] sm:text-[10px] font-black uppercase tracking-widest border shadow-sm"
                                     :class="item.condition === 'Baik' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-orange-50 text-orange-600 border-orange-100'">
                                     {{ item.condition }}
                                 </span>
                             </div>
 
-                            <div class="mb-8">
-                                <h3 class="font-black text-gray-900 dark:text-white text-2xl leading-tight mb-2 uppercase tracking-tighter">{{ item.name }}</h3>
+                            <div class="mb-6">
+                                <h3 class="font-black text-gray-900 dark:text-white text-xl sm:text-2xl leading-tight mb-2 uppercase tracking-tighter">{{ item.name }}</h3>
                                 <div class="flex items-center gap-2">
                                     <div class="w-1.5 h-1.5 rounded-full bg-pail-gold"></div>
-                                    <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">{{ item.room?.name || 'AREA BELUM TERDEFINISI' }}</p>
+                                    <p class="text-[9px] sm:text-[10px] text-gray-400 font-black uppercase tracking-widest truncate">{{ item.room?.name || 'AREA BELUM TERDEFINISI' }}</p>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-6 mb-10">
-                                <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
-                                    <span class="text-[9px] font-black text-gray-400 uppercase block mb-2 tracking-widest">Kapasitas Stok</span>
+                            <div class="grid grid-cols-2 gap-4 sm:gap-6 mb-8">
+                                <div class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
+                                    <span class="text-[7px] sm:text-[9px] font-black text-gray-400 uppercase block mb-2 tracking-widest">Kapasitas Stok</span>
                                     <div class="flex items-end gap-2">
-                                        <span class="text-3xl font-black font-mono tracking-tighter" :class="item.stock <= item.min_stock ? 'text-red-500' : 'text-gray-900 dark:text-white'">{{ item.stock }}</span>
-                                         <span class="text-[9px] font-black text-gray-300 uppercase mb-1.5">Item</span>
+                                        <span class="text-2xl sm:text-3xl font-black font-mono tracking-tighter" :class="item.stock <= item.min_stock ? 'text-red-500' : 'text-gray-900 dark:text-white'">{{ item.stock }}</span>
+                                         <span class="text-[7px] sm:text-[9px] font-black text-gray-300 uppercase mb-1.5">Item</span>
                                     </div>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800">
-                                    <span class="text-[9px] font-black text-gray-400 uppercase block mb-2 tracking-widest">PJ Aset</span>
-                                    <span class="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-tighter truncate block">{{ item.responsible_person || '-' }}</span>
+                                <div class="bg-gray-50 dark:bg-gray-900/50 p-4 sm:p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700">
+                                    <span class="text-[7px] sm:text-[9px] font-black text-gray-400 uppercase block mb-2 tracking-widest">PJ Aset</span>
+                                    <span class="text-[10px] sm:text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-tighter truncate block">{{ item.responsible_person || '-' }}</span>
                                 </div>
                             </div>
 
-                            <div class="flex gap-4">
+                            <div class="flex gap-3">
                                 <Link 
                                     :href="route('admin.items.edit', item.id)"
-                                    class="flex-1 py-5 bg-pail-gold text-white rounded-[1.5rem] hover:bg-yellow-600 transition-all text-center font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-pail-gold/20"
+                                    class="flex-1 py-4 bg-pail-gold text-white rounded-full hover:bg-yellow-600 transition-all text-center font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-pail-gold/20"
                                 >
                                     Update Aset
                                 </Link>
                                 <button 
                                     @click="deleteItem(item.id)"
-                                    class="w-16 h-16 bg-red-50 text-red-500 rounded-[1.5rem] flex items-center justify-center border border-red-100 shadow-lg shadow-red-500/5 group-active:scale-95 transition-transform"
+                                    class="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center border border-red-100 shadow-md shadow-red-500/5 group-active:scale-95 transition-transform shrink-0"
                                 >
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </div>
                         </div>

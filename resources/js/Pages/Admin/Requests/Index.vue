@@ -30,24 +30,24 @@ const getStatusColor = (status) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-0 font-sans">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter text-center sm:text-left">
                     Manajemen Pengajuan
                 </h2>
-                <div class="flex items-center gap-4">
-                    <span class="hidden md:flex px-5 py-2 rounded-xl bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest border border-black shadow-lg shadow-black/20">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+                    <span class="hidden lg:flex px-5 py-2.5 rounded-xl bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest border border-black shadow-lg shadow-black/20">
                         Total Audit: {{ requests.total }}
                     </span>
                     <a 
                         :href="route('admin.requests.export')" 
-                        class="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 font-black text-xs uppercase tracking-widest flex items-center gap-2 group"
+                        class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2 group"
                     >
                         <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Export Excel
                     </a>
                     <Link 
                         :href="route('admin.requests.create')" 
-                        class="px-6 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-xs uppercase tracking-widest flex items-center gap-2"
+                        class="px-6 py-3 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2"
                     >
                         <PlusIcon class="w-4 h-4" />
                         Buat Baru
@@ -60,39 +60,39 @@ const getStatusColor = (status) => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-8">
                 
                 <!-- Stats Carousel Style Overview -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
                         <div class="relative z-10">
-                            <h3 class="text-gray-400 font-black uppercase tracking-widest text-[9px] mb-1">Menunggu Review</h3>
-                            <div class="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.pending }}</div>
-                            <div class="text-[9px] font-black text-yellow-600 uppercase tracking-widest mt-2">Butuh Persetujuan</div>
+                            <h3 class="text-gray-400 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Menunggu Review</h3>
+                            <div class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.pending }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-yellow-600 uppercase tracking-widest mt-2">Butuh Persetujuan</div>
                         </div>
                         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-yellow-50 dark:bg-yellow-900/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
                         <div class="relative z-10">
-                            <h3 class="text-gray-400 font-black uppercase tracking-widest text-[9px] mb-1">Anggaran Pending</h3>
-                            <div class="text-2xl font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_pending) }}</div>
-                            <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2 italic">Estimasi Serapan</div>
+                            <h3 class="text-gray-400 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Anggaran Pending</h3>
+                            <div class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_pending) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2 italic">Estimasi Serapan</div>
                         </div>
                         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gray-50 dark:bg-gray-900/20 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-8 rounded-[2.5rem] shadow-xl shadow-green-500/10 relative overflow-hidden group">
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] shadow-xl shadow-green-500/10 relative overflow-hidden group">
                         <div class="relative z-10">
-                            <h3 class="text-white/70 font-black uppercase tracking-widest text-[9px] mb-1">Realisasi Anggaran</h3>
-                            <div class="text-2xl font-black text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_approved) }}</div>
-                            <div class="text-[9px] font-black text-white uppercase tracking-widest mt-2">{{ stats.approved }} Pengajuan Disetujui</div>
+                            <h3 class="text-white/70 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Realisasi Anggaran</h3>
+                            <div class="text-xl sm:text-2xl font-black text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_approved) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-white uppercase tracking-widest mt-2">{{ stats.approved }} Pengajuan Disetujui</div>
                         </div>
                         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-gray-900 to-black p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group">
+                    <div class="bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] shadow-xl relative overflow-hidden group">
                         <div class="relative z-10">
-                            <h3 class="text-gray-500 font-black uppercase tracking-widest text-[9px] mb-1">Efisiensi Biaya</h3>
-                            <div class="text-2xl font-black text-white tracking-tighter">{{ stats.rejected }} DITOLAK</div>
-                            <div class="text-[9px] font-black text-pail-gold uppercase tracking-widest mt-2">Optimalisasi Aset</div>
+                            <h3 class="text-gray-500 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Efisiensi Biaya</h3>
+                            <div class="text-xl sm:text-2xl font-black text-white tracking-tighter">{{ stats.rejected }} DITOLAK</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-pail-gold uppercase tracking-widest mt-2">Optimalisasi Aset</div>
                         </div>
                         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
@@ -190,13 +190,13 @@ const getStatusColor = (status) => {
 
                 <!-- Mobile Card Layout -->
                 <div class="md:hidden space-y-6">
-                    <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-gray-800 rounded-[3rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
-                        <div class="p-10">
-                            <div class="flex items-center justify-between mb-8">
-                                <span class="px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] bg-gray-50 dark:bg-gray-900 text-gray-500 border border-gray-100 dark:border-gray-700 shadow-inner">
+                    <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+                        <div class="p-6 sm:p-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <span class="px-3 py-1.5 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] bg-gray-50 dark:bg-gray-900 text-gray-500 border border-gray-100 dark:border-gray-700 shadow-inner">
                                     {{ req.institution?.code || '-' }}
                                 </span>
-                                <span class="px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm"
+                                <span class="px-3 py-1.5 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm"
                                     :class="req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : 
                                             req.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100' : 
                                             'bg-red-50 text-red-700 border-red-100'">
@@ -204,36 +204,36 @@ const getStatusColor = (status) => {
                                 </span>
                             </div>
 
-                            <div class="mb-10">
+                            <div class="mb-8">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-[9px] uppercase font-black text-pail-gold tracking-[0.3em] block">{{ req.type }}</span>
-                                    <span v-if="req.photo_evidence" class="text-[9px] font-black text-blue-500 uppercase tracking-widest">📸 GAMBAR</span>
+                                    <span class="text-[8px] sm:text-[9px] uppercase font-black text-pail-gold tracking-[0.3em] block">{{ req.type }}</span>
+                                    <span v-if="req.photo_evidence" class="text-[8px] sm:text-[9px] font-black text-blue-500 uppercase tracking-widest">📸 GAMBAR</span>
                                 </div>
-                                <h3 class="font-black text-gray-900 dark:text-white text-2xl leading-tight mb-4 tracking-tighter">{{ req.title }}</h3>
-                                <p class="text-xs text-gray-500 font-medium line-clamp-3 leading-relaxed italic mb-8 border-l-2 border-gray-100 dark:border-gray-700 pl-4">{{ req.description }}</p>
+                                <h3 class="font-black text-gray-900 dark:text-white text-xl sm:text-2xl leading-tight mb-3 tracking-tighter truncate">{{ req.title }}</h3>
+                                <p class="text-[10px] sm:text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed italic mb-6 border-l-2 border-gray-100 dark:border-gray-700 pl-4">{{ req.description }}</p>
                             </div>
 
-                            <div class="p-8 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] mb-10 border border-gray-100 dark:border-gray-700/50">
+                            <div class="p-5 sm:p-8 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] mb-8 border border-gray-100 dark:border-gray-700/50">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-[9px] uppercase font-black text-gray-400 tracking-widest">Serapan Biaya</span>
-                                    <span class="font-mono font-black text-gray-900 dark:text-white text-xl">
+                                    <span class="text-[8px] sm:text-[9px] uppercase font-black text-gray-400 tracking-widest">Serapan Biaya</span>
+                                    <span class="font-mono font-black text-gray-900 dark:text-white text-lg sm:text-xl">
                                         {{ formatRupiah(req.estimated_cost) }}
                                     </span>
                                 </div>
                             </div>
 
-                            <div class="flex gap-4">
+                            <div class="flex gap-3">
                                 <a 
                                     v-if="req.photo_evidence" 
                                     :href="`/storage/${req.photo_evidence}`" 
                                     target="_blank"
-                                    class="w-16 h-16 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-800 transition shadow-sm"
+                                    class="w-14 h-14 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-800 transition shadow-sm"
                                 >
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </a>
                                 <Link 
                                     :href="route('admin.requests.edit', req.id)"
-                                    class="flex-1 py-5 bg-gray-900 text-white rounded-2xl text-center font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 group hover:bg-pail-gold transition-all flex items-center justify-center gap-2"
+                                    class="flex-1 py-4 bg-gray-900 text-white rounded-full text-center font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 group hover:bg-pail-gold transition-all flex items-center justify-center gap-2"
                                 >
                                     {{ req.status === 'pending' ? 'Tinjau Pengajuan' : 'Detail Lengkap' }}
                                     <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>

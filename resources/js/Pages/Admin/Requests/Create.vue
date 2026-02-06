@@ -39,11 +39,11 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 font-sans">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter text-center sm:text-left">
                     Buat Pengajuan Baru
                 </h2>
-                <Link :href="route('admin.requests.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                <Link :href="route('admin.requests.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all text-center sm:text-right">
                     &larr; Batalkan
                 </Link>
             </div>
@@ -51,17 +51,17 @@ const submit = () => {
 
         <div class="pt-6 pb-12">
             <div class="mx-auto max-w-4xl sm:px-6 lg:px-8 space-y-8">
-                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[2.5rem] sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden relative">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-pail-gold opacity-5 rounded-full blur-3xl"></div>
                     
-                    <div class="p-12 relative z-10">
-                        <header class="mb-14">
+                    <div class="p-6 sm:p-12 relative z-10">
+                        <header class="mb-10 sm:mb-14">
                             <div class="flex items-center gap-4 mb-3">
                                 <div class="w-10 h-[2px] bg-pail-gold"></div>
                                 <span class="text-[10px] font-black text-pail-gold uppercase tracking-[0.3em]">Operational Portal</span>
                             </div>
-                            <h3 class="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-3">Form Pengajuan</h3>
-                            <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
+                            <h3 class="text-2xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-3">Form Pengajuan</h3>
+                            <p class="text-xs sm:text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
                                 Masukkan rincian kebutuhan operasional lembaga. Pastikan data estimasi biaya dan bukti pendukung akurat untuk proses audit.
                             </p>
                         </header>
@@ -131,16 +131,16 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-6 mt-14 pt-12 border-t border-gray-50 dark:border-gray-800">
+                            <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mt-10 sm:mt-14 pt-8 sm:pt-12 border-t border-gray-50 dark:border-gray-800">
                                 <button 
                                     type="submit" 
-                                    class="flex-1 py-6 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-2xl shadow-pail-gold/30 transition-all uppercase tracking-[0.3em] text-xs transform active:scale-[0.98]" 
+                                    class="w-full sm:flex-1 py-5 sm:py-6 bg-pail-gold text-white rounded-full sm:rounded-[2rem] hover:bg-yellow-600 font-black shadow-2xl shadow-pail-gold/30 transition-all uppercase tracking-[0.3em] text-[10px] sm:text-xs transform active:scale-[0.98]" 
                                     :disabled="form.processing"
                                 >
                                     Konfirmasi & Kirim
                                 </button>
                                 <Link :href="route('admin.requests.index')" 
-                                    class="px-10 py-6 bg-gray-50 text-gray-400 rounded-[2rem] hover:bg-gray-100 font-black transition-all text-xs uppercase tracking-[0.2em] border border-gray-100">
+                                    class="w-full sm:auto px-10 py-5 sm:py-6 bg-gray-50 dark:bg-gray-700 text-gray-400 rounded-full sm:rounded-[2rem] hover:bg-gray-100 dark:hover:bg-gray-600 font-black transition-all text-[10px] sm:text-xs uppercase tracking-[0.2em] border border-gray-100 dark:border-gray-600 text-center">
                                     Batalkan
                                 </Link>
                             </div>

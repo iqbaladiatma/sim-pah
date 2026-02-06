@@ -27,6 +27,11 @@ class RoomController extends Controller
         ]);
     }
 
+    public function showImport()
+    {
+        return Inertia::render('Admin/Rooms/Import');
+    }
+
     public function create()
     {
         $institutions = Institution::all();
@@ -94,15 +99,15 @@ class RoomController extends Controller
             ->causedBy(auth()->user())
             ->performedOn(new Room())
             ->withProperties([
-            'action' => 'import',
-            'total_imported' => $importedCount,
-            'total_before' => $countBefore,
-            'total_after' => $countAfter,
-            'file_name' => $request->file('file')->getClientOriginalName(),
-        ])
+                'action' => 'import',
+                'total_imported' => $importedCount,
+                'total_before' => $countBefore,
+                'total_after' => $countAfter,
+                'file_name' => $request->file('file')->getClientOriginalName(),
+            ])
             ->log("Import {$importedCount} ruangan baru dari file CSV");
 
-        return redirect()->back()->with('success', "Berhasil mengimpor {$importedCount} ruangan baru.");
+        return redirect()->route('admin.rooms.index')->with('success', "Berhasil mengimpor {$importedCount} ruangan baru.");
     }
 
     public function downloadTemplate()

@@ -35,11 +35,11 @@ const formatDateDay = (dateString) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 font-sans">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter text-center sm:text-left">
                     Ikhtisar Dashboard
                 </h2>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center justify-center sm:justify-end gap-2">
                     <span class="relative flex h-3 w-3">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
@@ -53,23 +53,23 @@ const formatDateDay = (dateString) => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-12">
                 
                 <!-- Ultra-Premium Welcome Hub -->
-                <div class="relative bg-white dark:bg-gray-800 rounded-[2.5rem] p-8 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden group">
+                <div class="relative bg-white dark:bg-gray-800 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden group">
                     <div class="absolute -right-24 -top-24 w-96 h-96 bg-pail-gold opacity-5 rounded-full blur-[100px] group-hover:opacity-10 transition-opacity duration-1000"></div>
                     <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-pail-gold opacity-5 rounded-full blur-[100px]"></div>
                     
-                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="w-12 h-[2px] bg-pail-gold"></div>
-                                <span class="text-[10px] font-black text-pail-gold uppercase tracking-[0.4em]">Markas Pusat Administrasi</span>
+                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-10">
+                        <div class="flex-1 text-center lg:text-left">
+                            <div class="flex items-center justify-center lg:justify-start gap-4 mb-4">
+                                <div class="w-8 sm:w-12 h-[2px] bg-pail-gold"></div>
+                                <span class="text-[8px] sm:text-[10px] font-black text-pail-gold uppercase tracking-[0.4em]">Markas Pusat Administrasi</span>
                             </div>
-                            <h1 class="text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tighter uppercase leading-none">{{ greeting }}, {{ user.name.split(' ')[0] }}!</h1>
-                            <p class="text-gray-400 max-w-2xl leading-relaxed font-bold text-sm uppercase tracking-tight">
+                            <h1 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tighter uppercase leading-none">{{ greeting }}, {{ user.name.split(' ')[0] }}!</h1>
+                            <p class="text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-bold text-xs sm:text-sm uppercase tracking-tight">
                                 Sistem Manajemen Terintegrasi untuk <span class="text-pail-gold">Yayasan Abu Hurairah</span>. Anda memiliki <span class="text-gray-900 dark:text-white underline decoration-pail-gold decoration-4 underline-offset-4">{{ stats.pending_requests }} pengajuan aktif</span> yang menunggu protokol verifikasi.
                             </p>
                         </div>
-                        <div class="flex items-center gap-6">
-                            <Link :href="route('admin.requests.index')" class="px-6 py-4 bg-gray-900 text-pail-gold rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center gap-3 group/btn">
+                        <div class="flex items-center justify-center gap-6">
+                            <Link :href="route('admin.requests.index')" class="w-full sm:w-auto px-6 py-4 bg-gray-900 text-pail-gold rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center justify-center gap-3 group/btn">
                                 Pusat Intelijen
                                 <svg class="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </Link>
@@ -78,39 +78,39 @@ const formatDateDay = (dateString) => {
                 </div>
 
                 <!-- Strategic Intelligence Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">Lembaga</h4>
+                        <h4 class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">Lembaga</h4>
                         <div class="flex items-end gap-2 relative z-10 leading-none">
-                            <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_institutions }}</div>
-                            <span class="text-[9px] font-black text-gray-300 uppercase mb-1">Units</span>
+                            <div class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_institutions }}</div>
+                            <span class="text-[8px] sm:text-[9px] font-black text-gray-300 uppercase mb-1">Units</span>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">SDM & Personil</h4>
+                        <h4 class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">SDM & Personil</h4>
                         <div class="flex items-end gap-2 relative z-10 leading-none">
-                            <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_users }}</div>
-                            <span class="text-[9px] font-black text-gray-300 uppercase mb-1">Staff</span>
+                            <div class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_users }}</div>
+                            <span class="text-[8px] sm:text-[9px] font-black text-gray-300 uppercase mb-1">Staff</span>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
                         <div class="absolute -right-4 -top-4 w-24 h-24 bg-orange-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
-                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">Total Inventaris</h4>
+                        <h4 class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">Total Inventaris</h4>
                         <div class="flex items-end gap-2 relative z-10 leading-none">
-                            <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_items }}</div>
-                            <span class="text-[9px] font-black text-gray-300 uppercase mb-1">SKUs</span>
+                            <div class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_items }}</div>
+                            <span class="text-[8px] sm:text-[9px] font-black text-gray-300 uppercase mb-1">SKUs</span>
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-[2rem] shadow-2xl shadow-red-500/20 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] shadow-2xl shadow-red-500/20 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
                         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <h4 class="text-[10px] font-black text-red-100 uppercase tracking-[0.3em] mb-4 relative z-10 italic">Peringatan Stok Kritis</h4>
-                        <div class="text-3xl font-black text-white tracking-tighter relative z-10 leading-none">{{ stats.low_stock_items }}</div>
-                        <div class="mt-4 flex items-center gap-2 text-[10px] font-black text-white uppercase relative z-10">
+                        <h4 class="text-[8px] sm:text-[10px] font-black text-red-100 uppercase tracking-[0.3em] mb-4 relative z-10 italic">Peringatan Stok Kritis</h4>
+                        <div class="text-2xl sm:text-3xl font-black text-white tracking-tighter relative z-10 leading-none">{{ stats.low_stock_items }}</div>
+                        <div class="mt-4 flex items-center gap-2 text-[8px] sm:text-[10px] font-black text-white uppercase relative z-10">
                             <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
                             Pesanan Ulang Mendesak
                         </div>
@@ -167,56 +167,56 @@ const formatDateDay = (dateString) => {
                 </div>
 
                 <!-- Strategic Operations & Activity -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-10">
                     
                     <!-- Insightful Requests List -->
-                    <div class="lg:col-span-2 space-y-8">
-                        <div class="flex items-center justify-between px-6">
+                    <div class="lg:col-span-2 space-y-6 sm:space-y-8">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 sm:px-6">
                             <div class="flex items-center gap-4">
                                 <div class="w-1.5 h-6 bg-pail-gold rounded-full"></div>
-                                <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Proposal Strategis Terbaru</h3>
+                                <h3 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter">Proposal Strategis Terbaru</h3>
                             </div>
-                            <Link :href="route('admin.requests.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] hover:text-pail-gold transition-colors border-b-2 border-transparent hover:border-pail-gold pb-1">
+                            <Link :href="route('admin.requests.index')" class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] hover:text-pail-gold transition-colors border-b-2 border-transparent hover:border-pail-gold pb-1 self-start sm:self-auto">
                                 Eksplorasi Katalog &rarr;
                             </Link>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
-                            <div v-if="recent_requests.length === 0" class="p-40 text-center relative overflow-hidden">
+                        <div class="bg-white dark:bg-gray-800 rounded-[2rem] sm:rounded-[3.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+                            <div v-if="recent_requests.length === 0" class="p-20 sm:p-40 text-center relative overflow-hidden">
                                 <div class="absolute inset-0 bg-gray-50/50 opacity-20 dark:bg-transparent"></div>
                                 <div class="relative z-10 flex flex-col items-center text-gray-400">
-                                    <InboxIcon className="w-16 h-16 mb-6 opacity-20" />
-                                    <p class="font-black uppercase tracking-[0.3em] text-sm">Silo Komunikasi Kosong</p>
-                                    <p class="text-[10px] text-gray-300 font-bold mt-2 uppercase">Tidak ada proposal yang tertunda dalam antrian.</p>
+                                    <InboxIcon className="w-12 h-12 sm:w-16 sm:h-16 mb-6 opacity-20" />
+                                    <p class="font-black uppercase tracking-[0.3em] text-xs sm:text-sm">Silo Komunikasi Kosong</p>
+                                    <p class="text-[8px] sm:text-[10px] text-gray-300 font-bold mt-2 uppercase">Tidak ada proposal yang tertunda dalam antrian.</p>
                                 </div>
                             </div>
-                            <div v-else class="p-4 space-y-4">
-                                <div v-for="req in recent_requests" :key="req.id" class="p-8 hover:bg-gray-50/80 dark:hover:bg-gray-900/50 rounded-[2.5rem] transition-all flex items-center justify-between group border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
-                                    <div class="flex items-center gap-8">
-                                        <div class="w-16 h-16 rounded-[1.75rem] bg-gray-900 flex flex-col items-center justify-center border-2 border-pail-gold/30 shadow-2xl shadow-black/20 shrink-0">
-                                            <span class="text-[9px] font-black text-pail-gold uppercase leading-none mb-1 opacity-70 font-mono">{{ formatDateDay(req.created_at).split(' ')[1] }}</span>
-                                            <span class="text-2xl font-black text-white leading-none tracking-tighter font-mono">{{ formatDateDay(req.created_at).split(' ')[0] }}</span>
+                            <div v-else class="p-2 sm:p-4 space-y-3 sm:space-y-4">
+                                <div v-for="req in recent_requests" :key="req.id" class="p-4 sm:p-8 hover:bg-gray-50/80 dark:hover:bg-gray-900/50 rounded-3xl sm:rounded-[2.5rem] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
+                                    <div class="flex items-center gap-4 sm:gap-8 w-full sm:w-auto">
+                                        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-[1.75rem] bg-gray-900 flex flex-col items-center justify-center border-2 border-pail-gold/30 shadow-2xl shadow-black/20 shrink-0">
+                                            <span class="text-[7px] sm:text-[9px] font-black text-pail-gold uppercase leading-none mb-1 opacity-70 font-mono">{{ formatDateDay(req.created_at).split(' ')[1] }}</span>
+                                            <span class="text-lg sm:text-2xl font-black text-white leading-none tracking-tighter font-mono">{{ formatDateDay(req.created_at).split(' ')[0] }}</span>
                                         </div>
-                                        <div>
-                                            <h4 class="font-black text-gray-900 dark:text-white text-lg tracking-tight uppercase leading-none mb-3 group-hover:text-pail-gold transition-colors">{{ req.title }}</h4>
-                                            <div class="flex items-center gap-4">
-                                                <div class="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 px-3 py-1 rounded-full border border-gray-100 dark:border-gray-600 shadow-sm">
-                                                    <span class="text-[10px] font-black uppercase text-gray-500 dark:text-gray-300 tracking-widest">{{ req.type }}</span>
+                                        <div class="min-w-0 flex-1">
+                                            <h4 class="font-black text-gray-900 dark:text-white text-sm sm:text-lg tracking-tight uppercase leading-none mb-2 sm:mb-3 group-hover:text-pail-gold transition-colors truncate">{{ req.title }}</h4>
+                                            <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+                                                <div class="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-gray-100 dark:border-gray-600 shadow-sm">
+                                                    <span class="text-[7px] sm:text-[10px] font-black uppercase text-gray-500 dark:text-gray-300 tracking-widest">{{ req.type }}</span>
                                                 </div>
                                                 <div class="flex items-center gap-2">
-                                                    <div class="w-1.5 h-1.5 rounded-full bg-pail-gold/40"></div>
-                                                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ req.institution?.name || 'Central Administration' }}</span>
+                                                    <div class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-pail-gold/40"></div>
+                                                    <span class="text-[7px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest truncate max-w-[100px] sm:max-w-none">{{ req.institution?.name || 'Central Administration' }}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-8">
-                                        <div class="text-right hidden sm:block">
-                                            <div class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-1">Estimasi Biaya</div>
-                                            <div class="text-xl font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(req.estimated_cost) }}</div>
+                                    <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-8 w-full sm:w-auto border-t sm:border-0 pt-4 sm:pt-0 border-gray-50 dark:border-gray-700/50">
+                                        <div class="text-left sm:text-right">
+                                            <div class="text-[8px] sm:text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-1">Estimasi Biaya</div>
+                                            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(req.estimated_cost) }}</div>
                                         </div>
-                                        <Link :href="route('admin.requests.edit', req.id)" class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-400 hover:bg-pail-gold hover:text-white hover:scale-110 transition-all shadow-inner border border-gray-100 dark:border-gray-600 group/btn">
-                                            <svg class="w-6 h-6 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                                        <Link :href="route('admin.requests.edit', req.id)" class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-400 hover:bg-pail-gold hover:text-white hover:scale-110 transition-all shadow-inner border border-gray-100 dark:border-gray-600 group/btn">
+                                            <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                                         </Link>
                                     </div>
                                 </div>
@@ -231,37 +231,37 @@ const formatDateDay = (dateString) => {
                             <button class="text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-gray-500 transition-colors italic">Realtime Trace</button>
                         </div>
 
-                        <div class="bg-gray-900 dark:bg-black rounded-[3.5rem] shadow-2xl p-10 relative overflow-hidden group">
+                        <div class="bg-gray-900 dark:bg-black rounded-[2rem] sm:rounded-[3.5rem] shadow-2xl p-6 sm:p-10 relative overflow-hidden group">
                             <div class="absolute inset-0 bg-pail-gold/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             
-                            <div class="space-y-10 relative z-10">
+                            <div class="space-y-8 sm:space-y-10 relative z-10">
                                 <div class="absolute left-[15px] top-4 bottom-4 w-[1px] bg-white/10"></div>
                                 
-                                <div v-for="log in recent_activity" :key="log.id" class="flex gap-6 relative group/item">
-                                    <div class="w-8 h-8 rounded-2xl bg-gray-800 border-2 border-white/5 flex items-center justify-center shrink-0 shadow-2xl relative z-10 group-hover/item:border-pail-gold/50 transition-colors">
-                                        <div class="w-2 h-2 rounded-full shadow-[0_0_10px_rgba(201,166,88,0.5)]" :class="log.description.includes('deleted') ? 'bg-red-500 shadow-red-500/50' : 'bg-pail-gold'"></div>
+                                <div v-for="log in recent_activity" :key="log.id" class="flex gap-4 sm:gap-6 relative group/item">
+                                    <div class="w-8 h-8 rounded-full bg-gray-800 border-2 border-white/5 flex items-center justify-center shrink-0 shadow-2xl relative z-10 group-hover/item:border-pail-gold/50 transition-colors">
+                                        <div class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full shadow-[0_0_10px_rgba(201,166,88,0.5)]" :class="log.description.includes('deleted') ? 'bg-red-500 shadow-red-500/50' : 'bg-pail-gold'"></div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-bold text-gray-400 leading-relaxed uppercase tracking-tight">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[10px] sm:text-xs font-bold text-gray-400 leading-relaxed uppercase tracking-tight">
                                             <span class="text-white font-black">{{ log.causer?.name || 'Neural System' }}</span>
                                             <span class="mx-1 lowercase opacity-50">telah menjalankan</span>
                                             <span class="text-pail-gold">{{ log.description }}</span>
                                         </p>
-                                        <div class="flex items-center gap-3 mt-2">
-                                            <span class="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] font-mono">{{ formatTime(log.created_at) }}</span>
+                                        <div class="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2">
+                                            <span class="text-[7px] sm:text-[9px] font-black text-white/30 uppercase tracking-[0.2em] font-mono">{{ formatTime(log.created_at) }}</span>
                                             <span class="w-1 h-1 rounded-full bg-white/10"></span>
-                                            <span class="text-[9px] font-black text-pail-gold/40 uppercase tracking-widest italic font-mono">{{ log.log_name }}</span>
+                                            <span class="text-[7px] sm:text-[9px] font-black text-pail-gold/40 uppercase tracking-widest italic font-mono">{{ log.log_name }}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div v-if="recent_activity.length === 0" class="py-20 text-center relative flex flex-col items-center">
-                                    <MoonIcon className="w-12 h-12 mb-4 text-white opacity-10" />
-                                    <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Nol latensi terdeteksi</p>
+                                <div v-if="recent_activity.length === 0" class="py-10 sm:py-20 text-center relative flex flex-col items-center">
+                                    <MoonIcon className="w-8 h-8 sm:w-12 sm:h-12 mb-4 text-white opacity-10" />
+                                    <p class="text-[8px] sm:text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Nol latensi terdeteksi</p>
                                 </div>
                             </div>
                             
-                            <Link :href="route('admin.activity_log.index')" class="mt-12 block w-full py-5 bg-white/5 border border-white/10 rounded-[1.5rem] text-center text-[10px] font-black text-white/40 uppercase tracking-[0.3em] hover:bg-white hover:text-black hover:border-white transition-all transform active:scale-[0.98]">
+                            <Link :href="route('admin.activity_log.index')" class="mt-8 sm:mt-12 block w-full py-4 sm:py-5 bg-white/5 border border-white/10 rounded-2xl sm:rounded-[1.5rem] text-center text-[8px] sm:text-[10px] font-black text-white/40 uppercase tracking-[0.3em] hover:bg-white hover:text-black hover:border-white transition-all transform active:scale-[0.98]">
                                 Arsip Aktivitas Global
                             </Link>
                         </div>

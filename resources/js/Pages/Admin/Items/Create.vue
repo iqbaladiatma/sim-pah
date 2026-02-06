@@ -63,11 +63,11 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 font-sans">
+                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter text-center sm:text-left">
                     Tambah Barang Baru
                 </h2>
-                <Link :href="route('admin.items.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all">
+                <Link :href="route('admin.items.index')" class="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-all text-center sm:text-right">
                     &larr; Batalkan
                 </Link>
             </div>
@@ -75,11 +75,11 @@ const submit = () => {
 
         <div class="pt-6 pb-12">
             <div class="mx-auto max-w-5xl sm:px-6 lg:px-8 space-y-8">
-                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
-                    <div class="p-12">
-                        <header class="mb-10">
-                            <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Registrasi Barang</h3>
-                            <p class="text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
+                <div class="bg-white dark:bg-gray-800 shadow-2xl rounded-[2.5rem] sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6 sm:p-12">
+                        <header class="mb-8 sm:mb-10">
+                            <h3 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-2">Registrasi Barang</h3>
+                            <p class="text-xs sm:text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
                                 Registrasi aset dan inventaris baru ke dalam sistem pergudangan pusat. Pastikan data koordinat ruangan sudah sesuai.
                             </p>
                         </header>
@@ -173,15 +173,15 @@ const submit = () => {
                                 </div>
                             </div>
 
-                            <div class="flex items-center gap-4 pt-10 border-t border-gray-50 dark:border-gray-800">
+                            <div class="flex flex-col sm:flex-row items-center gap-4 pt-8 sm:pt-10 border-t border-gray-50 dark:border-gray-800">
                                 <button 
                                     type="submit" 
-                                    class="px-12 py-5 bg-pail-gold text-white rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-xs" 
+                                    class="w-full sm:w-auto px-12 py-4 sm:py-5 bg-pail-gold text-white rounded-full sm:rounded-[2rem] hover:bg-yellow-600 font-black shadow-xl shadow-pail-gold/20 transition-all uppercase tracking-[0.2em] text-[10px] sm:text-xs" 
                                     :disabled="form.processing"
                                 >
                                     Simpan Aset Baru
                                 </button>
-                                <Link :href="route('admin.items.index')" class="px-8 py-5 bg-gray-50 text-gray-400 rounded-[2rem] hover:bg-gray-100 font-bold transition text-xs uppercase tracking-widest">
+                                <Link :href="route('admin.items.index')" class="w-full sm:w-auto px-8 py-4 sm:py-5 bg-gray-50 dark:bg-gray-700 text-gray-400 rounded-full sm:rounded-[2rem] hover:bg-gray-100 dark:hover:bg-gray-600 font-bold transition text-[10px] sm:text-xs uppercase tracking-widest text-center">
                                     Batalkan
                                 </Link>
                             </div>

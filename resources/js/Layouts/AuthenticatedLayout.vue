@@ -170,7 +170,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col min-w-0 min-h-screen bg-gray-50/50 dark:bg-gray-900">
             <!-- Glass Header -->
-            <header class="h-20 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700/50 items-center justify-between px-6 lg:px-12 sticky top-0 z-40 flex shadow-[0_1px_40px_-10px_rgba(0,0,0,0.05)]">
+            <header class="h-20 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700/50 items-center justify-between px-4 sm:px-6 lg:px-12 sticky top-0 z-40 flex shadow-[0_1px_40px_-10px_rgba(0,0,0,0.05)]">
                 <div class="flex items-center gap-6">
                     <button 
                         @click="isSidebarCollapsed = !isSidebarCollapsed" 
@@ -233,13 +233,13 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
 
             <!-- Page-Specific Header Slot -->
             <header v-if="$slots.header" class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border-b border-gray-100 dark:border-gray-700/50 transition-all duration-300">
-                <div class="px-8 lg:px-14 py-8">
+                <div class="px-4 sm:px-8 lg:px-14 py-6 sm:py-8">
                     <slot name="header" />
                 </div>
             </header>
 
             <!-- Main Scrollable Canvas -->
-            <main class="flex-1 p-8 lg:p-14 relative z-10">
+            <main class="flex-1 p-4 sm:p-8 lg:p-14 relative z-10 pb-32 lg:pb-14">
                 <!-- Performance Grid Pattern Background -->
                 <div class="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05] z-0 overflow-hidden">
                     <div class="absolute inset-0" style="background-image: radial-gradient(#000 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
@@ -254,30 +254,30 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
                     leave-from-class="opacity-100 translate-y-0"
                     leave-to-class="opacity-0 translate-y-4"
                 >
-                    <div v-if="$page.props.flash.success" key="success" class="mb-10 p-6 bg-white dark:bg-gray-800 border-l-[6px] border-green-500 rounded-3xl shadow-xl shadow-green-500/5 flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-2xl bg-green-50 flex items-center justify-center">
-                                <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                    <div v-if="$page.props.flash.success" key="success" class="mb-6 sm:mb-10 p-4 sm:p-6 bg-white dark:bg-gray-800 border-l-[6px] border-green-500 rounded-2xl sm:rounded-3xl shadow-xl shadow-green-500/5 flex items-center justify-between group">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+                                <CheckCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                             </div>
-                            <div>
-                                <p class="text-[10px] font-black text-green-600 uppercase tracking-widest mb-0.5">Operasi Berhasil</p>
-                                <p class="text-sm text-gray-900 dark:text-white font-bold">{{ $page.props.flash.success }}</p>
+                            <div class="min-w-0">
+                                <p class="text-[8px] sm:text-[10px] font-black text-green-600 uppercase tracking-widest mb-0.5">Operasi Berhasil</p>
+                                <p class="text-xs sm:text-sm text-gray-900 dark:text-white font-bold truncate">{{ $page.props.flash.success }}</p>
                             </div>
                         </div>
-                        <button @click="$page.props.flash.success = null" class="w-8 h-8 rounded-xl hover:bg-gray-50 text-gray-300 hover:text-gray-600 transition-all font-bold">✕</button>
+                        <button @click="$page.props.flash.success = null" class="w-8 h-8 rounded-xl hover:bg-gray-50 text-gray-300 hover:text-gray-600 transition-all font-bold shrink-0">✕</button>
                     </div>
 
-                    <div v-if="$page.props.flash.error" key="error" class="mb-10 p-6 bg-white dark:bg-gray-800 border-l-[6px] border-red-500 rounded-3xl shadow-xl shadow-red-500/5 flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center">
-                                <XCircleIcon className="w-6 h-6 text-red-500" />
+                    <div v-if="$page.props.flash.error" key="error" class="mb-6 sm:mb-10 p-4 sm:p-6 bg-white dark:bg-gray-800 border-l-[6px] border-red-500 rounded-2xl sm:rounded-3xl shadow-xl shadow-red-500/5 flex items-center justify-between group">
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+                                <XCircleIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
                             </div>
-                            <div>
-                                <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-0.5">Gagal Sistem</p>
-                                <p class="text-sm text-gray-900 dark:text-white font-bold">{{ $page.props.flash.error }}</p>
+                            <div class="min-w-0">
+                                <p class="text-[8px] sm:text-[10px] font-black text-red-600 uppercase tracking-widest mb-0.5">Gagal Sistem</p>
+                                <p class="text-xs sm:text-sm text-gray-900 dark:text-white font-bold truncate">{{ $page.props.flash.error }}</p>
                             </div>
                         </div>
-                        <button @click="$page.props.flash.error = null" class="w-8 h-8 rounded-xl hover:bg-gray-50 text-gray-300 hover:text-gray-600 transition-all font-bold">✕</button>
+                        <button @click="$page.props.flash.error = null" class="w-8 h-8 rounded-xl hover:bg-gray-50 text-gray-300 hover:text-gray-600 transition-all font-bold shrink-0">✕</button>
                     </div>
                 </TransitionGroup>
 
@@ -304,8 +304,8 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value.
 
             <Link :href="requestsUrl" class="flex flex-col items-center justify-center w-full h-full transition-all duration-500 rounded-3xl group" :class="route().current('requests.*') || route().current('admin.requests.*') ? 'text-pail-gold relative' : 'text-gray-400'">
                 <div v-if="route().current('requests.*') || route().current('admin.requests.*')" class="absolute top-0 w-8 h-1 bg-pail-gold rounded-full"></div>
-                <svg class="w-6 h-6 transform group-active:scale-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
-                <span class="text-[8px] font-black uppercase mt-1 tracking-widest">Audit</span>
+                <svg class="w-6 h-6 transform group-active:scale-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span class="text-[8px] font-black uppercase mt-1 tracking-widest">Pengajuan</span>
             </Link>
 
             <button @click="isSidebarOpen = !isSidebarOpen" class="flex flex-col items-center justify-center w-full h-full transition-all rounded-3xl text-gray-400 group relative">
