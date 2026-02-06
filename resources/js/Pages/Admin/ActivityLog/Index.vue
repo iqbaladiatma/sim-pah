@@ -3,6 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Pagination from "@/Components/Pagination.vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 
 const props = defineProps({
     activities: Object,
@@ -30,12 +31,24 @@ watch(filterForm, (newFilters) => {
     });
 }, { deep: true });
 
+// Clear Logs Confirmation Modal State
+const showClearModal = ref(false);
+
 const confirmClearLogs = () => {
-    if (confirm('Apakah Anda yakin ingin menghapus SEMUA riwayat aktivitas? Tindakan ini tidak dapat dibatalkan.')) {
-        router.delete(route('admin.activity_log.destroy'), {
-            onSuccess: () => alert('Log berhasil dibersihkan.')
-        });
-    }
+    showClearModal.value = true;
+};
+
+const executeClearLogs = () => {
+    router.delete(route('admin.activity_log.destroy'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showClearModal.value = false;
+        }
+    });
+};
+
+const closeClearModal = () => {
+    showClearModal.value = false;
 };
 
 const selectedActivity = ref(null);
@@ -304,5 +317,17 @@ const getEventIcon = (event) => {
                 </div>
             </div>
         </div>
+
+        <!-- Clear Logs Confirmation Modal -->
+        <ConfirmModal
+            :show="showClearModal"
+            title="Hapus Semua Log"
+            message="Apakah Anda yakin ingin menghapus SEMUA riwayat aktivitas? Tindakan ini tidak dapat dibatalkan dan akan menghapus seluruh audit trail sistem."
+            confirm-text="Ya, Hapus Semua"
+            cancel-text="Batal"
+            variant="danger"
+            @confirm="executeClearLogs"
+            @close="closeClearModal"
+        />
     </AuthenticatedLayout>
 </template>

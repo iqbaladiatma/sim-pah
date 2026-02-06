@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Request as GeneralRequest;
+use App\Exports\RequestsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Inertia\Inertia;
 
 class GeneralRequestController extends Controller
@@ -113,5 +115,22 @@ class GeneralRequestController extends Controller
     {
         $request->delete();
         return redirect()->back()->with('success', 'Pengajuan berhasil dihapus.');
+    }
+
+    /**
+     * Export requests to Excel
+     */
+    public function export(Request $request)
+    {
+        $status = $request->query('status', 'all');
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        $fileName = 'Pengajuan_' . now()->format('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(
+            new RequestsExport($status, $startDate, $endDate),
+            $fileName
+        );
     }
 }

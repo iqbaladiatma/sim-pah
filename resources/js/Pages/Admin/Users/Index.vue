@@ -1,16 +1,35 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
+import { ref } from "vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 
 const props = defineProps({
     users: Object,
     stats: Object,
 });
 
+// Delete Confirmation Modal State
+const showDeleteModal = ref(false);
+const userToDelete = ref(null);
+
 const deleteUser = (id) => {
-    if (confirm("Yakin ingin menghapus user ini?")) {
-        router.delete(route("admin.users.destroy", id));
-    }
+    userToDelete.value = id;
+    showDeleteModal.value = true;
+};
+
+const confirmDelete = () => {
+    router.delete(route("admin.users.destroy", userToDelete.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            userToDelete.value = null;
+        },
+    });
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    userToDelete.value = null;
 };
 </script>
 
@@ -160,5 +179,17 @@ const deleteUser = (id) => {
                 </div>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmModal
+            :show="showDeleteModal"
+            title="Hapus Pengguna"
+            message="Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan."
+            confirm-text="Ya, Hapus"
+            cancel-text="Batal"
+            variant="danger"
+            @confirm="confirmDelete"
+            @close="closeDeleteModal"
+        />
     </AuthenticatedLayout>
 </template>

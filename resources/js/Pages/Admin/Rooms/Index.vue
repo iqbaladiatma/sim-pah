@@ -6,6 +6,7 @@ import Pagination from "@/Components/Pagination.vue";
 import FolderIcon from "@/Components/Icons/FolderIcon.vue";
 import PlusIcon from "@/Components/Icons/PlusIcon.vue";
 import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 
 const props = defineProps({
     rooms: Object,
@@ -15,10 +16,27 @@ const props = defineProps({
     },
 });
 
+// Delete Confirmation Modal State
+const showDeleteModal = ref(false);
+const roomToDelete = ref(null);
+
 const deleteRoom = (id) => {
-    if (confirm("Yakin ingin menghapus ruangan ini?")) {
-        router.delete(route("admin.rooms.destroy", id));
-    }
+    roomToDelete.value = id;
+    showDeleteModal.value = true;
+};
+
+const confirmDelete = () => {
+    router.delete(route("admin.rooms.destroy", roomToDelete.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            roomToDelete.value = null;
+        },
+    });
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    roomToDelete.value = null;
 };
 
 const importForm = useForm({
@@ -241,5 +259,17 @@ const handleImport = () => {
                 </form>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmModal
+            :show="showDeleteModal"
+            title="Hapus Ruangan"
+            message="Apakah Anda yakin ingin menghapus ruangan ini? Tindakan ini tidak dapat dibatalkan."
+            confirm-text="Ya, Hapus"
+            cancel-text="Batal"
+            variant="danger"
+            @confirm="confirmDelete"
+            @close="closeDeleteModal"
+        />
     </AuthenticatedLayout>
 </template>

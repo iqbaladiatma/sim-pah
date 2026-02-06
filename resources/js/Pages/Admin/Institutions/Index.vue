@@ -6,6 +6,7 @@ import Pagination from "@/Components/Pagination.vue";
 import FolderIcon from "@/Components/Icons/FolderIcon.vue";
 import PlusIcon from "@/Components/Icons/PlusIcon.vue";
 import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 
 const props = defineProps({
     institutions: Object,
@@ -19,7 +20,49 @@ const importForm = useForm({
     file: null,
 });
 
-// ... rest of logic
+// Import Modal State
+const isImportModalOpen = ref(false);
+
+const openImportModal = () => {
+    isImportModalOpen.value = true;
+};
+
+const closeImportModal = () => {
+    isImportModalOpen.value = false;
+    importForm.reset();
+};
+
+const handleImport = () => {
+    importForm.post(route('admin.institutions.import'), {
+        onSuccess: () => {
+            closeImportModal();
+        },
+    });
+};
+
+// Delete Confirmation Modal State
+const showDeleteModal = ref(false);
+const institutionToDelete = ref(null);
+
+// Delete Institution
+const deleteInstitution = (id) => {
+    institutionToDelete.value = id;
+    showDeleteModal.value = true;
+};
+
+const confirmDelete = () => {
+    router.delete(route('admin.institutions.destroy', institutionToDelete.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            institutionToDelete.value = null;
+        },
+    });
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    institutionToDelete.value = null;
+};
 </script>
 
 <template>
@@ -231,5 +274,17 @@ const importForm = useForm({
                 </form>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmModal
+            :show="showDeleteModal"
+            title="Hapus Lembaga"
+            message="Apakah Anda yakin ingin menghapus lembaga ini? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua data terkait."
+            confirm-text="Ya, Hapus"
+            cancel-text="Batal"
+            variant="danger"
+            @confirm="confirmDelete"
+            @close="closeDeleteModal"
+        />
     </AuthenticatedLayout>
 </template>

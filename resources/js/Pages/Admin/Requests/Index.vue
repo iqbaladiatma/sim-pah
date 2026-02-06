@@ -38,6 +38,13 @@ const getStatusColor = (status) => {
                     <span class="hidden md:flex px-5 py-2 rounded-xl bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest border border-black shadow-lg shadow-black/20">
                         Total Audit: {{ requests.total }}
                     </span>
+                    <a 
+                        :href="route('admin.requests.export')" 
+                        class="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 font-black text-xs uppercase tracking-widest flex items-center gap-2 group"
+                    >
+                        <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Export Excel
+                    </a>
                     <Link 
                         :href="route('admin.requests.create')" 
                         class="px-6 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-xs uppercase tracking-widest flex items-center gap-2"

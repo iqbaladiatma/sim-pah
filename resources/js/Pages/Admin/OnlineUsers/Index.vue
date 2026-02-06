@@ -1,6 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
+import { ref } from "vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 
 const props = defineProps({
     sessions: Array,
@@ -10,14 +12,27 @@ const props = defineProps({
     },
 });
 
+// Kick Confirmation Modal State
+const showKickModal = ref(false);
+const sessionToKick = ref(null);
+
 const kickSession = (sessionId) => {
-    if (confirm('Yakin ingin mengeluarkan user ini dari sistem?')) {
-        router.delete(route('admin.online_users.kick', sessionId), {
-            onSuccess: () => {
-                // Will reload the page automatically
-            }
-        });
-    }
+    sessionToKick.value = sessionId;
+    showKickModal.value = true;
+};
+
+const confirmKick = () => {
+    router.delete(route('admin.online_users.kick', sessionToKick.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            sessionToKick.value = null;
+        }
+    });
+};
+
+const closeKickModal = () => {
+    showKickModal.value = false;
+    sessionToKick.value = null;
 };
 
 const getRelativeTime = (lastActivity) => {
@@ -220,5 +235,17 @@ const getRelativeTime = (lastActivity) => {
                 </div>
             </div>
         </div>
+
+        <!-- Kick Confirmation Modal -->
+        <ConfirmModal
+            :show="showKickModal"
+            title="Keluarkan User"
+            message="Apakah Anda yakin ingin mengeluarkan user ini dari sistem? User akan logout secara paksa."
+            confirm-text="Ya, Keluarkan"
+            cancel-text="Batal"
+            variant="warning"
+            @confirm="confirmKick"
+            @close="closeKickModal"
+        />
     </AuthenticatedLayout>
 </template>

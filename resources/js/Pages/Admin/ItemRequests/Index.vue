@@ -1,6 +1,8 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm } from "@inertiajs/vue3";
+import { ref } from "vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 
 defineProps({
     requests: Object,
@@ -9,16 +11,50 @@ defineProps({
 
 const form = useForm({});
 
+// Approve Confirmation Modal State
+const showApproveModal = ref(false);
+const requestToApprove = ref(null);
+
+// Reject Confirmation Modal State
+const showRejectModal = ref(false);
+const requestToReject = ref(null);
+
 const approve = (id) => {
-    if (confirm("Setujui update stok ini?")) {
-        form.post(route("admin.item_requests.approve", id));
-    }
+    requestToApprove.value = id;
+    showApproveModal.value = true;
+};
+
+const confirmApprove = () => {
+    form.post(route("admin.item_requests.approve", requestToApprove.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            requestToApprove.value = null;
+        },
+    });
+};
+
+const closeApproveModal = () => {
+    showApproveModal.value = false;
+    requestToApprove.value = null;
 };
 
 const reject = (id) => {
-    if (confirm("Tolak request ini?")) {
-        form.post(route("admin.item_requests.reject", id));
-    }
+    requestToReject.value = id;
+    showRejectModal.value = true;
+};
+
+const confirmReject = () => {
+    form.post(route("admin.item_requests.reject", requestToReject.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            requestToReject.value = null;
+        },
+    });
+};
+
+const closeRejectModal = () => {
+    showRejectModal.value = false;
+    requestToReject.value = null;
 };
 </script>
 
@@ -147,5 +183,29 @@ const reject = (id) => {
                 </div>
             </div>
         </div>
+
+        <!-- Approve Confirmation Modal -->
+        <ConfirmModal
+            :show="showApproveModal"
+            title="Setujui Request"
+            message="Apakah Anda yakin ingin menyetujui perubahan stok ini? Stok barang akan diupdate sesuai request."
+            confirm-text="Ya, Setujui"
+            cancel-text="Batal"
+            variant="success"
+            @confirm="confirmApprove"
+            @close="closeApproveModal"
+        />
+
+        <!-- Reject Confirmation Modal -->
+        <ConfirmModal
+            :show="showRejectModal"
+            title="Tolak Request"
+            message="Apakah Anda yakin ingin menolak request ini? Request akan ditandai sebagai ditolak."
+            confirm-text="Ya, Tolak"
+            cancel-text="Batal"
+            variant="danger"
+            @confirm="confirmReject"
+            @close="closeRejectModal"
+        />
     </AuthenticatedLayout>
 </template>

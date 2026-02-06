@@ -7,6 +7,7 @@ import FolderIcon from "@/Components/Icons/FolderIcon.vue";
 import PlusIcon from "@/Components/Icons/PlusIcon.vue";
 import RocketIcon from "@/Components/Icons/RocketIcon.vue";
 import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
+import ConfirmModal from "@/Components/ConfirmModal.vue";
 import { formatRupiah } from "@/Utils/format";
 
 const props = defineProps({
@@ -14,10 +15,27 @@ const props = defineProps({
     stats: Object,
 });
 
+// Delete Confirmation Modal State
+const showDeleteModal = ref(false);
+const itemToDelete = ref(null);
+
 const deleteItem = (id) => {
-    if (confirm("Yakin ingin menghapus barang ini?")) {
-        router.delete(route("admin.items.destroy", id));
-    }
+    itemToDelete.value = id;
+    showDeleteModal.value = true;
+};
+
+const confirmDelete = () => {
+    router.delete(route("admin.items.destroy", itemToDelete.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            itemToDelete.value = null;
+        },
+    });
+};
+
+const closeDeleteModal = () => {
+    showDeleteModal.value = false;
+    itemToDelete.value = null;
 };
 
 const importForm = useForm({
@@ -278,5 +296,17 @@ const handleImport = () => {
                 </form>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <ConfirmModal
+            :show="showDeleteModal"
+            title="Hapus Barang"
+            message="Apakah Anda yakin ingin menghapus barang ini? Tindakan ini tidak dapat dibatalkan dan akan menghapus semua riwayat terkait."
+            confirm-text="Ya, Hapus"
+            cancel-text="Batal"
+            variant="danger"
+            @confirm="confirmDelete"
+            @close="closeDeleteModal"
+        />
     </AuthenticatedLayout>
 </template>

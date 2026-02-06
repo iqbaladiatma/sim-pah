@@ -132,82 +132,114 @@ const filteredRooms = computed(() => {
     <AuthenticatedLayout>
         <template #header>
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                    Manajemen Aset & Inventaris
-                </h2>
-                <PrimaryButton @click="openCreateModal" class="bg-[#C9A658] hover:bg-[#b08d45] border-none shadow-lg text-white">
-                    <span class="mr-2">+</span> Tambah Barang
-                </PrimaryButton>
+                <div>
+                    <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                        Manajemen Aset & Inventaris
+                    </h2>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Sistem Katalog Barang Unit</p>
+                </div>
+                <button @click="openCreateModal" class="px-6 py-4 bg-gray-900 text-pail-gold rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center gap-3 group">
+                    <svg class="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                    Tambah Barang
+                </button>
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-[95%] sm:px-6 lg:px-8">
+        <div class="pt-6 pb-12">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-8">
                 
-                <!-- Search & Filters -->
-                <div class="mb-6 flex gap-4">
-                    <TextInput
-                        v-model="search"
-                        placeholder="Cari item..."
-                        class="w-full md:w-1/3"
-                    />
+                <!-- Premium Search Bar -->
+                <div class="bg-white dark:bg-gray-800 rounded-[2rem] p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center gap-4">
+                        <div class="relative flex-1">
+                            <div class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                            <TextInput
+                                v-model="search"
+                                placeholder="Cari nama barang, merk, atau ruangan..."
+                                class="w-full pl-12 pr-4 py-3 rounded-full border-2 border-gray-100 dark:border-gray-700 focus:border-pail-gold focus:ring-pail-gold/20 font-bold text-sm"
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Desktop Table View -->
-                <div class="hidden md:block bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-900/50">
-                                <tr>
-                                    <th v-if="isAdmin" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Lembaga</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Barang</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Ruangan</th>
-                                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Stok</th>
-                                    <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Kondisi</th>
-                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                <tr v-for="item in items.data" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                                    <td v-if="isAdmin" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ item.institution?.name || '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex flex-col">
-                                            <span class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ item.name }}</span>
-                                            <span class="text-xs text-gray-500">{{ item.brand }}</span>
+                <!-- Items Grid -->
+                <div class="hidden md:block space-y-4">
+                    <div v-for="item in items.data" :key="item.id" class="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 group">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-start gap-6">
+                                    <!-- Icon/Badge -->
+                                    <div class="w-16 h-16 rounded-[1.5rem] bg-pail-gold/10 border-2 border-pail-gold/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                        <svg class="w-8 h-8 text-pail-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                                    </div>
+                                    
+                                    <!-- Content -->
+                                    <div class="flex-1">
+                                        <div class="flex items-start justify-between mb-4">
+                                            <div>
+                                                <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight group-hover:text-pail-gold transition-colors">{{ item.name }}</h3>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 font-bold mt-1">{{ item.brand || 'No Brand' }}</p>
+                                                <span v-if="isAdmin" class="inline-block mt-2 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wider rounded-full">
+                                                    {{ item.institution?.name || '-' }}
+                                                </span>
+                                            </div>
+                                            <span class="px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider shadow-sm" :class="item.condition === 'Baik' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-orange-50 text-orange-600 border border-orange-100'">
+                                                {{ item.condition }}
+                                            </span>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
-                                        {{ item.room?.name || '-' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span class="px-2 py-1 text-xs font-bold rounded-full"
-                                            :class="item.stock <= item.min_stock ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'">
-                                            {{ item.stock }} {{ item.unit }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <span class="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-600 font-semibold border border-blue-100">
-                                            {{ item.condition }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                        <button @click="openEditModal(item)" class="text-indigo-600 hover:text-indigo-900 font-bold bg-indigo-50 px-3 py-1 rounded-full transition hover:bg-indigo-100">
-                                            Edit
-                                        </button>
-                                        <button @click="openDeleteModal(item)" class="text-red-600 hover:text-red-900 font-bold bg-red-50 px-3 py-1 rounded-full transition hover:bg-red-100">
-                                            Hapus
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr v-if="items.data.length === 0">
-                                    <td :colspan="isAdmin ? 6 : 5" class="px-6 py-10 text-center text-gray-500 italic">
-                                        Tidak ada data yang ditemukan.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                        
+                                        <!-- Details Grid -->
+                                        <div class="grid grid-cols-3 gap-6 py-4 border-t border-gray-100 dark:border-gray-700">
+                                            <div>
+                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Ruangan</p>
+                                                <p class="text-sm font-bold text-gray-900 dark:text-white">{{ item.room?.name || '-' }}</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Stok Tersedia</p>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-2xl font-black tracking-tighter" :class="item.stock <= item.min_stock ? 'text-red-600' : 'text-green-600'">{{ item.stock }}</span>
+                                                    <span class="text-xs font-bold text-gray-400 uppercase">{{ item.unit }}</span>
+                                                </div>
+                                                <p v-if="item.stock <= item.min_stock" class="text-[9px] font-black text-red-500 uppercase tracking-wider mt-1 flex items-center gap-1">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                                    Stok Rendah
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Min. Stok</p>
+                                                <p class="text-sm font-bold text-gray-600 dark:text-gray-300">{{ item.min_stock }} {{ item.unit }}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Note if exists -->
+                                        <div v-if="item.note" class="mt-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                                            <p class="text-xs text-gray-600 dark:text-gray-400 italic">{{ item.note }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div class="flex items-center gap-3 ml-6">
+                                <button @click="openEditModal(item)" class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-all flex items-center justify-center group/btn">
+                                    <svg class="w-5 h-5 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                <button @click="openDeleteModal(item)" class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all flex items-center justify-center group/btn">
+                                    <svg class="w-5 h-5 group-hover/btn:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div v-if="items.data.length === 0" class="bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 p-20 text-center">
+                        <div class="flex flex-col items-center text-gray-400">
+                            <svg class="w-16 h-16 mb-6 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            <p class="font-black uppercase tracking-[0.3em] text-sm">Belum Ada Barang</p>
+                            <p class="text-xs text-gray-300 font-bold mt-2 uppercase">Mulai dengan menambahkan barang baru.</p>
+                        </div>
                     </div>
                 </div>
 

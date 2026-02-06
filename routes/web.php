@@ -53,6 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/item-requests/{itemUpdateRequest}/reject', [\App\Http\Controllers\Admin\ItemRequestController::class, 'reject'])->name('item_requests.reject');
 
             // General Requests Admin Management
+            Route::get('/requests/export', [\App\Http\Controllers\Admin\GeneralRequestController::class, 'export'])->name('requests.export');
             Route::resource('requests', \App\Http\Controllers\Admin\GeneralRequestController::class);
 
             // Activity Log & Online Users (Super Admin only)
