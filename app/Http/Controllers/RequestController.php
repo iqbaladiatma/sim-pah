@@ -65,6 +65,59 @@ class RequestController extends Controller
         return redirect()->route('requests.index')->with('success', 'Pengajuan berhasil dikirim.');
     }
 
-// Update is handled by Admin/GeneralRequestController for approval
-// But if we need 'edit' for the user (e.g. while pending), we can add it later.
+    public function edit(\App\Models\Request $request)
+    {
+        $user = auth()->user();
+
+        // Check ownership
+        if ($request->user_id !== $user->id) {
+            abort(403, 'Akses ditolak. Anda hanya bisa mengedit pengajuan Anda sendiri.');
+        }
+
+        // Check status (Optional: can they edit if approved? requested said "edit pengajuan bukan keputusan")
+        // Usually it's better to only allow editing pending ones.
+        if ($request->status !== 'pending') {
+            return redirect()->back()->with('error', 'Pengajuan yang sudah diproses tidak bisa diedit.');
+        }
+
+        return Inertia::render('Requests/Edit', [
+            'request' => $request
+        ]);
+    }
+
+    public function update(Request $httpRequest, \App\Models\Request $request)
+    {
+        $user = auth()->user();
+
+        if ($request->user_id !== $user->id) {
+            abort(403);
+        }
+
+        if ($request->status !== 'pending') {
+            return redirect()->back()->with('error', 'Pengajuan yang sudah diproses tidak bisa diedit.');
+        }
+
+        $validated = $httpRequest->validate([
+            'type' => 'required|string|max:50',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'estimated_cost' => 'required|numeric|min:0',
+            'photo_evidence' => 'nullable|image|max:2048',
+        ]);
+
+        $data = [
+            'type' => $validated['type'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'estimated_cost' => $validated['estimated_cost'],
+        ];
+
+        if ($httpRequest->hasFile('photo_evidence')) {
+            $data['photo_evidence'] = $httpRequest->file('photo_evidence')->store('reports', 'public');
+        }
+
+        $request->update($data);
+
+        return redirect()->route('requests.index')->with('success', 'Pengajuan berhasil diperbarui.');
+    }
 }

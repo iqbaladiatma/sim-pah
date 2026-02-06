@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { Head, Link, router } from "@inertiajs/vue3";
+import { ref, watch } from "vue";
 import Pagination from "@/Components/Pagination.vue";
 
 const props = defineProps({
@@ -12,6 +12,31 @@ const props = defineProps({
         default: () => ({ total: 0, today: 0, this_week: 0 }),
     },
 });
+
+const filterForm = ref({
+    user_id: props.filters.user_id || '',
+    date_from: props.filters.date_from || '',
+    date_to: props.filters.date_to || '',
+    event: props.filters.event || '',
+    subject_type: props.filters.subject_type || '',
+    role: props.filters.role || '',
+});
+
+watch(filterForm, (newFilters) => {
+    router.get(route('admin.activity_log.index'), newFilters, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+}, { deep: true });
+
+const confirmClearLogs = () => {
+    if (confirm('Apakah Anda yakin ingin menghapus SEMUA riwayat aktivitas? Tindakan ini tidak dapat dibatalkan.')) {
+        router.delete(route('admin.activity_log.destroy'), {
+            onSuccess: () => alert('Log berhasil dibersihkan.')
+        });
+    }
+};
 
 const selectedActivity = ref(null);
 const isDetailModalOpen = ref(false);
@@ -77,7 +102,39 @@ const getEventIcon = (event) => {
                 <!-- Activity List -->
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
                     <div class="p-6">
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Riwayat Aktivitas</h3>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
+                            <span>Riwayat Aktivitas</span>
+                            <div class="flex gap-2">
+                                <button v-if="Object.values(filters).some(x => x)" @click="router.visit(route('admin.activity_log.index'))" class="text-xs text-red-500 font-bold hover:underline">
+                                    Reset Filter
+                                </button>
+                                <button @click="confirmClearLogs" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition font-bold text-xs">
+                                    🗑️ Bersihkan Log
+                                </button>
+                            </div>
+                        </h3>
+                        
+                        <!-- Filters -->
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <select v-model="filterForm.role" class="w-full border-gray-100 rounded-xl bg-gray-50/50 text-sm focus:ring-pail-gold font-bold">
+                                    <option value="">Semua Role</option>
+                                    <option value="admin">Admin & Superadmin</option>
+                                    <option value="lembaga">Lembaga</option>
+                                </select>
+                            </div>
+                           <div>
+                                <select v-model="filterForm.event" class="w-full border-gray-100 rounded-xl bg-gray-50/50 text-sm focus:ring-pail-gold font-bold">
+                                    <option value="">Semua Event</option>
+                                    <option value="created">Created</option>
+                                    <option value="updated">Updated</option>
+                                    <option value="deleted">Deleted</option>
+                                </select>
+                            </div>
+                             <div>
+                                <input v-model="filterForm.date_from" type="date" class="w-full border-gray-100 rounded-xl bg-gray-50/50 text-sm focus:ring-pail-gold font-bold" placeholder="Dari Tanggal">
+                            </div>
+                        </div>
                         
                         <!-- Desktop Table -->
                         <div class="hidden md:block overflow-x-auto">

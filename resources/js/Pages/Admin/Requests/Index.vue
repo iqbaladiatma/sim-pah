@@ -39,7 +39,7 @@ const getStatusColor = (status) => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
                 
                  <!-- Stats Overview -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div class="bg-yellow-50 dark:bg-yellow-900/10 rounded-2xl p-6 border border-yellow-100 dark:border-yellow-900/30">
                         <h3 class="text-yellow-600 dark:text-yellow-500 font-black uppercase tracking-wider text-[10px] mb-1">Pending</h3>
                         <div class="text-2xl font-black text-yellow-700 dark:text-yellow-400">{{ stats.pending }}</div>
@@ -55,6 +55,10 @@ const getStatusColor = (status) => {
                      <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
                         <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-1">Est. Biaya Pending</h3>
                         <div class="text-lg font-black text-gray-900 dark:text-white font-mono">{{ formatRupiah(stats.total_cost_pending) }}</div>
+                    </div>
+                    <div class="bg-pail-gold rounded-2xl p-6 border border-pail-gold shadow-lg shadow-pail-gold/10">
+                        <h3 class="text-white/70 font-black uppercase tracking-wider text-[10px] mb-1 uppercase">Biaya Disetujui</h3>
+                        <div class="text-lg font-black text-white font-mono">{{ formatRupiah(stats.total_cost_approved) }}</div>
                     </div>
                 </div>
 
@@ -94,7 +98,7 @@ const getStatusColor = (status) => {
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                            {{ req.user.institution?.code || 'ADMIN' }}
+                                            {{ req.institution?.code || '-' }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4">
@@ -154,7 +158,7 @@ const getStatusColor = (status) => {
                         <div class="p-5">
                             <div class="flex items-center justify-between mb-4">
                                 <span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                    {{ req.user.institution?.code || 'ADMIN' }}
+                                    {{ req.institution?.code || '-' }}
                                 </span>
                                 <span class="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm"
                                     :class="getStatusColor(req.status)">

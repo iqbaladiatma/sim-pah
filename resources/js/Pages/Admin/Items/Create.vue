@@ -3,6 +3,7 @@ import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import axios from "axios";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 import LocationIcon from "@/Components/Icons/LocationIcon.vue";
 import PackageIcon from "@/Components/Icons/PackageIcon.vue";
 import CalendarIcon from "@/Components/Icons/CalendarIcon.vue";
@@ -48,7 +49,7 @@ const fetchRooms = async (institutionId) => {
 };
 
 watch(() => form.institution_id, (newVal) => {
-    form.room_id = "";
+    form.room_id = ""; // Reset room when institution changes
     fetchRooms(newVal);
 });
 
@@ -87,20 +88,25 @@ const submit = () => {
                             <!-- Row 1: Institution & Room -->
                             <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga Pemilik</label>
-                                <select v-model="form.institution_id" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all" required>
-                                    <option value="">- Pilih Lembaga -</option>
-                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.code }} - {{ inst.name }}</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.institution_id"
+                                    :options="institutions"
+                                    placeholder="- Pilih Lembaga -"
+                                    :customLabel="(opt) => `${opt.code} - ${opt.name}`"
+                                />
                                 <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1.5">
                                     <LocationIcon className="w-3.5 h-3.5" /> Lokasi / Ruangan
                                 </label>
-                                <select v-model="form.room_id" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all" required :disabled="!form.institution_id || isLoadingRooms">
-                                    <option value="">- Pilih Ruangan -</option>
-                                    <option v-for="room in rooms" :key="room.id" :value="room.id">{{ room.name }}</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.room_id"
+                                    :options="rooms"
+                                    placeholder="- Pilih Ruangan -"
+                                    :disabled="!form.institution_id || isLoadingRooms"
+                                    label-key="name"
+                                />
                                 <div v-if="form.errors.room_id" class="text-red-500 text-xs mt-1">{{ form.errors.room_id }}</div>
                             </div>
 

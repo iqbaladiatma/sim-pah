@@ -20,6 +20,20 @@ class ActivityLogController extends Controller
             $query->where('causer_id', $request->user_id);
         }
 
+        // Filter berdasarkan role user
+        if ($request->has('role') && $request->role) {
+            if ($request->role === 'admin') {
+                $query->whereHas('causer', function ($q) {
+                    $q->whereIn('role', ['admin', 'super admin']);
+                });
+            } elseif ($request->role === 'lembaga') {
+                $query->whereHas('causer', function ($q) {
+                    $q->where('role', '!=', 'admin')
+                        ->where('role', '!=', 'super admin');
+                });
+            }
+        }
+
         // Filter berdasarkan tanggal
         if ($request->has('date_from') && $request->date_from) {
             $query->whereDate('created_at', '>=', $request->date_from);
@@ -45,9 +59,9 @@ class ActivityLogController extends Controller
         // Cache stats untuk 5 menit agar tidak query terus
         $stats = Cache::remember('activity_log_stats', 300, function () {
             return [
-            'total' => Activity::count(),
-            'today' => Activity::whereDate('created_at', today())->count(),
-            'this_week' => Activity::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+                'total' => Activity::count(),
+                'today' => Activity::whereDate('created_at', today())->count(),
+                'this_week' => Activity::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
             ];
         });
 
@@ -61,9 +75,17 @@ class ActivityLogController extends Controller
 
         return Inertia::render('Admin/ActivityLog/Index', [
             'activities' => $activities,
-            'filters' => $request->only(['user_id', 'date_from', 'date_to', 'event', 'subject_type']),
+            'filters' => $request->only(['user_id', 'date_from', 'date_to', 'event', 'subject_type', 'role']),
             'stats' => $stats,
             'subjectTypes' => $subjectTypes,
         ]);
+    }
+
+    public function destroy()
+    {
+        Activity::truncate();
+        Cache::forget('activity_log_stats');
+
+        return redirect()->back()->with('success', 'Riwayat aktivitas berhasil dikosongkan.');
     }
 }

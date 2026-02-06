@@ -13,7 +13,7 @@ class ItemController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Item::with(['institution']);
+        $query = Item::with(['institution', 'room']);
 
         if ($request->has('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');

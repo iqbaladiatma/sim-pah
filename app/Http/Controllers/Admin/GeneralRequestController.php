@@ -22,7 +22,8 @@ class GeneralRequestController extends Controller
                 'pending' => GeneralRequest::where('status', 'pending')->count(),
                 'approved' => GeneralRequest::where('status', 'approved')->count(),
                 'rejected' => GeneralRequest::where('status', 'rejected')->count(),
-                'total_cost_pending' => GeneralRequest::where('status', 'pending')->sum('estimated_cost'),
+                'total_cost_pending' => (float) GeneralRequest::where('status', 'pending')->sum('estimated_cost'),
+                'total_cost_approved' => (float) GeneralRequest::where('status', 'approved')->sum('estimated_cost'),
             ]
         ]);
     }
@@ -71,24 +72,41 @@ class GeneralRequestController extends Controller
     public function edit(GeneralRequest $request)
     {
         return Inertia::render('Admin/Requests/Edit', [
-            'request' => $request->load(['user.institution', 'institution'])
+            'request' => $request->load(['user.institution', 'institution']),
+            'institutions' => \App\Models\Institution::orderBy('code')->get(),
         ]);
     }
 
     public function update(Request $httpRequest, GeneralRequest $request)
     {
         $validated = $httpRequest->validate([
+            'institution_id' => 'required|exists:institutions,id',
+            'type' => 'required|string|max:50',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'estimated_cost' => 'required|numeric|min:0',
             'status' => 'required|in:pending,approved,rejected',
-            'admin_note' => 'nullable|string'
+            'admin_note' => 'nullable|string',
+            'photo_evidence' => 'nullable|image|max:2048',
         ]);
 
-        // Explicitly update the passed model instance
-        $request->update([
+        $data = [
+            'institution_id' => $validated['institution_id'],
+            'type' => $validated['type'],
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'estimated_cost' => $validated['estimated_cost'],
             'status' => $validated['status'],
-            'admin_note' => $validated['admin_note']
-        ]);
+            'admin_note' => $validated['admin_note'],
+        ];
 
-        return redirect()->route('admin.requests.index')->with('success', 'Status pengajuan berhasil diperbarui.');
+        if ($httpRequest->hasFile('photo_evidence')) {
+            $data['photo_evidence'] = $httpRequest->file('photo_evidence')->store('reports', 'public');
+        }
+
+        $request->update($data);
+
+        return redirect()->route('admin.requests.index')->with('success', 'Data pengajuan berhasil diperbarui.');
     }
 
     public function destroy(GeneralRequest $request)

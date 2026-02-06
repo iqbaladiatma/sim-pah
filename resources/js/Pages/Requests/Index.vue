@@ -80,9 +80,18 @@ const getStatusColor = (status) => {
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold text-xs underline">
-                                            Lihat Bukti
-                                        </a>
+                                        <div class="flex items-center justify-end gap-3">
+                                            <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="text-blue-600 hover:text-blue-800 font-bold text-xs underline">
+                                                Lihat Bukti
+                                            </a>
+                                            <Link 
+                                                v-if="req.status === 'pending'"
+                                                :href="route('requests.edit', req.id)"
+                                                class="px-3 py-1 bg-pail-gold text-white rounded-lg hover:bg-yellow-600 transition shadow-sm font-bold text-[10px] uppercase tracking-wider"
+                                            >
+                                                Edit
+                                            </Link>
+                                        </div>
                                         <div v-if="req.admin_note" class="mt-2 text-[10px] text-gray-400 italic">
                                             Note: {{ req.admin_note }}
                                         </div>
@@ -122,9 +131,18 @@ const getStatusColor = (status) => {
                                 <p class="text-xs text-yellow-800 italic">"{{ req.admin_note }}"</p>
                             </div>
 
-                            <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="block w-full py-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition font-bold text-sm text-center">
-                                Lihat Bukti Foto
-                            </a>
+                            <div class="flex gap-2">
+                                <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="flex-1 py-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition font-bold text-sm text-center">
+                                    Lihat Bukti
+                                </a>
+                                <Link 
+                                    v-if="req.status === 'pending'"
+                                    :href="route('requests.edit', req.id)"
+                                    class="flex-1 py-3 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition font-bold text-sm text-center shadow-lg shadow-pail-gold/20"
+                                >
+                                    Edit Pengajuan
+                                </Link>
+                            </div>
                         </div>
                     </div>
 

@@ -1,19 +1,38 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
-import { formatRupiah } from "@/Utils/format";
+import { computed } from "vue";
+import { formatRupiah, parseRupiah } from "@/Utils/format";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 
 const props = defineProps({
     request: Object,
+    institutions: Array,
 });
 
 const form = useForm({
-    status: props.request.status || "approved",
+    _method: 'PUT', // Method spoofing for file uploads
+    institution_id: props.request.institution_id || "",
+    type: props.request.type || "",
+    title: props.request.title || "",
+    description: props.request.description || "",
+    estimated_cost: props.request.estimated_cost || 0,
+    status: props.request.status || "pending",
     admin_note: props.request.admin_note || "",
+    photo_evidence: null,
+});
+
+const costDisplay = computed({
+    get: () => formatRupiah(form.estimated_cost),
+    set: (val) => {
+        form.estimated_cost = parseRupiah(val);
+    }
 });
 
 const submit = () => {
-    form.put(route("admin.requests.update", props.request.id));
+    form.post(route("admin.requests.update", props.request.id), {
+        preserveScroll: true,
+    });
 };
 
 const getStatusColor = (status) => {
@@ -94,26 +113,68 @@ const getStatusColor = (status) => {
 
                             <!-- Right Column: Admin Action Form -->
                             <div>
-                                <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Form Keputusan</h4>
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-6">Edit & Proses Pengajuan</h4>
                                 <form @submit.prevent="submit" class="space-y-6">
                                     <div>
-                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keputusan</label>
-                                        <select v-model="form.status" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold">
-                                            <option value="approved">Setujui (Approved)</option>
-                                            <option value="rejected">Tolak (Rejected)</option>
-                                        </select>
-                                        <div v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga Pengaju</label>
+                                        <SearchableSelect
+                                            v-model="form.institution_id"
+                                            :options="institutions"
+                                            placeholder="- Pilih Lembaga -"
+                                            :customLabel="(opt) => `${opt.code} - ${opt.name}`"
+                                        />
+                                        <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Tipe Pengajuan</label>
+                                        <input v-model="form.type" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required />
+                                        <div v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Judul</label>
+                                        <input v-model="form.title" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required />
+                                        <div v-if="form.errors.title" class="text-red-500 text-xs mt-1">{{ form.errors.title }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Deskripsi</label>
+                                        <textarea v-model="form.description" rows="3" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required></textarea>
+                                        <div v-if="form.errors.description" class="text-red-500 text-xs mt-1">{{ form.errors.description }}</div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Estimasi Biaya</label>
+                                        <input v-model="costDisplay" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm font-mono font-bold" required />
+                                        <div v-if="form.errors.estimated_cost" class="text-red-500 text-xs mt-1">{{ form.errors.estimated_cost }}</div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keputusan</label>
+                                            <select v-model="form.status" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold">
+                                                <option value="pending">Tertunda (Pending)</option>
+                                                <option value="approved">Setujui (Approved)</option>
+                                                <option value="rejected">Tolak (Rejected)</option>
+                                            </select>
+                                            <div v-if="form.errors.status" class="text-red-500 text-xs mt-1">{{ form.errors.status }}</div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Bukti Baru (Optional)</label>
+                                            <input type="file" @change="e => form.photo_evidence = e.target.files[0]" class="w-full text-[10px] text-gray-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition" />
+                                        </div>
                                     </div>
 
                                     <div>
                                         <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Catatan Admin</label>
-                                        <textarea v-model="form.admin_note" rows="4" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Opsional..."></textarea>
+                                        <textarea v-model="form.admin_note" rows="3" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Opsional..."></textarea>
                                         <div v-if="form.errors.admin_note" class="text-red-500 text-xs mt-1">{{ form.errors.admin_note }}</div>
                                     </div>
 
                                     <div class="pt-4">
-                                        <button type="submit" class="w-full py-4 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 font-black shadow-lg shadow-blue-600/20 transition uppercase tracking-widest" :disabled="form.processing">
-                                            Simpan Keputusan
+                                        <button type="submit" class="w-full py-4 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-black shadow-lg shadow-pail-gold/20 transition uppercase tracking-widest" :disabled="form.processing">
+                                            Simpan Perubahan
                                         </button>
                                     </div>
                                 </form>
