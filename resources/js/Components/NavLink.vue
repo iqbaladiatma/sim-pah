@@ -10,13 +10,21 @@ const props = defineProps({
     active: {
         type: Boolean,
     },
+    collapsed: {
+        type: Boolean,
+        default: false,
+    },
 });
 
-const classes = computed(() =>
-    props.active
-        ? 'flex items-center px-4 py-3 rounded-xl bg-pail-gold/10 text-pail-gold font-bold transition-all duration-200'
-        : 'flex items-center px-4 py-3 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white transition-all duration-200',
-);
+const classes = computed(() => {
+    const base = 'flex items-center rounded-xl transition-all duration-200';
+    const padding = props.collapsed ? 'px-0 justify-center py-3' : 'px-4 py-3';
+    const colors = props.active
+        ? 'bg-pail-gold/10 text-pail-gold font-bold'
+        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white';
+    
+    return `${base} ${padding} ${colors}`;
+});
 </script>
 
 <template>

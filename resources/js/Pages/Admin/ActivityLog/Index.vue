@@ -4,6 +4,10 @@ import { Head, Link, router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
 import Pagination from "@/Components/Pagination.vue";
 import ConfirmModal from "@/Components/ConfirmModal.vue";
+import PlusIcon from "@/Components/Icons/PlusIcon.vue";
+import EditIcon from "@/Components/Icons/EditIcon.vue";
+import TrashIcon from "@/Components/Icons/TrashIcon.vue";
+import DocumentIcon from "@/Components/Icons/DocumentIcon.vue";
 
 const props = defineProps({
     activities: Object,
@@ -66,19 +70,19 @@ const closeModal = () => {
 
 const getEventColor = (event) => {
     switch (event) {
-        case 'created': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
-        case 'updated': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
-        case 'deleted': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
-        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+        case 'created': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800/50';
+        case 'updated': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800/50';
+        case 'deleted': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800/50';
+        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800/50';
     }
 };
 
 const getEventIcon = (event) => {
     switch (event) {
-        case 'created': return '➕';
-        case 'updated': return '✏️';
-        case 'deleted': return '🗑️';
-        default: return '📝';
+        case 'created': return PlusIcon;
+        case 'updated': return EditIcon;
+        case 'deleted': return TrashIcon;
+        default: return DocumentIcon;
     }
 };
 </script>
@@ -97,7 +101,7 @@ const getEventIcon = (event) => {
                         Reset Filter
                     </button>
                     <button @click="confirmClearLogs" class="px-6 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20 font-black text-xs uppercase tracking-widest flex items-center gap-2">
-                        🗑️ Bersihkan Log
+                        <TrashIcon className="w-4 h-4" /> Bersihkan Log
                     </button>
                 </div>
             </div>
@@ -178,7 +182,7 @@ const getEventIcon = (event) => {
                                     <td class="px-6 py-8">
                                         <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 border shadow-sm"
                                             :class="getEventColor(activity.event)">
-                                            <span>{{ getEventIcon(activity.event) }}</span>
+                                            <component :is="getEventIcon(activity.event)" className="w-3.5 h-3.5" />
                                             {{ activity.event }}
                                         </span>
                                     </td>
@@ -228,7 +232,7 @@ const getEventIcon = (event) => {
                             <div class="flex items-center justify-between mb-6">
                                 <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 border shadow-sm"
                                     :class="getEventColor(activity.event)">
-                                    {{ getEventIcon(activity.event) }} {{ activity.event }}
+                                    <component :is="getEventIcon(activity.event)" className="w-3 h-3" /> {{ activity.event }}
                                 </span>
                                 <span class="text-[10px] font-mono text-gray-400">{{ new Date(activity.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' }) }}</span>
                             </div>
@@ -281,9 +285,9 @@ const getEventIcon = (event) => {
                     <div class="grid grid-cols-2 gap-8 p-8 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800">
                         <div>
                             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Aksi Sistem</span>
-                            <span class="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 border shadow-sm"
+                            <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest inline-flex items-center gap-2 border shadow-sm"
                                 :class="getEventColor(selectedActivity.event)">
-                                {{ getEventIcon(selectedActivity.event) }} {{ selectedActivity.event }}
+                                <component :is="getEventIcon(selectedActivity.event)" className="w-3.5 h-3.5" /> {{ selectedActivity.event }}
                             </span>
                         </div>
                         <div>

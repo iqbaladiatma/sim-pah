@@ -13,6 +13,7 @@ import XCircleIcon from "@/Components/Icons/XCircleIcon.vue";
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 const isDarkMode = ref(false);
+const isIsoMenuOpen = ref(usePage().url.includes('procedures'));
 
 // Auto-close sidebar on mobile when navigating
 const closeSidebarOnMobile = () => {
@@ -73,15 +74,15 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
             class="fixed inset-y-0 left-0 z-[60] bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl border-r border-gray-100 dark:border-gray-700/50 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform lg:translate-x-0 lg:static lg:inset-0 shadow-2xl lg:shadow-none"
             :class="[
                 isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
-                isSidebarCollapsed ? 'lg:w-28' : 'lg:w-[22rem] w-[75vw] max-w-xs'
+                isSidebarCollapsed ? 'lg:w-20' : 'lg:w-[22rem] w-[75vw] max-w-xs'
             ]"
         >
             <div class="h-full flex flex-col overflow-hidden">
                 <!-- Sidebar Branding -->
                 <div 
-                    class="lg:h-24 flex items-center shrink-0 relative overflow-hidden transition-all duration-500"
+                    class="flex items-center shrink-0 relative overflow-hidden transition-all duration-500"
                     :class="[
-                        isSidebarCollapsed ? 'flex-col justify-center gap-4 h-32' : 'h-20 justify-between px-4 lg:px-8'
+                        isSidebarCollapsed ? 'h-24 justify-center px-2' : 'h-24 justify-between px-4 lg:px-8'
                     ]"
                 >
                     <Link :href="dashboardUrl" class="flex items-center gap-3">
@@ -94,6 +95,7 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
 
                     <!-- Header Theme Toggle -->
                     <button 
+                        v-if="!isSidebarCollapsed"
                         @click="toggleDarkMode" 
                         class="flex flex-col items-center gap-1 group transition-all"
                         :title="isDarkMode ? 'Mode Terang' : 'Mode Gelap'"
@@ -116,11 +118,9 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                         <p class="text-[9px] lg:text-[10px] font-black uppercase text-gray-400 tracking-[0.25em] lg:tracking-[0.3em]">Konsol Utama</p>
                     </div>
 
-                    <NavLink :href="dashboardUrl" :active="route().current('dashboard') || route().current('admin.dashboard')" @click="closeSidebarOnMobile">
-                        <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Beranda</span>
-                        </div>
+                    <NavLink :href="dashboardUrl" :active="route().current('dashboard') || route().current('admin.dashboard')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                        <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                        <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Beranda</span>
                     </NavLink>
 
 
@@ -129,23 +129,17 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                         <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-3 lg:mb-4" v-if="!isSidebarCollapsed">
                             <p class="text-[9px] lg:text-[10px] font-black uppercase text-gray-400 tracking-[0.25em] lg:tracking-[0.3em]">Pusat Institusi</p>
                         </div>
-                        <NavLink :href="route('admin.institutions.index')" :active="route().current('admin.institutions.*')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Lembaga</span>
-                            </div>
+                        <NavLink :href="route('admin.institutions.index')" :active="route().current('admin.institutions.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Lembaga</span>
                         </NavLink>
-                        <NavLink :href="route('admin.rooms.index')" :active="route().current('admin.rooms.*')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Ruangan</span>
-                            </div>
+                        <NavLink :href="route('admin.rooms.index')" :active="route().current('admin.rooms.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Ruangan</span>
                         </NavLink>
-                        <NavLink :href="route('admin.users.index')" :active="route().current('admin.users.*')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Sdm & Akses</span>
-                            </div>
+                        <NavLink :href="route('admin.users.index')" :active="route().current('admin.users.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Sdm & Akses</span>
                         </NavLink>
                     </template>
 
@@ -153,102 +147,105 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                         <p class="text-[9px] lg:text-[10px] font-black uppercase text-gray-400 tracking-[0.25em] lg:tracking-[0.3em]">Mesin Logistik</p>
                     </div>
 
-                    <NavLink :href="itemsUrl" :active="route().current('items.*') || route().current('admin.items.*')" @click="closeSidebarOnMobile">
-                        <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Gudang Aset</span>
-                        </div>
+                    <NavLink :href="itemsUrl" :active="route().current('items.*') || route().current('admin.items.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                        <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                        <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Gudang Aset</span>
                     </NavLink>
 
-                    <NavLink v-if="['super admin', 'admin'].includes(user.role)" :href="route('admin.item_requests.index')" :active="route().current('admin.item_requests.*')" @click="closeSidebarOnMobile">
-                        <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Audit Stok</span>
-                        </div>
+                    <NavLink v-if="['super admin', 'admin'].includes(user.role)" :href="route('admin.item_requests.index')" :active="route().current('admin.item_requests.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                        <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Audit Stok</span>
                     </NavLink>
 
-                    <NavLink :href="requestsUrl" :active="route().current('requests.*') || route().current('admin.requests.*')" @click="closeSidebarOnMobile">
-                        <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
-                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Pengajuan Umum</span>
-                        </div>
+                    <NavLink :href="requestsUrl" :active="route().current('requests.*') || route().current('admin.requests.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                        <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path></svg>
+                        <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Pengajuan Umum</span>
                     </NavLink>
 
                     <template v-if="['super admin', 'admin'].includes(user.role)">
-                        <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-3 lg:mb-4" v-if="!isSidebarCollapsed">
-                            <p class="text-[9px] lg:text-[10px] font-black uppercase text-pail-gold tracking-[0.25em] lg:tracking-[0.3em]">PROSEDUR ISO URT</p>
+                        <!-- ISO Section Header / Toggle -->
+                        <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-1" v-if="!isSidebarCollapsed">
+                            <button 
+                                @click="isIsoMenuOpen = !isIsoMenuOpen"
+                                class="w-full flex items-center justify-between group py-2"
+                            >
+                                <p class="text-[9px] lg:text-[10px] font-black uppercase text-pail-gold tracking-[0.25em] lg:tracking-[0.3em]">PROSEDUR ISO URT</p>
+                                <svg 
+                                    class="w-3 h-3 text-pail-gold transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]" 
+                                    :class="isIsoMenuOpen ? 'rotate-180' : ''"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
                         </div>
+
+                        <!-- Divider for collapsed sidebar -->
+                        <div v-else class="mx-4 mt-6 mb-2 border-t border-gray-100 dark:border-gray-700/50 pt-4"></div>
                         
-                        <!-- 1. Modul Aset -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'aset' })" :active="$page.url.includes('group=aset')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Aset</span>
-                            </div>
-                        </NavLink>
+                        <Transition
+                            enter-active-class="transition-all duration-500 ease-in-out"
+                            enter-from-class="max-h-0 opacity-0 overflow-hidden"
+                            enter-to-class="max-h-[800px] opacity-100 overflow-hidden"
+                            leave-active-class="transition-all duration-400 ease-in-out"
+                            leave-from-class="max-h-[800px] opacity-100 overflow-hidden"
+                            leave-to-class="max-h-0 opacity-0 overflow-hidden"
+                        >
+                            <div v-if="isIsoMenuOpen || isSidebarCollapsed" class="space-y-1.5 lg:space-y-2 overflow-hidden">
+                                <!-- 1. Modul Aset -->
+                                <NavLink :href="route('admin.procedures.index', { group: 'aset' })" :active="$page.url.includes('group=aset')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Aset</span>
+                                </NavLink>
 
-                        <!-- 2. Modul Sarpras -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'sarpras' })" :active="$page.url.includes('group=sarpras')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Sarpras</span>
-                            </div>
-                        </NavLink>
+                                <!-- 2. Modul Sarpras -->
+                                <NavLink :href="route('admin.procedures.index', { group: 'sarpras' })" :active="$page.url.includes('group=sarpras')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Sarpras</span>
+                                </NavLink>
 
-                        <!-- 3. Modul Proyek -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'proyek' })" :active="$page.url.includes('group=proyek')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Proyek</span>
-                            </div>
-                        </NavLink>
+                                <!-- 3. Modul Proyek -->
+                                <NavLink :href="route('admin.procedures.index', { group: 'proyek' })" :active="$page.url.includes('group=proyek')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Proyek</span>
+                                </NavLink>
 
-                        <!-- 4. Modul Logistik -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'logistik' })" :active="$page.url.includes('group=logistik')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Logistik</span>
-                            </div>
-                        </NavLink>
+                                <!-- 4. Modul Logistik -->
+                                <NavLink :href="route('admin.procedures.index', { group: 'logistik' })" :active="$page.url.includes('group=logistik')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Logistik</span>
+                                </NavLink>
 
-                        <!-- 5. Modul Kebersihan -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'kebersihan' })" :active="$page.url.includes('group=kebersihan')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Kebersihan</span>
-                            </div>
-                        </NavLink>
+                                <!-- 5. Modul Kebersihan -->
+                                <NavLink :href="route('admin.procedures.index', { group: 'kebersihan' })" :active="$page.url.includes('group=kebersihan')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Kebersihan</span>
+                                </NavLink>
 
-                        <!-- 6. Modul Kendaraan & Lainnya -->
-                        <NavLink :href="route('admin.procedures.index', { group: 'lainnya' })" :active="$page.url.includes('group=lainnya')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Lainnya</span>
-                            </div>
-                        </NavLink>
+                                <!-- 6. Modul Kendaraan & Lainnya -->
+                                <NavLink :href="route('admin.procedures.index', { group: 'lainnya' })" :active="$page.url.includes('group=lainnya')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">ISO: Lainnya</span>
+                                </NavLink>
 
-                        <!-- 7. Modul Audit ISO Master -->
-                        <NavLink :href="route('admin.procedures.show', 'ceklist-iso')" :active="route().current('admin.procedures.show', 'ceklist-iso')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Master Ceklist ISO</span>
+                                <!-- 7. Modul Audit ISO Master -->
+                                <NavLink :href="route('admin.procedures.show', 'ceklist-iso')" :active="route().current('admin.procedures.show', 'ceklist-iso')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                                    <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-[11px] lg:text-xs uppercase ml-3">Master Ceklist ISO</span>
+                                </NavLink>
                             </div>
-                        </NavLink>
+                        </Transition>
 
                         <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-3 lg:mb-4" v-if="!isSidebarCollapsed">
                             <p class="text-[9px] lg:text-[10px] font-black uppercase text-gray-400 tracking-[0.25em] lg:tracking-[0.3em]">Intelijen Sistem</p>
                         </div>
-                        <NavLink :href="route('admin.activity_log.index')" :active="route().current('admin.activity_log.*')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Audit Trail</span>
-                            </div>
+                        <NavLink :href="route('admin.activity_log.index')" :active="route().current('admin.activity_log.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Audit Trail</span>
                         </NavLink>
-                        <NavLink :href="route('admin.reports.index')" :active="route().current('admin.reports.*')" @click="closeSidebarOnMobile">
-                            <div class="flex items-center w-full" :class="isSidebarCollapsed ? 'justify-center py-2' : 'px-2 py-1.5 lg:py-1'">
-                                <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Analitik</span>
-                            </div>
+                        <NavLink :href="route('admin.reports.index')" :active="route().current('admin.reports.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Analitik</span>
                         </NavLink>
                     </template>
                 </nav>
@@ -391,6 +388,39 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                     <slot />
                 </div>
             </main>
+
+            <!-- Sticky Footer Signature -->
+            <footer class="shrink-0 px-4 sm:px-8 lg:px-14 py-8 pb-32 lg:pb-8 border-t border-gray-100 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+                    <div class="flex flex-col items-center lg:items-start gap-1">
+                        <p class="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">
+                            © {{ new Date().getFullYear() }} Pondok Pesantren Abu Hurairah Mataram
+                        </p>
+                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">
+                            Sistem Informasi Manajemen - Unit Rumah Tangga
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col lg:flex-row items-center gap-3 lg:gap-6 bg-gray-50 dark:bg-gray-900/50 px-6 py-3 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-inner">
+                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Development By</span>
+                        <div class="flex items-center gap-4">
+                            <a href="https://instagram.com/iq_html" target="_blank" class="group flex items-center gap-2 transition-all">
+                                <div class="w-6 h-6 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-500 group-hover:bg-pink-500 group-hover:text-white transition-all shadow-sm">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.848 0-3.204.012-3.584.07-4.849.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                </div>
+                                <span class="text-[10px] font-black text-gray-500 group-hover:text-pink-600 transition-colors tracking-tighter">@iq_html</span>
+                            </a>
+                            <div class="w-1 h-1 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                            <a href="https://linkedin.com/in/Iqbaladiatma" target="_blank" class="group flex items-center gap-2 transition-all">
+                                <div class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg>
+                                </div>
+                                <span class="text-[10px] font-black text-gray-500 group-hover:text-blue-600 transition-colors tracking-tighter">@Iqbaladiatma</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
         </div>
 
         <!-- Mobile Smart Bottom Navigation -->
