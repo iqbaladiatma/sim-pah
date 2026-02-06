@@ -41,7 +41,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Akses Terotorisasi | SIM PAH" />
+        <Head title="Login | SIM PAH" />
 
         <div v-if="status" class="mb-8 p-6 bg-green-500/10 border border-green-500/20 rounded-[2rem] text-[10px] font-black text-green-600 uppercase tracking-[0.2em] text-center backdrop-blur-md">
             {{ status }}
@@ -56,7 +56,7 @@ const submit = () => {
             </div>
             
             <h2 class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-tight">
-                Gerbang <span class="text-pail-gold">Autentikasi</span>
+                <span class="text-pail-gold">Login</span>
             </h2>
             <div class="mt-4 flex items-center justify-center gap-3">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
@@ -74,7 +74,7 @@ const submit = () => {
                 <div class="relative z-10">
                     <div class="flex items-center justify-between mb-4 px-1">
                         <InputLabel for="institution" value="Identitas Lembaga" class="text-[10px] uppercase tracking-[0.3em] font-black text-gray-400" />
-                        <span class="text-[9px] font-black text-pail-gold/40 uppercase tracking-widest">Wajib untuk Karyawan</span>
+                        <span class="text-[9px] font-black text-pail-gold/40 uppercase tracking-widest">Wajib untuk Lembaga-Lembaga</span>
                     </div>
                     
                     <InstitutionSelect 
@@ -165,7 +165,7 @@ const submit = () => {
                         Memverifikasi...
                     </span>
                     <span v-else class="flex items-center gap-4 text-pail-gold">
-                        Inisialisasi Pusat Akses
+                        Login
                         <ZapIcon className="w-5 h-5 group-hover/btn:scale-125 transition-transform" />
                     </span>
                 </PrimaryButton>

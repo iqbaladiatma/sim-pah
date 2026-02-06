@@ -16,11 +16,10 @@ import { Link } from "@inertiajs/vue3";
 
         <div class="w-full max-w-md relative z-10 flex flex-col items-center">
             <!-- Branding Header -->
-            <div class="mb-12 text-center group">
+            <div class="mb-12 text-center">
                 <Link href="/" class="flex flex-col items-center gap-4">
-                    <div class="w-20 h-20 flex items-center justify-center bg-gray-900 dark:bg-black rounded-[2.5rem] shadow-2xl relative overflow-hidden transform hover:scale-105 transition-all duration-500">
-                        <ApplicationLogo class="h-10 w-10 fill-current text-pail-gold" />
-                        <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="w-32 h-32 flex items-center justify-center">
+                        <ApplicationLogo class="h-24 w-24 fill-current text-pail-gold" />
                     </div>
                     <div class="flex flex-col items-center mt-2">
                         <span class="text-4xl font-black tracking-tighter text-gray-900 dark:text-white leading-none">

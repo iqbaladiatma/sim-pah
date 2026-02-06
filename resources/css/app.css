@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    /* Ensure pail-gold colors are always available */
+    .bg-pail-gold {
+        background-color: #c9a658;
+    }
+
+    .text-pail-gold {
+        color: #c9a658;
+    }
+
+    .border-pail-gold {
+        border-color: #c9a658;
+    }
+
+    /* Scrollbar hide utility */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@layer base {
+    /* Ensure dark mode works correctly */
+    html {
+        @apply antialiased;
+    }
+
+    html.dark {
+        color-scheme: dark;
+    }
+}
