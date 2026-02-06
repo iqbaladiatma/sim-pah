@@ -18,6 +18,10 @@ const props = defineProps({
         type: Object,
         default: () => ({})
     },
+    distribution: {
+        type: Object,
+        default: () => ({})
+    },
     maintenanceTrend: {
         type: Array,
         default: () => []
@@ -177,17 +181,17 @@ const formatGroupTitle = (slug) => {
                                         </svg>
                                     </div>
                                     <div class="space-y-4 w-full">
-                                        <div v-for="(count, name, i) in groups" :key="name" class="flex items-center justify-between group/line">
+                                        <div v-for="(count, name) in distribution" :key="name" class="flex items-center justify-between group/line">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-3 h-3 rounded-md" :class="[
-                                                    i === 0 ? 'bg-gray-900' : 
-                                                    i === 1 ? 'bg-pail-gold' : 
-                                                    i === 2 ? 'bg-gray-400' : 
-                                                    i === 3 ? 'bg-gray-200' : 'bg-gray-100'
+                                                    name === 'Aset' ? 'bg-gray-900' : 
+                                                    name === 'Sarpras' ? 'bg-pail-gold' : 
+                                                    name === 'Logistik' ? 'bg-gray-400' : 
+                                                    name === 'Kebersihan' ? 'bg-gray-200' : 'bg-gray-100'
                                                 ]"></div>
-                                                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest group-hover/line:text-gray-900 dark:group-hover/line:text-white transition-colors">{{ formatGroupTitle(name) }}</span>
+                                                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest group-hover/line:text-gray-900 dark:group-hover/line:text-white transition-colors">{{ name }}</span>
                                             </div>
-                                            <span class="text-xs font-black text-gray-900 dark:text-white font-mono">{{ count }}</span>
+                                            <span class="text-xs font-black text-gray-900 dark:text-white font-mono">{{ count }} <span class="text-[8px] opacity-40">ITEM</span></span>
                                         </div>
                                     </div>
                                 </div>

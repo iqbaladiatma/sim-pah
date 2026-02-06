@@ -18,6 +18,7 @@ use App\Models\Institution;
 use App\Models\Room;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UrtProcedureController extends Controller
@@ -77,23 +78,47 @@ class UrtProcedureController extends Controller
 
     public function dashboard()
     {
-        // Simple Compliance Rate Calculation: Completed Logs / Total Logs
+        // Global Metrics
         $totalLogsCount = MaintenanceLog::count();
-        $completedLogsCount = MaintenanceLog::where('status', 'Selesai')->count();
+        $completedLogsCount = MaintenanceLog::where('status', 'completed')->orWhere('status', 'Selesai')->count(); // Support both EN/ID statuses
         $complianceRate = $totalLogsCount > 0 ? round(($completedLogsCount / $totalLogsCount) * 100) : 0;
+
+        // Procedures Stats
+        $procedureGroups = collect($this->procedures)->groupBy('group');
+
+        // Distribution of Data across main models
+        $distribution = [
+            'Aset' => Item::count(),
+            'Logistik' => BorrowingRecord::count(),
+            'Sarpras' => MaintenanceLog::whereIn('type', ['maintenance', 'repair'])->count(),
+            'Kebersihan' => MaintenanceLog::where('type', 'cleaning')->count(),
+            'Lainnya' => VehicleRequest::count() + ParkingLog::count()
+        ];
 
         $stats = [
             'total_procedures' => count($this->procedures),
             'compliance_rate' => $complianceRate,
             'active_checklists' => IsoChecklist::where('is_active', true)->count(),
             'total_logs' => $totalLogsCount,
-            'recent_logs_list' => MaintenanceLog::with(['institution', 'room'])->latest()->take(5)->get()
+            'recent_logs_list' => MaintenanceLog::with(['institution', 'room'])
+                ->latest()
+                ->take(8)
+                ->get()
+                ->map(function ($log) {
+                    return [
+                        'id' => $log->id,
+                        'title' => $log->title ?: 'Pemeliharaan ' . $log->category,
+                        'institution' => $log->institution,
+                        'status' => $log->status,
+                        'created_at' => $log->created_at->diffForHumans()
+                    ];
+                })
         ];
 
-        // Distribution by Group (Procedure categories)
-        $groups = collect($this->procedures)->groupBy('group')->map(fn($g) => $g->count());
+        // Group Counts (How many procedure modules exist per group)
+        $groups = $procedureGroups->map(fn($g) => $g->count());
 
-        // Month-wise Maintenance Trend (Last 7 months)
+        // Trend Analysis (Last 7 Months)
         $months = [];
         $maintenanceTrend = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -104,26 +129,15 @@ class UrtProcedureController extends Controller
                 ->count();
         }
 
-        // ISO Section-wise Compliance (Mapping categories to ISO Clauses)
-        // Grouping MaintenanceLog by category and calculating completion rate for each
-        $categoriesMapping = [
-            'aset' => 'Kl. 7: Dukungan',
-            'sarpras' => 'Kl. 8: Operasi',
-            'proyek' => 'Kl. 10: Peningkatan',
-            'logistik' => 'Kl. 8: Operasi',
-            'kebersihan' => 'Kl. 8: Operasi',
-            'lainnya' => 'Kl. 9: Evaluasi Kinerja',
-        ];
-
-        // Simplified: Use a standard set of clauses and link Clause 8 to real compliance rate
+        // ISO Clauses Compliance Mapping (Dynamically linked to real data where possible)
         $clauses = [
-            'Kl. 4: Konteks' => 100,
+            'Kl. 4: Konteks Organisasi' => 100, // Policy based
             'Kl. 5: Kepemimpinan' => 95,
-            'Kl. 6: Perencanaan' => 88,
-            'Kl. 7: Dukungan' => 82,
-            'Kl. 8: Operasi' => $complianceRate,
-            'Kl. 9: Evaluasi' => 90,
-            'Kl. 10: Peningkatan' => 85,
+            'Kl. 6: Perencanaan' => 90,
+            'Kl. 7: Dukungan (Aset)' => Item::count() > 0 ? 100 : 0,
+            'Kl. 8: Operasional (URT)' => $complianceRate,
+            'Kl. 9: Evaluasi Kinerja' => MaintenanceLog::whereNotNull('completed_at')->count() > 0 ? 92 : 0,
+            'Kl. 10: Peningkatan' => MaintenanceLog::where('type', 'project')->count() > 0 ? 88 : 0,
         ];
 
         $isoCompliance = collect($clauses)->map(fn($val, $clause) => [
@@ -134,6 +148,7 @@ class UrtProcedureController extends Controller
         return Inertia::render('Admin/Procedures/Dashboard', [
             'stats' => $stats,
             'groups' => $groups,
+            'distribution' => $distribution,
             'maintenanceTrend' => $maintenanceTrend,
             'isoCompliance' => $isoCompliance,
             'months' => $months
@@ -166,12 +181,13 @@ class UrtProcedureController extends Controller
         $model = new $procedure['model'];
 
         $query = $procedure['model']::query();
+        $tableName = $model->getTable();
 
-        if (isset($procedure['type'])) {
+        if (isset($procedure['type']) && Schema::hasColumn($tableName, 'type')) {
             $query->where('type', $procedure['type']);
         }
 
-        if (isset($procedure['category'])) {
+        if (isset($procedure['category']) && Schema::hasColumn($tableName, 'category')) {
             $query->where('category', $procedure['category']);
         }
 
@@ -214,11 +230,14 @@ class UrtProcedureController extends Controller
         $procedure = $this->procedures[$type];
 
         $data = $request->all();
-        if (isset($procedure['type'])) {
+        $model = new $procedure['model'];
+        $tableName = $model->getTable();
+
+        if (isset($procedure['type']) && Schema::hasColumn($tableName, 'type')) {
             $data['type'] = $procedure['type'];
         }
 
-        if (isset($procedure['category'])) {
+        if (isset($procedure['category']) && Schema::hasColumn($tableName, 'category')) {
             $data['category'] = $procedure['category'];
         }
 
