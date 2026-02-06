@@ -4,7 +4,12 @@ import { Head, useForm, Link } from "@inertiajs/vue3";
 import { computed } from "vue";
 import { formatRupiah, parseRupiah } from "@/Utils/format";
 
+const props = defineProps({
+    institutions: Array,
+});
+
 const form = useForm({
+    institution_id: "",
     type: "",
     title: "",
     description: "",
@@ -33,8 +38,8 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Buat Pengajuan Baru (Admin)
+            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                Buat Pengajuan Baru
             </h2>
         </template>
 
@@ -56,8 +61,25 @@ const submit = () => {
 
                         <form @submit.prevent="submit" class="max-w-xl space-y-6">
                             <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga Pengaju</label>
+                                <select v-model="form.institution_id" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" required>
+                                    <option value="">- Pilih Lembaga -</option>
+                                    <option v-for="inst in institutions" :key="inst.id" :value="inst.id">{{ inst.code }} - {{ inst.name }}</option>
+                                </select>
+                                <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
+                            </div>
+
+                            <div>
                                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Tipe Pengajuan</label>
-                                <input v-model="form.type" type="text" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Contoh: Utilitas, B7, Darurat" required />
+                                <input v-model="form.type" type="text" list="type-suggestions" class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold" placeholder="Contoh: Utilitas, B7, Darurat" required />
+                                <datalist id="type-suggestions">
+                                    <option value="Utilitas"></option>
+                                    <option value="Barang Habis Pakai (B7)"></option>
+                                    <option value="Darurat"></option>
+                                    <option value="Pemeliharaan"></option>
+                                    <option value="Renovasi"></option>
+                                    <option value="Pengadaan"></option>
+                                </datalist>
                                 <div v-if="form.errors.type" class="text-red-500 text-xs mt-1">{{ form.errors.type }}</div>
                             </div>
 

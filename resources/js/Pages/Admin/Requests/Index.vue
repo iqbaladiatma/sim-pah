@@ -5,6 +5,7 @@ import { formatRupiah } from "@/Utils/format";
 
 const props = defineProps({
     requests: Object,
+    stats: Object,
 });
 
 const getStatusColor = (status) => {
@@ -34,7 +35,29 @@ const getStatusColor = (status) => {
         </template>
 
         <div class="py-12">
+
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+                
+                 <!-- Stats Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-yellow-50 dark:bg-yellow-900/10 rounded-2xl p-6 border border-yellow-100 dark:border-yellow-900/30">
+                        <h3 class="text-yellow-600 dark:text-yellow-500 font-black uppercase tracking-wider text-[10px] mb-1">Pending</h3>
+                        <div class="text-2xl font-black text-yellow-700 dark:text-yellow-400">{{ stats.pending }}</div>
+                    </div>
+                    <div class="bg-green-50 dark:bg-green-900/10 rounded-2xl p-6 border border-green-100 dark:border-green-900/30">
+                        <h3 class="text-green-600 dark:text-green-500 font-black uppercase tracking-wider text-[10px] mb-1">Disetujui</h3>
+                        <div class="text-2xl font-black text-green-700 dark:text-green-400">{{ stats.approved }}</div>
+                    </div>
+                    <div class="bg-red-50 dark:bg-red-900/10 rounded-2xl p-6 border border-red-100 dark:border-red-900/30">
+                        <h3 class="text-red-600 dark:text-red-500 font-black uppercase tracking-wider text-[10px] mb-1">Ditolak</h3>
+                        <div class="text-2xl font-black text-red-700 dark:text-red-400">{{ stats.rejected }}</div>
+                    </div>
+                     <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-1">Est. Biaya Pending</h3>
+                        <div class="text-lg font-black text-gray-900 dark:text-white font-mono">{{ formatRupiah(stats.total_cost_pending) }}</div>
+                    </div>
+                </div>
+
                 <!-- Add Button Container -->
                 <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <div>
@@ -56,6 +79,7 @@ const getStatusColor = (status) => {
                         <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
                             <thead>
                                 <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
+                                    <th class="px-6 py-4 text-left">No</th>
                                     <th class="px-6 py-4 text-left">Lembaga</th>
                                     <th class="px-6 py-4 text-left">Detail Pengajuan</th>
                                     <th class="px-6 py-4 text-left">Biaya</th>
@@ -64,7 +88,10 @@ const getStatusColor = (status) => {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                                <tr v-for="req in requests.data" :key="req.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
+                                <tr v-for="(req, index) in requests.data" :key="req.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
+                                    <td class="px-6 py-4 whitespace-nowrap font-bold text-gray-500">
+                                        {{ (requests.current_page - 1) * requests.per_page + index + 1 }}
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 py-1 rounded text-[10px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                                             {{ req.user.institution?.code || 'ADMIN' }}

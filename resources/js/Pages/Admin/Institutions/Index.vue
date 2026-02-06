@@ -9,34 +9,17 @@ import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
 
 const props = defineProps({
     institutions: Object,
+    stats: {
+        type: Object,
+        default: () => ({ total: 0, new_this_month: 0 }),
+    },
 });
 
 const importForm = useForm({
     file: null,
 });
 
-const isImportModalOpen = ref(false);
-
-const openImportModal = () => {
-    isImportModalOpen.value = true;
-};
-
-const closeImportModal = () => {
-    isImportModalOpen.value = false;
-    importForm.reset();
-};
-
-const handleImport = () => {
-    importForm.post(route("admin.institutions.import"), {
-        onSuccess: () => closeImportModal(),
-    });
-};
-
-const deleteInstitution = (id) => {
-    if (confirm("Yakin ingin menghapus lembaga ini?")) {
-        router.delete(route("admin.institutions.destroy", id));
-    }
-};
+// ... rest of logic
 </script>
 
 <template>
@@ -44,15 +27,28 @@ const deleteInstitution = (id) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200"
-            >
+            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
                 Manajemen Lembaga (Institutions)
             </h2>
         </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-pail-gold to-yellow-600 rounded-2xl p-6 text-white shadow-lg shadow-pail-gold/20">
+                        <h3 class="text-white/80 font-bold uppercase tracking-wider text-xs mb-1">Total Lembaga</h3>
+                        <div class="text-3xl font-black">{{ stats.total }}</div>
+                        <div class="text-white/60 text-xs mt-2">Unit Kerja Terdaftar</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                         <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Terdaftar Bulan Ini</h3>
+                         <div class="text-2xl font-black text-gray-800 dark:text-white">{{ stats.new_this_month }}</div>
+                         <div class="text-green-500 text-xs font-bold mt-1">+{{ stats.new_this_month }} Unit Baru</div>
+                    </div>
+                </div>
+
                 <!-- Add Button -->
                 <div class="mb-6 flex justify-end gap-3">
                     <button
@@ -80,6 +76,11 @@ const deleteInstitution = (id) => {
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                                     >
+                                        No
+                                    </th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                                    >
                                         Kode
                                     </th>
                                     <th
@@ -102,9 +103,14 @@ const deleteInstitution = (id) => {
                                 class="divide-y divide-gray-200 dark:divide-gray-700"
                             >
                                 <tr
-                                    v-for="inst in institutions.data"
+                                    v-for="(inst, index) in institutions.data"
                                     :key="inst.id"
                                 >
+                                    <td
+                                        class="px-6 py-4 whitespace-nowrap font-bold text-gray-500"
+                                    >
+                                        {{ (institutions.current_page - 1) * institutions.per_page + index + 1 }}
+                                    </td>
                                     <td
                                         class="px-6 py-4 whitespace-nowrap font-bold"
                                     >

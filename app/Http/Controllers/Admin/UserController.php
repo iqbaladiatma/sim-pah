@@ -3,26 +3,30 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Models\Institution;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = \App\Models\User::with('institution')->latest()->paginate(10);
-        $institutions = \App\Models\Institution::all();
-
-        return inertia('Admin/Users/Index', [
-            'users' => $users,
-            'institutions' => $institutions
+        return Inertia::render('Admin/Users/Index', [
+            'users' => User::with('institution')->latest()->paginate(10),
+            'stats' => [
+                'total' => User::count(),
+                'admins' => User::whereIn('role', ['admin', 'super admin'])->count(),
+                'lembaga' => User::where('role', 'lembaga')->count(),
+            ]
         ]);
     }
 
     public function create()
     {
-        $institutions = \App\Models\Institution::all();
-        return inertia('Admin/Users/Create', [
-            'institutions' => $institutions
+        return Inertia::render('Admin/Users/Create', [
+            'institutions' => Institution::all(),
         ]);
     }
 
@@ -31,57 +35,82 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:super admin,admin,lembaga',
+            'role' => 'required|in:admin,super admin,lembaga',
             'institution_id' => 'nullable|exists:institutions,id',
-            'phone' => 'nullable|string',
+            'password' => 'required|string|min:8',
         ]);
 
-        $validated['password'] = bcrypt($validated['password']);
-
-        \App\Models\User::create($validated);
+        User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'institution_id' => $validated['role'] === 'lembaga' ? $validated['institution_id'] : null,
+            'password' => Hash::make($validated['password']),
+            'is_super_admin' => false, // New users are not super admin
+        ]);
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
     }
 
-    public function edit(\App\Models\User $user)
+    public function edit(User $user)
     {
-        $institutions = \App\Models\Institution::all();
-        return inertia('Admin/Users/Edit', [
-            'user' => $user,
-            'institutions' => $institutions
+        // Prevent editing super admin
+        if ($user->is_super_admin) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Super Admin tidak dapat diubah.');
+        }
+
+        return Inertia::render('Admin/Users/Edit', [
+            'user' => $user->load('institution'),
+            'institutions' => Institution::all(),
         ]);
     }
 
-    public function update(Request $request, \App\Models\User $user)
+    public function update(Request $request, User $user)
     {
+        // Prevent updating super admin
+        if ($user->is_super_admin) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Super Admin tidak dapat diubah.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'role' => 'required|in:super admin,admin,lembaga',
+            'role' => 'required|in:admin,super admin,lembaga',
             'institution_id' => 'nullable|exists:institutions,id',
-            'phone' => 'nullable|string',
             'password' => 'nullable|string|min:8',
         ]);
 
-        if (isset($validated['password']) && $validated['password']) {
-            $validated['password'] = bcrypt($validated['password']);
-        }
-        else {
-            unset($validated['password']);
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'institution_id' => $validated['role'] === 'lembaga' ? $validated['institution_id'] : null,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($validated['password']);
         }
 
-        $user->update($validated);
+        $user->update($data);
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
 
-    public function destroy(\App\Models\User $user)
+    public function destroy(User $user)
     {
-        if ($user->id === auth()->id()) {
-            return redirect()->back()->with('error', 'Tidak bisa menghapus akun sendiri.');
+        // Prevent deleting super admin
+        if ($user->is_super_admin) {
+            return back()->with('error', 'Super Admin tidak dapat dihapus.');
         }
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Tidak bisa menghapus akun sendiri.');
+        }
+
         $user->delete();
+
         return redirect()->back()->with('success', 'User berhasil dihapus.');
     }
 }

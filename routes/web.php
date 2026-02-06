@@ -6,19 +6,14 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-    'canLogin' => Route::has('login'),
-    'canRegister' => Route::has('register'),
-    'laravelVersion' => Application::VERSION,
-    'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('login');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Lembaga Items (Accessible only by Lembaga)
+    // Items (Accessible by all, role logic in controller)
+    // Note: Admin routes are prefixed 'admin.' so no name collision.
     Route::resource('items', \App\Http\Controllers\ItemController::class)
-        ->only(['index', 'update'])
-        ->middleware('role:lembaga');
+        ->only(['index', 'store', 'update', 'destroy']);
 
     // Lembaga Requests (Accessible only by Lembaga)
     Route::resource('requests', \App\Http\Controllers\RequestController::class)
@@ -58,7 +53,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // General Requests Admin Management
             Route::resource('requests', \App\Http\Controllers\Admin\GeneralRequestController::class);
-            Route::get('/logs', [\App\Http\Controllers\Admin\LogController::class , 'index'])->name('logs.index');
+
+            // Activity Log & Online Users (Super Admin only)
+            Route::get('/activity-log', [\App\Http\Controllers\Admin\ActivityLogController::class , 'index'])->name('activity_log.index');
+            Route::get('/online-users', [\App\Http\Controllers\Admin\OnlineUsersController::class , 'index'])->name('online_users.index');
+            Route::delete('/online-users/{session}', [\App\Http\Controllers\Admin\OnlineUsersController::class , 'kick'])->name('online_users.kick');
+
             Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class , 'index'])->name('reports.index');
         }
         );

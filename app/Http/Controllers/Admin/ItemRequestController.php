@@ -3,52 +3,61 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ItemUpdateRequest;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class ItemRequestController extends Controller
 {
     public function index()
     {
-        $requests = \App\Models\ItemUpdateRequest::with(['item', 'user.institution'])
-            ->where('status', 'pending')
-            ->latest()
-            ->paginate(10);
-
-        return inertia('Admin/ItemRequests/Index', [
-            'requests' => $requests
+        return Inertia::render('Admin/ItemRequests/Index', [
+            'requests' => ItemUpdateRequest::with(['user.institution', 'item'])->latest()->paginate(10),
+            'stats' => [
+                'pending' => ItemUpdateRequest::where('status', 'pending')->count(),
+                'approved' => ItemUpdateRequest::where('status', 'approved')->count(),
+                'rejected' => ItemUpdateRequest::where('status', 'rejected')->count(),
+                'total' => ItemUpdateRequest::count(),
+            ]
         ]);
     }
 
-    public function approve(\App\Models\ItemUpdateRequest $itemUpdateRequest)
+    public function approve(ItemUpdateRequest $request)
     {
-        if ($itemUpdateRequest->status !== 'pending')
-            abort(400, 'Request already processed');
+        if ($request->status !== 'pending') {
+            return back()->with('error', 'Request ini sudah diproses sebelumnya.');
+        }
 
-        // Update Item Stock
-        $item = $itemUpdateRequest->item;
-        $item->update(['stock' => $itemUpdateRequest->new_data['stock']]);
+        DB::transaction(function () use ($request) {
+            // Update request status
+            $request->update(['status' => 'approved']);
 
-        // Update Request Status
-        $itemUpdateRequest->update([
-            'status' => 'approved',
-            'admin_id' => auth()->id(),
-            'processed_at' => now(),
-        ]);
+            if ($request->type === 'delete') {
+                $request->item()->delete();
+            }
+            else {
+                // Update item stock
+                $item = $request->item;
+                $newStock = $request->new_data['stock'] ?? $item->stock;
+                $item->update(['stock' => $newStock]);
+            }
+        });
 
-        return redirect()->back()->with('success', 'Stok berhasil diupdate.');
+        $message = $request->type === 'delete' ? 'Penghapusan barang disetujui.' : 'Update stok disetujui & berhasil diubah.';
+        return back()->with('success', $message);
+
+
     }
 
-    public function reject(\App\Models\ItemUpdateRequest $itemUpdateRequest)
+    public function reject(ItemUpdateRequest $request)
     {
-        if ($itemUpdateRequest->status !== 'pending')
-            abort(400, 'Request already processed');
+        if ($request->status !== 'pending') {
+            return back()->with('error', 'Request ini sudah diproses sebelumnya.');
+        }
 
-        $itemUpdateRequest->update([
-            'status' => 'rejected',
-            'admin_id' => auth()->id(),
-            'processed_at' => now(),
-        ]);
+        $request->update(['status' => 'rejected']);
 
-        return redirect()->back()->with('success', 'Request ditolak.');
+        return back()->with('success', 'Permintaan update stok ditolak.');
     }
 }

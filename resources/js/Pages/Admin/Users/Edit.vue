@@ -1,10 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+
 
 const props = defineProps({
     user: Object,
@@ -30,86 +27,86 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
                 Edit User
             </h2>
         </template>
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <header class="mb-6 flex justify-between items-center">
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700">
+                    <div class="p-8 text-gray-900 dark:text-gray-100">
+                        <header class="mb-8 flex justify-between items-center">
                             <div>
-                                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Update Informasi User</h3>
-                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Update Informasi User</h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                     Ubah detail pengguna. Kosongkan password jika tidak ingin mengubahnya.
                                 </p>
                             </div>
-                            <Link :href="route('admin.users.index')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 font-bold text-sm">
+                            <Link :href="route('admin.users.index')" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 font-bold text-sm transition-all">
                                 &larr; Kembali
                             </Link>
                         </header>
 
-                        <form @submit.prevent="submit" class="max-w-xl">
-                            <div class="mb-4">
-                                <InputLabel for="name" value="Nama Lengkap" />
-                                <TextInput
+                        <form @submit.prevent="submit" class="max-w-2xl space-y-6">
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
+                                <input
                                     id="name"
                                     type="text"
-                                    class="mt-1 block w-full"
+                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
                                     v-model="form.name"
                                     required
                                     autofocus
                                 />
-                                <InputError class="mt-2" :message="form.errors.name" />
+                                <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
                             </div>
 
-                            <div class="mb-4">
-                                <InputLabel for="email" value="Email Address" />
-                                <TextInput
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
+                                <input
                                     id="email"
                                     type="email"
-                                    class="mt-1 block w-full"
+                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
                                     v-model="form.email"
                                     required
                                 />
-                                <InputError class="mt-2" :message="form.errors.email" />
+                                <div v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</div>
                             </div>
 
-                            <div class="mb-4">
-                                <InputLabel for="password" value="Password (Opsional)" />
-                                <TextInput
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Password (Opsional)</label>
+                                <input
                                     id="password"
                                     type="password"
-                                    class="mt-1 block w-full"
+                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
                                     v-model="form.password"
                                     placeholder="Biarkan kosong jika tidak ingin mengubah"
                                 />
-                                <InputError class="mt-2" :message="form.errors.password" />
+                                <div v-if="form.errors.password" class="text-red-500 text-xs mt-1">{{ form.errors.password }}</div>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <InputLabel for="role" value="Role / Peran" />
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Role / Peran</label>
                                     <select
                                         id="role"
                                         v-model="form.role"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                        class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
                                     >
                                         <option value="super admin">Super Admin</option>
                                         <option value="admin">Admin</option>
                                         <option value="lembaga">Lembaga</option>
                                     </select>
-                                    <InputError class="mt-2" :message="form.errors.role" />
+                                    <div v-if="form.errors.role" class="text-red-500 text-xs mt-1">{{ form.errors.role }}</div>
                                 </div>
                                 
                                 <div>
-                                    <InputLabel for="institution_id" value="Lembaga (Opsional)" />
+                                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Lembaga (Opsional)</label>
                                     <select
                                         id="institution_id"
                                         v-model="form.institution_id"
-                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                        class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
                                     >
                                         <option value="">- Pilih Lembaga -</option>
                                         <option :value="null">Bukan Lembaga</option>
@@ -121,25 +118,28 @@ const submit = () => {
                                             {{ inst.code }} - {{ inst.name }}
                                         </option>
                                     </select>
-                                    <InputError class="mt-2" :message="form.errors.institution_id" />
+                                    <div v-if="form.errors.institution_id" class="text-red-500 text-xs mt-1">{{ form.errors.institution_id }}</div>
                                 </div>
                             </div>
 
-                            <div class="mb-4">
-                                <InputLabel for="phone" value="No. Telepon (Opsional)" />
-                                <TextInput
+                            <div>
+                                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">No. Telepon (Opsional)</label>
+                                <input
                                     id="phone"
                                     type="text"
-                                    class="mt-1 block w-full"
+                                    class="w-full border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold transition-all"
                                     v-model="form.phone"
                                 />
-                                <InputError class="mt-2" :message="form.errors.phone" />
+                                <div v-if="form.errors.phone" class="text-red-500 text-xs mt-1">{{ form.errors.phone }}</div>
                             </div>
 
-                            <div class="flex items-center gap-4 mt-8">
-                                <PrimaryButton :disabled="form.processing">
+                            <div class="flex items-center gap-4 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700">
+                                <button type="submit" class="px-10 py-3 bg-pail-gold text-white rounded-2xl hover:bg-yellow-600 font-bold shadow-lg shadow-pail-gold/20 transition" :disabled="form.processing">
                                     Simpan Perubahan
-                                </PrimaryButton>
+                                </button>
+                                <Link :href="route('admin.users.index')" class="px-8 py-3 bg-gray-100 text-gray-500 rounded-2xl hover:bg-gray-200 font-bold transition text-center">
+                                    Batal
+                                </Link>
 
                                 <Transition
                                     enter-active-class="transition ease-in-out"
@@ -147,7 +147,7 @@ const submit = () => {
                                     leave-active-class="transition ease-in-out"
                                     leave-to-class="opacity-0"
                                 >
-                                    <p v-if="form.recentlySuccessful" class="text-sm text-gray-600 dark:text-gray-400">Tersimpan.</p>
+                                    <p v-if="form.recentlySuccessful" class="text-sm text-green-600 dark:text-green-400 font-bold">✓ Tersimpan.</p>
                                 </Transition>
                             </div>
                         </form>

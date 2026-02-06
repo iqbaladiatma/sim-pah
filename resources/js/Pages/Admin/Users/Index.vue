@@ -4,6 +4,7 @@ import { Head, Link, router } from "@inertiajs/vue3";
 
 const props = defineProps({
     users: Object,
+    stats: Object,
 });
 
 const deleteUser = (id) => {
@@ -27,6 +28,23 @@ const deleteUser = (id) => {
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+                
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-pail-gold shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Total User</h3>
+                        <div class="text-3xl font-black text-gray-900 dark:text-white">{{ stats.total }}</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-blue-500 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Admin Pusat</h3>
+                        <div class="text-3xl font-black text-blue-600">{{ stats.admins }}</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border-l-4 border-green-500 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">User Lembaga</h3>
+                        <div class="text-3xl font-black text-green-600">{{ stats.lembaga }}</div>
+                    </div>
+                </div>
+
                 <!-- Add Button Container -->
                 <div class="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <div>
@@ -45,13 +63,17 @@ const deleteUser = (id) => {
                         <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
                             <thead>
                                 <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
+                                    <th class="px-6 py-4 text-left">No</th>
                                     <th class="px-6 py-4 text-left">User</th>
                                     <th class="px-6 py-4 text-left">Role & Lembaga</th>
                                     <th class="px-6 py-4 text-right">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                                <tr v-for="user in users.data" :key="user.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
+                                <tr v-for="(user, index) in users.data" :key="user.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
+                                    <td class="px-6 py-4 font-bold text-gray-500">
+                                        {{ (users.current_page - 1) * users.per_page + index + 1 }}
+                                    </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 rounded-xl bg-pail-gold/10 text-pail-gold flex items-center justify-center font-black">

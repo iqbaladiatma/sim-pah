@@ -18,8 +18,8 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Tambah Lembaga Baru (Admin)
+            <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
+                Tambah Lembaga Baru
             </h2>
         </template>
 

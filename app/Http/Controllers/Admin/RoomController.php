@@ -14,9 +14,16 @@ class RoomController extends Controller
 {
     public function index()
     {
+        $totalRooms = Room::count();
+        $latestRoom = Room::latest()->first();
+
         return Inertia::render('Admin/Rooms/Index', [
             'rooms' => Room::with('institution')->latest()->paginate(50),
             'institutions' => Institution::all(),
+            'stats' => [
+                'total' => $totalRooms,
+                'latest' => $latestRoom ? $latestRoom->name : '-',
+            ],
         ]);
     }
 
@@ -75,9 +82,27 @@ class RoomController extends Controller
             'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
+        $countBefore = Room::count();
+
         Excel::import(new RoomImport, $request->file('file'));
 
-        return redirect()->back()->with('success', 'Data ruangan berhasil diimpor.');
+        $countAfter = Room::count();
+        $importedCount = $countAfter - $countBefore;
+
+        // Log activity dengan detail import
+        activity()
+            ->causedBy(auth()->user())
+            ->performedOn(new Room())
+            ->withProperties([
+            'action' => 'import',
+            'total_imported' => $importedCount,
+            'total_before' => $countBefore,
+            'total_after' => $countAfter,
+            'file_name' => $request->file('file')->getClientOriginalName(),
+        ])
+            ->log("Import {$importedCount} ruangan baru dari file CSV");
+
+        return redirect()->back()->with('success', "Berhasil mengimpor {$importedCount} ruangan baru.");
     }
 
     public function downloadTemplate()

@@ -7,9 +7,11 @@ import FolderIcon from "@/Components/Icons/FolderIcon.vue";
 import PlusIcon from "@/Components/Icons/PlusIcon.vue";
 import RocketIcon from "@/Components/Icons/RocketIcon.vue";
 import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
+import { formatRupiah } from "@/Utils/format";
 
 const props = defineProps({
     items: Object,
+    stats: Object,
 });
 
 const deleteItem = (id) => {
@@ -52,6 +54,27 @@ const handleImport = () => {
 
         <div class="py-12">
             <div class="mx-auto max-w-[95%] sm:px-6 lg:px-8">
+                
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-1">Total Item</h3>
+                        <div class="text-2xl font-black text-gray-900 dark:text-white">{{ stats.total_items }}</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-1">Total Stok</h3>
+                        <div class="text-2xl font-black text-blue-600">{{ stats.total_stock }}</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-1">Low Stock</h3>
+                        <div class="text-2xl font-black text-orange-500">{{ stats.low_stock }}</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                        <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-1">Total Nilai Aset</h3>
+                        <div class="text-lg font-black text-green-600 font-mono">{{ formatRupiah(stats.total_value) }}</div>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="mb-6 flex justify-end gap-3">
                     <button

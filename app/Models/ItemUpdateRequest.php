@@ -23,6 +23,7 @@ class ItemUpdateRequest extends Model
     protected $fillable = [
         'item_id',
         'user_id',
+        'type',
         'old_data',
         'new_data',
         'reason',

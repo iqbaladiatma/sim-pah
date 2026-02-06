@@ -4,79 +4,119 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Item;
-use App\Models\Institution;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\ItemImport;
+use Inertia\Inertia;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class ItemController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $items = Item::with(['institution', 'room'])->latest()->paginate(50);
-        $institutions = Institution::all();
+        $query = Item::with(['institution']);
 
-        return inertia('Admin/Items/Index', [
-            'items' => $items,
-            'institutions' => $institutions,
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        return Inertia::render('Admin/Items/Index', [
+            'items' => $query->latest()->paginate(10),
+            'stats' => [
+                'total_items' => Item::count(),
+                'total_stock' => Item::sum('stock'),
+                'low_stock' => Item::whereColumn('stock', '<=', 'min_stock')->count(),
+                'total_value' => 0 // 'price' column does not exist in items table.
+            ]
         ]);
     }
 
     public function create()
     {
-        $institutions = Institution::all();
-        return inertia('Admin/Items/Create', [
-            'institutions' => $institutions
+        return Inertia::render('Admin/Items/Create', [
+            'institutions' => \App\Models\Institution::all(),
+            'rooms' => \App\Models\Room::all(),
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'institution_id' => 'required|exists:institutions,id',
-            'room_id' => 'required|exists:rooms,id',
+            'institution_id' => 'nullable|exists:institutions,id',
+            'room_id' => 'nullable|exists:rooms,id',
             'name' => 'required|string|max:255',
-            'purchase_date' => 'nullable|date',
+            'brand' => 'nullable|string|max:255',
+            'description' => 'nullable|string', // mapped to note? No model has note. Description is not in fillable? Wait model has note.
             'stock' => 'required|integer|min:0',
-            'source' => 'required|string|max:255',
-            'condition' => 'required|string|max:255',
-            'responsible_person' => 'nullable|string|max:255',
+            'min_stock' => 'nullable|integer|min:0',
+            'unit' => 'nullable|string|max:50',
+            'purchase_date' => 'nullable|date',
+            'source' => 'nullable|string',
+            'condition' => 'nullable|string',
+            'responsible_person' => 'nullable|string',
             'note' => 'nullable|string',
         ]);
 
-        Item::create(array_merge($validated, [
-            'brand' => '-',
-            'unit' => 'pcs',
-            'min_stock' => 0
-        ]));
+        // Note: Model has no image field in fillable.
+
+        Item::create([
+            'institution_id' => $validated['institution_id'] ?? null,
+            'room_id' => $request->room_id,
+            'name' => $validated['name'],
+            'brand' => $validated['brand'] ?? null,
+            'stock' => $validated['stock'],
+            'min_stock' => $validated['min_stock'] ?? 0,
+            'unit' => $validated['unit'] ?? 'pcs',
+            'purchase_date' => $validated['purchase_date'] ?? null,
+            'source' => $validated['source'] ?? null,
+            'condition' => $validated['condition'] ?? 'Baik',
+            'responsible_person' => $validated['responsible_person'] ?? null,
+            'note' => $validated['note'] ?? $request->description, // Map description to note if needed or ignore
+        ]);
 
         return redirect()->route('admin.items.index')->with('success', 'Barang berhasil ditambahkan.');
     }
 
     public function edit(Item $item)
     {
-        $institutions = Institution::all();
-        return inertia('Admin/Items/Edit', [
-            'item' => $item,
-            'institutions' => $institutions
+        return Inertia::render('Admin/Items/Edit', [
+            'item' => $item->load(['institution', 'room']),
+            'institutions' => \App\Models\Institution::all(),
+            'rooms' => \App\Models\Room::all(),
         ]);
     }
 
     public function update(Request $request, Item $item)
     {
         $validated = $request->validate([
-            'institution_id' => 'required|exists:institutions,id',
-            'room_id' => 'required|exists:rooms,id',
+            'institution_id' => 'nullable|exists:institutions,id',
+            'room_id' => 'nullable|exists:rooms,id',
             'name' => 'required|string|max:255',
-            'purchase_date' => 'nullable|date',
+            'brand' => 'nullable|string|max:255',
             'stock' => 'required|integer|min:0',
-            'source' => 'required|string|max:255',
-            'condition' => 'required|string|max:255',
-            'responsible_person' => 'nullable|string|max:255',
+            'min_stock' => 'nullable|integer|min:0',
+            'unit' => 'nullable|string|max:50',
+            'purchase_date' => 'nullable|date',
+            'source' => 'nullable|string',
+            'condition' => 'nullable|string',
+            'responsible_person' => 'nullable|string',
             'note' => 'nullable|string',
         ]);
 
-        $item->update($validated);
+        $item->update([
+            'institution_id' => $validated['institution_id'] ?? null,
+            'room_id' => $request->room_id,
+            'name' => $validated['name'],
+            'brand' => $validated['brand'] ?? null,
+            'stock' => $validated['stock'],
+            'min_stock' => $validated['min_stock'] ?? 0,
+            'unit' => $validated['unit'] ?? 'pcs',
+            'purchase_date' => $validated['purchase_date'] ?? null,
+            'source' => $validated['source'] ?? null,
+            'condition' => $validated['condition'] ?? 'Baik',
+            'responsible_person' => $validated['responsible_person'] ?? null,
+            'note' => $validated['note'] ?? null,
+        ]);
+
         return redirect()->route('admin.items.index')->with('success', 'Barang berhasil diperbarui.');
     }
 
@@ -84,47 +124,5 @@ class ItemController extends Controller
     {
         $item->delete();
         return redirect()->back()->with('success', 'Barang berhasil dihapus.');
-    }
-
-    public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|file', // More flexible than mimes:csv
-        ]);
-
-        try {
-            \Illuminate\Support\Facades\Log::info('Starting Item Import...');
-            Excel::import(new ItemImport, $request->file('file'));
-            \Illuminate\Support\Facades\Log::info('Item Import Finished.');
-            return redirect()->back()->with('success', 'Data barang berhasil diimpor.');
-        }
-        catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Item Import Error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage());
-        }
-    }
-
-    public function downloadTemplate()
-    {
-        $headers = [
-            'lembaga_kode', 'ruangan', 'jenis_barang',
-            'tanggal_pembukuan_pembelian', 'kuantitas', 'sumber_perolehan_barang',
-            'keadaan_barang', 'penanggung_jawab', 'keterangan'
-        ];
-
-        $callback = function () use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-            fputcsv($file, [
-                'SMA-AH', 'Lab Komputer 1', 'Laptop',
-                '2023-10-25', '10', 'Yayasan',
-                'Baik', 'Ihsan Adi', 'Hibah dari yayasan pusat'
-            ]);
-            fclose($file);
-        };
-
-        return response()->streamDownload($callback, 'template_inventaris.csv', [
-            'Content-Type' => 'text/csv',
-        ]);
     }
 }

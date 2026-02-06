@@ -11,7 +11,11 @@ class InstitutionController extends Controller
     {
         $institutions = \App\Models\Institution::latest()->paginate(50);
         return inertia('Admin/Institutions/Index', [
-            'institutions' => $institutions
+            'institutions' => $institutions,
+            'stats' => [
+                'total' => \App\Models\Institution::count(),
+                'new_this_month' => \App\Models\Institution::whereMonth('created_at', now()->month)->count(),
+            ]
         ]);
     }
 

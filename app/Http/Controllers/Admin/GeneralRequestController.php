@@ -3,35 +3,39 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Request as GeneralRequest;
 use Illuminate\Http\Request;
+use App\Models\Request as GeneralRequest;
+use Inertia\Inertia;
 
 class GeneralRequestController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = GeneralRequest::with(['user.institution', 'institution']);
+        // For Admin: View All Requests
+        $requests = GeneralRequest::with(['user.institution', 'institution'])
+            ->latest()
+            ->paginate(10);
 
-        $requests = $query->latest()->paginate(10);
-
-        return inertia('Admin/Requests/Index', [
-            'requests' => $requests
+        return Inertia::render('Admin/Requests/Index', [
+            'requests' => $requests,
+            'stats' => [
+                'pending' => GeneralRequest::where('status', 'pending')->count(),
+                'approved' => GeneralRequest::where('status', 'approved')->count(),
+                'rejected' => GeneralRequest::where('status', 'rejected')->count(),
+                'total_cost_pending' => GeneralRequest::where('status', 'pending')->sum('estimated_cost'),
+            ]
         ]);
-    }
-
-    public function create()
-    {
-        return inertia('Admin/Requests/Create');
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'institution_id' => 'required|exists:institutions,id',
             'type' => 'required|string|max:50',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'estimated_cost' => 'required|numeric|min:0',
-            'photo_evidence' => 'nullable|image|max:2048',
+            'photo_evidence' => 'nullable|image|max:2048', // Max 2MB, optional
         ]);
 
         $path = $request->hasFile('photo_evidence')
@@ -42,39 +46,54 @@ class GeneralRequestController extends Controller
 
         GeneralRequest::create([
             'user_id' => $user->id,
-            'institution_id' => $user->institution_id,
+            'institution_id' => $validated['institution_id'],
             'type' => $validated['type'],
             'title' => $validated['title'],
             'description' => $validated['description'],
             'estimated_cost' => $validated['estimated_cost'],
             'photo_evidence' => $path,
             'status' => 'pending',
+            'is_admin_create' => true // Optional flag if we want to track admin activity
         ]);
 
-        return redirect()->route('admin.requests.index')->with('success', 'Pengajuan berhasil dibuat.');
+        return redirect()->route('admin.requests.index')->with('success', 'Pengajuan berhasil dibuat oleh Admin.');
+    }
+
+    public function create()
+    {
+        $institutions = \App\Models\Institution::orderBy('code')->get();
+
+        return Inertia::render('Admin/Requests/Create', [
+            'institutions' => $institutions
+        ]);
     }
 
     public function edit(GeneralRequest $request)
     {
-        $request->load(['user.institution', 'institution']);
-        return inertia('Admin/Requests/Edit', [
-            'request' => $request
+        return Inertia::render('Admin/Requests/Edit', [
+            'request' => $request->load(['user.institution', 'institution'])
         ]);
     }
 
-    // Fixed: Renamed $request to $httpRequest to allow model binding $request (route param 'request')
     public function update(Request $httpRequest, GeneralRequest $request)
     {
         $validated = $httpRequest->validate([
-            'status' => 'required|in:approved,rejected',
-            'admin_note' => 'nullable|string',
+            'status' => 'required|in:pending,approved,rejected',
+            'admin_note' => 'nullable|string'
         ]);
 
+        // Explicitly update the passed model instance
         $request->update([
             'status' => $validated['status'],
-            'admin_note' => $validated['admin_note'] ?? null,
+            'admin_note' => $validated['admin_note']
         ]);
 
-        return redirect()->route('admin.requests.index')->with('success', 'Status pengajuan diperbarui.');
+        return redirect()->route('admin.requests.index')->with('success', 'Status pengajuan berhasil diperbarui.');
+    }
+
+    public function destroy(GeneralRequest $request)
+    {
+        $request->delete();
+        return redirect()->back()->with('success', 'Pengajuan berhasil dihapus.');
     }
 }

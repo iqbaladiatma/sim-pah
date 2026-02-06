@@ -9,6 +9,10 @@ import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
 
 const props = defineProps({
     rooms: Object,
+    stats: {
+        type: Object,
+        default: () => ({ total: 0, latest: '-' }),
+    },
 });
 
 const deleteRoom = (id) => {
@@ -51,6 +55,22 @@ const handleImport = () => {
 
         <div class="py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                
+                <!-- Stats Overview -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl p-6 text-white shadow-lg shadow-blue-600/20 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 h-full w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <h3 class="text-white/80 font-bold uppercase tracking-wider text-xs mb-1 relative z-10">Total Ruangan</h3>
+                        <div class="text-3xl font-black relative z-10">{{ stats.total }}</div>
+                        <div class="text-white/60 text-xs mt-2 relative z-10">Ruangan Terdata</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm">
+                         <h3 class="text-gray-400 font-black uppercase tracking-wider text-[10px] mb-2">Penambahan Terakhir</h3>
+                         <div class="text-lg font-bold text-gray-800 dark:text-white truncate">{{ stats.latest }}</div>
+                         <div class="text-gray-400 text-xs mt-1">Ruangan Baru</div>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
                 <div class="mb-6 flex justify-end gap-3">
                     <button
@@ -73,6 +93,7 @@ const handleImport = () => {
                         <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
                             <thead>
                                 <tr class="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider bg-gray-50/80 dark:bg-gray-900/50">
+                                    <th class="px-6 py-4 text-left">No</th>
                                     <th class="px-6 py-4 text-left">Lembaga</th>
                                     <th class="px-6 py-4 text-left">Nama Ruangan</th>
                                     <th class="px-6 py-4 text-left">Deskripsi / Lokasi</th>
@@ -80,7 +101,10 @@ const handleImport = () => {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
-                                <tr v-for="room in rooms.data" :key="room.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
+                                <tr v-for="(room, index) in rooms.data" :key="room.id" class="hover:bg-gray-50/80 dark:hover:bg-gray-900/30 transition text-sm">
+                                    <td class="px-6 py-4 font-bold text-gray-500">
+                                        {{ (rooms.current_page - 1) * rooms.per_page + index + 1 }}
+                                    </td>
                                     <td class="px-6 py-4 font-bold text-pail-gold">{{ room.institution?.code }}</td>
                                     <td class="px-6 py-4 font-bold text-gray-900 dark:text-white">{{ room.name }}</td>
                                     <td class="px-6 py-4 text-gray-500 italic">{{ room.description || '-' }}</td>
