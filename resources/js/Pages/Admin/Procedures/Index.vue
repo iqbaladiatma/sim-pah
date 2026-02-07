@@ -106,31 +106,30 @@ const filteredProcedures = computed(() => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
-                <div class="flex items-center gap-4">
-                    <div class="w-1.5 h-8 md:w-2 md:h-10 bg-pail-gold rounded-full shrink-0"></div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-1 h-8 bg-pail-gold rounded-full shrink-0"></div>
                     <div>
-                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-tight">
+                        <h2 class="text-xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-tight">
                             {{ getGroupTitle(currentGroup) }}
                         </h2>
-                        <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
+                        <p class="text-[9px] font-black text-pail-gold uppercase tracking-widest mt-0.5">Sistem Informasi Manajemen Unit Rumah Tangga</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     <Link 
                         :href="route('admin.procedures.dashboard')" 
-                        class="flex items-center gap-2 px-6 py-3 bg-pail-gold text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-all shadow-lg hover:shadow-pail-gold/20 mr-2"
+                        class="flex items-center justify-center gap-2 px-5 py-2.5 bg-pail-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-all shadow-lg hover:shadow-pail-gold/20"
                     >
-                        <i class="block w-4 h-4 text-white">📊</i>
-                        Dashboard ISO
+                        📊 Dashboard ISO
                     </Link>
                     <a 
                         :href="route('admin.procedures.export_all')" 
                         target="_blank"
-                        class="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-pail-gold transition-all shadow-lg hover:shadow-pail-gold/20"
+                        class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-pail-gold transition-all shadow-lg hover:shadow-pail-gold/20"
                     >
                         <DocumentIcon class="w-4 h-4" />
-                        Export Seluruh ISO
+                        Export Seluruh
                     </a>
                 </div>
             </div>
@@ -139,68 +138,68 @@ const filteredProcedures = computed(() => {
         <div class="py-6 md:py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Group Info Header -->
-                <div v-if="currentGroup" class="mb-6 md:mb-10 flex flex-col md:flex-row md:items-center justify-between bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm gap-4">
+                <div v-if="currentGroup" class="mb-6 flex flex-col md:flex-row md:items-center justify-between bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm gap-4">
                     <div class="flex flex-col md:flex-row md:items-center gap-4">
-                        <div class="inline-block px-4 py-2 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest self-start md:self-auto">
+                        <div class="inline-block px-3 py-1.5 bg-gray-900 text-white rounded-lg text-[9px] font-black uppercase tracking-widest self-start md:self-auto">
                             MODUL: {{ currentGroup }}
                         </div>
-                        <span class="text-xs font-bold text-gray-400 uppercase tracking-tight italic">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tight italic">
                             Menampilkan {{ filteredProcedures.length }} prosedur kerja terotorisasi.
                         </span>
                     </div>
                     <div class="flex flex-col md:flex-row gap-4">
-                        <div class="relative min-w-[250px]">
-                            <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <div class="relative min-w-[200px]">
+                            <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                             <input 
                                 v-model="searchQuery"
                                 type="text" 
                                 placeholder="CARI PROSEDUR..."
-                                class="w-full bg-gray-50 dark:bg-gray-900/50 border-0 rounded-full pl-12 pr-6 py-3 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white focus:ring-2 focus:ring-pail-gold"
+                                class="w-full bg-gray-50 dark:bg-gray-900/50 border-0 rounded-xl pl-11 pr-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white focus:ring-2 focus:ring-pail-gold"
                             />
                         </div>
                         <Link :href="route('admin.procedures.index')" class="flex items-center text-[10px] font-black text-pail-gold uppercase tracking-widest hover:underline md:text-right">
-                            Lihat Semua Prosedur &rarr;
+                            Lihat Semua &rarr;
                         </Link>
                     </div>
                 </div>
 
                 <!-- Search box when no currentGroup (on all procedures page) -->
-                <div v-else class="mb-10 flex justify-end">
+                <div v-else class="mb-8 flex justify-end px-4 sm:px-0">
                     <div class="relative w-full md:w-1/3">
                         <SearchIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input 
                             v-model="searchQuery"
                             type="text" 
                             placeholder="CARI PROSEDUR ISO..."
-                            class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-full pl-12 pr-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-pail-gold transition-all"
+                            class="w-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl pl-12 pr-6 py-3.5 text-[10px] font-black uppercase tracking-widest text-gray-900 dark:text-white shadow-sm focus:ring-2 focus:ring-pail-gold transition-all"
                         />
                     </div>
                 </div>
 
                 <!-- Procedures Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                <div class="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
                     <Link 
                         v-for="(proc, key) in filteredProcedures" 
                         :key="key"
                         :href="proc.url"
-                        class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col items-center text-center"
+                        class="bg-white dark:bg-gray-800 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col items-center text-center"
                     >
                         <!-- Background Pattern -->
-                        <div class="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none font-black text-[120px] select-none flex items-center justify-center text-gray-900 dark:text-white transform -rotate-12 translate-x-8 translate-y-8">
+                        <div class="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none font-black text-[60px] sm:text-[100px] select-none flex items-center justify-center text-gray-900 dark:text-white transform -rotate-12 translate-x-6 translate-y-6">
                              {{ (proc.id || '').charAt(0).toUpperCase() }}
                         </div>
 
-                        <div class="w-16 h-16 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 mb-6 shadow-inner border border-gray-100 dark:border-gray-700 relative z-10">
-                            <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-8 h-8" />
+                        <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 mb-2 sm:mb-5 shadow-inner border border-gray-100 dark:border-gray-700 relative z-10">
+                            <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-5 h-5 sm:w-7 sm:h-7" />
                         </div>
                         
-                        <h4 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-3 relative z-10 leading-tight group-hover:text-pail-gold transition-colors">
+                        <h4 class="text-[8px] sm:text-[13px] font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1 sm:mb-2 relative z-10 leading-[1.1] group-hover:text-pail-gold transition-colors break-words">
                             {{ proc.title }}
                         </h4>
                         
-                        <div class="mt-auto pt-4 relative z-10">
-                            <span class="text-[9px] font-black text-pail-gold uppercase tracking-[0.3em] border-b-2 border-pail-gold/20 group-hover:border-pail-gold transition-all">
-                                Buka Modul &rarr;
+                        <div class="mt-auto pt-1 sm:pt-3 relative z-10 hidden sm:block">
+                            <span class="text-[8px] font-black text-pail-gold uppercase tracking-[0.3em] border-b-2 border-pail-gold/20 group-hover:border-pail-gold transition-all">
+                                Buka &rarr;
                             </span>
                         </div>
                     </Link>
