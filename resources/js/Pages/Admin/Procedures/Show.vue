@@ -40,20 +40,26 @@ const tableColspan = computed(() => {
     if (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(t)) return 30;
     if (t === 'pemeliharaan-kipas') return 8;
     if (t === 'pemeliharaan-septik') return 10;
+    if (t === 'pemeliharaan-sarpras') return 9;
+    if (t === 'agenda-perbaikan') return 5;
     if (['pengajuan-rab', 'analisis-kebutuhan'].includes(t)) return 7;
     if (['pengadaan-sarpras', 'berita-acara-pemeriksaan', 'penerimaan-barang'].includes(t)) return 10;
     if (t === 'penyerahan-barang') return 8;
     if (t === 'jadwal-token') return 9;
     if (t === 'pemeliharaan-kebersihan') return 17;
-    if (t === 'jadwal-kebersihan') return 8; // kept for fallback or history
-    if (t === 'detailed-monitoring') return 23; // 4 fixed + 18 dynamic (3 columns * 6 days) + 1 desc
-    if (t === 'detailed-monitoring') return 23; // 4 fixed + 18 dynamic (3 columns * 6 days) + 1 desc
-    if (t === 'weekly-activity') return 9;
-    if (t === 'vehicle-log') return 9;
-    if (t === 'electrical-maintenance') return 17;
+    if (t === 'detailed-monitoring') return 26;
+    if (t === 'weekly-activity') return 10;
+    if (t === 'vehicle-log') return 10;
+    if (t === 'electrical-maintenance') return 18;
     if (t === 'kelengkapan-alat') return 9;
     if (t === 'monitoring-kebersihan') return 17;
+    if (t === 'monitoring-aset') return 7;
     if (t === 'pemilihan-evaluasi') return 6;
+    if (t === 'pelelangan-aset') return 9;
+    if (t === 'peminjaman-barang') return 11;
+    if (t === 'laporan-proyek') return 11;
+    if (t === 'rekapan-pengajuan') return 10;
+    if (t.includes('kendaraan')) return 5;
     return 7; // default
 });
 
@@ -323,40 +329,41 @@ const importExcel = (event) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4 sm:px-0">
-                <div class="flex items-center gap-4">
-                    <Link :href="route('admin.procedures.index')" class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-pail-gold shadow-sm transition-all shrink-0">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <Link :href="route('admin.procedures.index')" class="w-9 h-9 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-pail-gold shadow-sm transition-all shrink-0 border border-gray-100 dark:border-gray-700">
                         &larr;
                     </Link>
                     <div>
-                        <h2 class="text-lg md:text-xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight">{{ procedure.title }}</h2>
-                        <p class="text-[9px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Management Console</p>
+                        <h2 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight">{{ procedure.title }}</h2>
+                        <p class="text-[9px] font-black text-pail-gold uppercase tracking-widest mt-0.5">Management Console</p>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 md:gap-3">
-                    <div v-if="type === 'pemeliharaan-septik'" class="px-4 py-2 bg-pail-gold/10 rounded-xl border border-pail-gold/20 flex items-center gap-2 mr-2">
-                        <span class="text-[9px] font-black text-pail-gold uppercase tracking-widest">TGL:</span>
-                        <span class="text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}</span>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div v-if="type === 'pemeliharaan-septik'" class="px-3 py-1.5 bg-pail-gold/10 rounded-lg border border-pail-gold/20 flex items-center gap-2 mr-1">
+                        <span class="text-[8px] font-black text-pail-gold uppercase tracking-widest">TGL:</span>
+                        <span class="text-[9px] font-black text-gray-900 dark:text-white uppercase">{{ new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}</span>
                     </div>
-                    <button @click="exportExcel" class="flex-1 sm:flex-none px-4 md:px-6 py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl text-[9px] md:text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-2 shadow-sm">
-                        <DownloadIcon class="w-4 h-4" /> <span class="hidden sm:inline">Export</span>
+                    <button @click="exportExcel" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm">
+                        <DownloadIcon class="w-3.5 h-3.5" /> <span class="hidden sm:inline">Export</span>
                     </button>
-                    <label class="flex-1 sm:flex-none px-4 md:px-6 py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl text-[9px] md:text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer">
-                        <UploadIcon class="w-4 h-4" /> <span class="hidden sm:inline">Import</span>
+                    <label class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm cursor-pointer">
+                        <UploadIcon class="w-3.5 h-3.5" /> <span class="hidden sm:inline">Import</span>
                         <input type="file" ref="fileInput" @change="importExcel" class="hidden" accept=".xlsx,.xls,.csv" />
                     </label>
-                    <button @click="showCreateModal = true" class="w-full sm:w-auto px-6 md:px-8 py-3 bg-gray-900 dark:bg-pail-gold text-pail-gold dark:text-white rounded-2xl text-[9px] md:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-2xl">
-                        <PlusIcon class="w-4 h-4" /> Tambah Data
+                    <button @click="showCreateModal = true" class="px-5 py-2 bg-gray-900 dark:bg-pail-gold text-pail-gold dark:text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2 shadow-xl shadow-black/10">
+                        <PlusIcon class="w-3.5 h-3.5" /> Tambah
                     </button>
                 </div>
             </div>
         </template>
 
-        <div class="py-6 md:py-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 rounded-[1.5rem] md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                    <div class="overflow-x-auto">
+        <div class="py-6 sm:py-10">
+            <div class="max-w-7xl mx-auto">
+                <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <!-- Desktop Table View -->
+                    <div class="hidden md:block overflow-x-auto scrollbar-hide">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <!-- Row 1 for Specialized & Double Headers -->
@@ -387,6 +394,16 @@ const importExcel = (event) => {
                                 <th rowspan="3" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                             </template>
                             
+                            <template v-if="type === 'kir-ruangan'">
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Barang</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Merk</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center text-[8px]">No. Seri</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Ukuran</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Bahan</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Tahun</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Kode</th>
+                                <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Jumlah</th>
+                            </template>
                             <template v-if="type === 'pendataan-aset'">
                                 <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Satuan Kerja</th>
                                 <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jumlah Aset</th>
@@ -748,28 +765,30 @@ const importExcel = (event) => {
 
                         <!-- specialized for Weekly Activity -->
                         <tr v-if="type === 'weekly-activity'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Pekanan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Nama Petugas</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Area Kegiatan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Uraian Pekerjaan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Waktu</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Ceklist</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Pekanan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Nama Petugas</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Area Kegiatan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Uraian Pekerjaan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Waktu</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Ceklist</th>
                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
-                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Paraf PJ</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Paraf PJ</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Manajemen</th>
                         </tr>
 
                         <!-- specialized for Vehicle Log -->
                         <tr v-if="type === 'vehicle-log'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Bln/Tgl/Thn</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Jenis Kendaraan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Waktu Jam</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Unit Kerja</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Tujuan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Kilometer</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Ampere BBM</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Kondisi Kendaraan</th>
-                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right">Nama PJ</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Bln/Tgl/Thn</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Jenis Kendaraan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Waktu Jam</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Unit Kerja</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tujuan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Kilometer</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Ampere BBM</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kondisi Kendaraan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Nama PJ</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Manajemen</th>
                         </tr>
 
                         <!-- specialized for Electrical Maintenance -->
@@ -1019,19 +1038,7 @@ const importExcel = (event) => {
                                         </span>
                                     </td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ item.follow_up_date || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic text-right">{{ item.remarks || '-' }}</td>
-
-                                    <!-- Management Actions for Rekapan Pengajuan -->
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
+                                     <td class="px-4 py-6 text-[9px] text-gray-400 italic text-right">{{ item.remarks || '-' }}</td>
                                 </template>
 
                                 <!-- Specialized Content for Pengajuan RAB -->
@@ -1041,20 +1048,8 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center">{{ item.volume || 0 }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-right">Rp {{ (parseFloat(item.unit_price) || 0).toLocaleString('id-ID') }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right">Rp {{ (parseFloat(item.total_price) || 0).toLocaleString('id-ID') }}</td>
-
-                                    <!-- Management Actions for Pengajuan RAB -->
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right">Rp {{ (parseFloat(item.total_price) || 0).toLocaleString('id-ID') }}</td>
+                                 </template>
 
                                 <!-- Specialized Content for Laporan Proyek Kegiatan -->
                                 <template v-else-if="type === 'laporan-proyek'">
@@ -1074,20 +1069,8 @@ const importExcel = (event) => {
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic">{{ item.description || '-' }}</td>
-
-                                    <!-- Management Actions for Laporan Proyek -->
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-4 py-6 text-[9px] text-gray-400 italic">{{ item.description || '-' }}</td>
+                                 </template>
 
                                 <!-- Specialized Content for Peminjaman Barang -->
                                 <template v-else-if="type === 'peminjaman-barang'">
@@ -1109,19 +1092,8 @@ const importExcel = (event) => {
                                     <!-- Saat Kembali -->
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center border-l border-gray-100 dark:border-gray-700 uppercase">{{ item.return_condition || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase">{{ item.actual_return_date ? new Date(item.actual_return_date).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-center uppercase">{{ item.returner_paraf || '-' }}</td>
-
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-center uppercase">{{ item.returner_paraf || '-' }}</td>
+                                 </template>
 
                                 <!-- Specialized Content for Pelelangan Aset -->
                                 <template v-else-if="type === 'pelelangan-aset'">
@@ -1137,18 +1109,8 @@ const importExcel = (event) => {
                                         </span>
                                     </td>
                                     <td class="px-4 py-6 text-right text-xs font-mono font-black text-gray-900 dark:text-white">Rp {{ Number(item.value || 0).toLocaleString() }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.reason || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.reason || '-' }}</td>
+                                 </template>
 
                                 <!-- Specialized Content for Monitoring Kebersihan -->
                                 <template v-else-if="type === 'monitoring-kebersihan'">
@@ -1167,18 +1129,8 @@ const importExcel = (event) => {
                                     <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.fri_status ? '√' : '' }}</td>
                                     <td class="px-2 py-6 text-[10px] text-center font-bold text-green-600">{{ item.sat_status ? '√' : '' }}</td>
                                     <td class="px-2 py-6 text-[10px] text-center font-bold text-red-400">{{ !item.sat_status ? '√' : '' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                 </template>
 
                                 <!-- Specialized Content for Detailed Monitoring -->
                                 <template v-else-if="type === 'detailed-monitoring'">
@@ -1202,18 +1154,8 @@ const importExcel = (event) => {
                                         </td>
                                     </template>
 
-                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                 </template>
 
                                 <!-- Specialized Content for Weekly Activity -->
                                 <template v-else-if="type === 'weekly-activity'">
@@ -1228,20 +1170,10 @@ const importExcel = (event) => {
                                         <span v-else class="text-gray-300">-</span>
                                     </td>
                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap text-gray-900 dark:text-white font-bold text-[10px] uppercase">
-                                        {{ item.responsible_person || '-' }}
-                                    </td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-8 py-6 text-right whitespace-nowrap text-gray-900 dark:text-white font-bold text-[10px] uppercase">
+                                         {{ item.responsible_person || '-' }}
+                                     </td>
+                                 </template>
 
                                 <!-- Specialized Content for Vehicle Log -->
                                 <template v-else-if="type === 'vehicle-log'">
@@ -1253,20 +1185,10 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.start_mileage || 0 }} KM</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.fuel_level_before || '-' }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.condition_before || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap text-[10px] font-bold uppercase">
-                                        {{ item.responsible_person || '-' }}
-                                    </td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-8 py-6 text-right whitespace-nowrap text-[10px] font-bold uppercase">
+                                         {{ item.responsible_person || '-' }}
+                                     </td>
+                                 </template>
 
                                 <!-- Specialized Content for Electrical Maintenance -->
                                 <template v-else-if="type === 'electrical-maintenance'">
@@ -1392,16 +1314,6 @@ const importExcel = (event) => {
                                             Rp {{ Number(item.total_price || 0).toLocaleString() }}
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Jadwal Token -->
@@ -1422,18 +1334,8 @@ const importExcel = (event) => {
                                     </td>
                                     <td class="px-4 py-6 text-[10px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center uppercase italic">TERLAMPIR</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center uppercase italic">TERLAMPIR</td>
+                                 </template>
 
                                 <!-- Specialized Content for Penyerahan Barang -->
                                 <template v-else-if="type === 'penyerahan-barang'">
@@ -1450,16 +1352,6 @@ const importExcel = (event) => {
                                         </span>
                                     </td>
                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Penerimaan Barang -->
@@ -1477,16 +1369,6 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">{{ item.source || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-pail-gold uppercase">{{ item.performer?.name || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Pengadaan Sarpras -->
@@ -1509,16 +1391,6 @@ const importExcel = (event) => {
                                             {{ item.status || 'pending' }}
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Analisis Kebutuhan Sarpras -->
@@ -1536,16 +1408,6 @@ const importExcel = (event) => {
                                             }">
                                             {{ item.procurement_type || '-' }}
                                         </span>
-                                    </td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
                                     </td>
                                 </template>
 
@@ -1569,16 +1431,6 @@ const importExcel = (event) => {
                                             }">
                                             {{ item.status || '-' }}
                                         </span>
-                                    </td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
                                     </td>
                                 </template>
 
@@ -1636,18 +1488,8 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.location || '-' }}</td>
                                     <td class="px-2 py-6 text-[10px] text-center border-l border-gray-100 dark:border-gray-700 font-bold" :class="item.condition === 'B' ? 'text-green-600' : 'text-gray-200'">{{ item.condition === 'B' ? '✓' : '-' }}</td>
                                     <td class="px-2 py-6 text-[10px] text-center border-l border-gray-100 dark:border-gray-700 font-bold" :class="item.condition === 'KB' ? 'text-yellow-600' : 'text-gray-200'">{{ item.condition === 'KB' ? '✓' : '-' }}</td>
-                                    <td class="px-2 py-6 text-[10px] text-center border-l border-gray-100 dark:border-gray-700 font-bold" :class="item.condition === 'R' ? 'text-red-600' : 'text-gray-200'">{{ item.condition === 'R' ? '✓' : '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                     <td class="px-2 py-6 text-[10px] text-center border-l border-gray-100 dark:border-gray-700 font-bold" :class="item.condition === 'R' ? 'text-red-600' : 'text-gray-200'">{{ item.condition === 'R' ? '✓' : '-' }}</td>
+                                 </template>
 
                                 <!-- Specialized Content for ELECTRICAL MAINTENANCE -->
                                 <template v-else-if="type === 'electrical-maintenance'">
@@ -1660,20 +1502,9 @@ const importExcel = (event) => {
                                     <td v-for="month in ['jul_status', 'aug_status', 'sep_status', 'oct_status', 'nov_status', 'dec_status', 'jan_status', 'feb_status', 'mar_status', 'apr_status', 'may_status', 'jun_status']" :key="month" class="px-1 py-6 text-center border-l dark:border-gray-700">
                                         <span v-if="item[month] === 'V'" class="text-green-500 font-black text-[10px]">V</span>
                                         <span v-else-if="item[month] === 'X'" class="text-red-500 font-black text-[10px]">X</span>
-                                        <span v-else class="text-gray-200 dark:text-gray-700">-</span>
-                                    </td>
-                                    
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </template>
+                                         <span v-else class="text-gray-200 dark:text-gray-700">-</span>
+                                     </td>
+                                 </template>
 
                                 <!-- Specialized Content for PEMELIHARAAN AC -->
                                 <template v-else-if="type === 'pemeliharaan-ac'">
@@ -1921,6 +1752,108 @@ const importExcel = (event) => {
                     </tbody>
                 </table>
 
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="md:hidden divide-y divide-gray-50 dark:divide-gray-700/50">
+                    <div v-for="(item, index) in data.data" :key="item.id" class="p-5 space-y-4">
+                        <!-- Card Header -->
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center text-pail-gold text-[10px] font-black shrink-0 shadow-lg">
+                                    {{ index + 1 }}
+                                </div>
+                                <div class="min-w-0">
+                                    <h3 class="text-[11px] font-black text-gray-900 dark:text-white uppercase tracking-tight leading-tight truncate">
+                                        {{ item.title || item.name || item.subcategory || item.item?.name || 'Data Prosedur' }}
+                                    </h3>
+                                    <p class="text-[8px] font-bold text-pail-gold uppercase tracking-widest mt-0.5 truncate">
+                                        {{ item.code || item.serial_number || item.brand || item.item?.code || '#' + item.id }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-colors">
+                                    <PencilIcon class="w-3.5 h-3.5" />
+                                </button>
+                                <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/10 flex items-center justify-center text-red-400 hover:text-red-600 transition-colors">
+                                    <TrashIcon class="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Card Info Grid -->
+                        <div class="grid grid-cols-2 gap-y-4 gap-x-2">
+                            <!-- Column 1: Core Meta -->
+                            <div v-if="item.room?.name || item.location || item.institution?.name || item.institution_name" class="space-y-1">
+                                <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest">Lokasi / Lembaga</p>
+                                <p class="text-[9px] font-black text-gray-800 dark:text-gray-200 uppercase leading-tight truncate">
+                                    {{ item.room?.name || item.location || item.institution?.name || item.institution_name }}
+                                </p>
+                            </div>
+
+                            <!-- Column 2: Status Indicators -->
+                            <div v-if="item.status || item.condition || item.after_condition || item.before_condition" class="space-y-1">
+                                <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest">Status / Kondisi</p>
+                                <span class="inline-flex px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-tighter border shadow-sm"
+                                    :class="{
+                                        'bg-green-50 text-green-600 border-green-100': ['selesai', 'completed', 'available', 'Terpilih', 'B', 'Baik', 'v', 'V', 'OK'].includes((item.status || item.condition || item.after_condition || item.before_condition || '').toString().toUpperCase() === 'V' ? 'V' : (item.status || item.condition || item.after_condition || item.before_condition || '')),
+                                        'bg-yellow-50 text-yellow-600 border-yellow-100': ['pending', 'proses', 'Cadangan', 'KB', 'PROCESSING'].includes((item.status || '').toUpperCase()),
+                                        'bg-red-50 text-red-600 border-red-100': ['RUSAK', 'R', 'NG', 'TIDAK TERPILIH', 'X'].includes((item.status || item.condition || item.after_condition || '').toString().toUpperCase())
+                                    }">
+                                    {{ item.status || item.condition || item.after_condition || item.before_condition || 'Aktif' }}
+                                </span>
+                            </div>
+
+                            <!-- Column 3: Temporal Data -->
+                            <div v-if="item.completed_at || item.request_date || item.borrow_date || item.scheduled_at || item.purchased_at" class="space-y-1">
+                                <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest">Tanggal</p>
+                                <p class="text-[9px] font-black text-gray-700 dark:text-gray-300">
+                                    {{ item.completed_at || item.request_date || item.borrow_date || item.scheduled_at || item.purchased_at }}
+                                </p>
+                            </div>
+
+                            <!-- Column 4: Financial Meta -->
+                            <div v-if="item.total_price || item.price || item.cost || item.budget_amount" class="space-y-1">
+                                <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest">Estimasi Nilai</p>
+                                <p class="text-[10px] font-black text-pail-gold font-mono leading-none">
+                                    Rp {{ Number(item.total_price || item.price || item.cost || item.budget_amount || 0).toLocaleString() }}
+                                </p>
+                            </div>
+                            
+                            <!-- Column 5: Resource (Secondary) -->
+                            <div v-if="item.quantity || item.stock || item.volume" class="space-y-1">
+                                <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest">Jumlah / Volume</p>
+                                <p class="text-[9px] font-black text-gray-700 dark:text-gray-300 uppercase">
+                                    {{ item.quantity || item.stock || item.volume }} {{ item.unit || 'UNIT' }}
+                                </p>
+                            </div>
+
+                            <!-- Column 6: Performer / Responsible -->
+                            <div v-if="item.performer?.name || item.responsible_person || item.performed_by" class="space-y-1">
+                                <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest">Petugas / P.Jawab</p>
+                                <p class="text-[9px] font-black text-gray-600 dark:text-gray-400 uppercase truncate">
+                                    {{ item.performer?.name || item.responsible_person || item.performed_by }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Footer Detail: Keterangan / Action -->
+                        <div v-if="item.description || item.remarks || item.note || item.action_taken" class="pt-3 border-t border-gray-50 dark:border-gray-700/50">
+                            <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Keterangan / Tindakan</p>
+                            <div class="px-3 py-2 bg-gray-50 dark:bg-gray-900/50 rounded-xl text-[9px] text-gray-500 italic leading-relaxed">
+                                {{ item.description || item.remarks || item.note || item.action_taken || '-' }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div v-if="!data.data.length" class="py-20 flex flex-col items-center justify-center opacity-30">
+                        <svg class="w-12 h-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        <p class="text-[10px] font-black uppercase tracking-widest">Data Tidak Ditemukan</p>
+                    </div>
+                </div>
+
                 <div v-if="type === 'agenda-perbaikan' && data.data.length > 0" class="px-8 py-6 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
                     <div class="flex flex-col gap-2">
                         <div class="flex items-start gap-4 text-[10px] font-black uppercase text-gray-400 tracking-widest">
@@ -1933,13 +1866,6 @@ const importExcel = (event) => {
                     </div>
                 </div>
                 </div>
-                <!-- Empty State -->
-                <div v-if="data.data.length === 0" class="py-24 text-center">
-                    <div class="flex flex-col items-center text-gray-400">
-                        <PlusIcon class="w-12 h-12 mb-4 opacity-20" />
-                        <p class="text-[10px] font-black uppercase tracking-widest">Belum ada data di sistem.</p>
-                    </div>
-                </div>
             </div>
 
             <!-- Pagination -->
@@ -1951,7 +1877,7 @@ const importExcel = (event) => {
                 />
             </div>
         </div>
-    </div>     <!-- Create Modal -->
+    <!-- Create Modal -->
         <Teleport to="body">
             <div v-if="showCreateModal" class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-md">
                 <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/10 max-h-[90vh] overflow-y-auto pb-28 sm:pb-0">

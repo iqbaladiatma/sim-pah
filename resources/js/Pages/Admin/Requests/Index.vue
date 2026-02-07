@@ -61,40 +61,40 @@ const getStatusColor = (status) => {
                 
                 <!-- Stats Carousel Style Overview -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
                         <div class="relative z-10">
                             <h3 class="text-gray-400 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Menunggu Review</h3>
-                            <div class="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.pending }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-black text-yellow-600 uppercase tracking-widest mt-2">Butuh Persetujuan</div>
+                            <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.pending }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-yellow-600 uppercase tracking-widest mt-1.5">Butuh Persetujuan</div>
                         </div>
-                        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-yellow-50 dark:bg-yellow-900/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-yellow-50 dark:bg-yellow-900/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
                         <div class="relative z-10">
                             <h3 class="text-gray-400 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Anggaran Pending</h3>
-                            <div class="text-xl sm:text-2xl font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_pending) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest mt-2 italic">Estimasi Serapan</div>
+                            <div class="text-xl font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_pending) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1.5 italic">Estimasi Serapan</div>
                         </div>
-                        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-gray-50 dark:bg-gray-900/20 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-gray-50 dark:bg-gray-900/20 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] shadow-xl shadow-green-500/10 relative overflow-hidden group">
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-3xl shadow-xl shadow-green-500/10 relative overflow-hidden group">
                         <div class="relative z-10">
                             <h3 class="text-white/70 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Realisasi Anggaran</h3>
-                            <div class="text-xl sm:text-2xl font-black text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_approved) }}</div>
-                            <div class="text-[8px] sm:text-[9px] font-black text-white uppercase tracking-widest mt-2">{{ stats.approved }} Pengajuan Disetujui</div>
+                            <div class="text-xl font-black text-white font-mono tracking-tighter">{{ formatRupiah(stats.total_cost_approved) }}</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-white uppercase tracking-widest mt-1.5">{{ stats.approved }} Pengajuan Disetujui</div>
                         </div>
-                        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-gray-900 to-black p-6 sm:p-8 rounded-3xl sm:rounded-[2.5rem] shadow-xl relative overflow-hidden group">
+                    <div class="bg-gradient-to-br from-gray-900 to-black p-6 rounded-3xl shadow-xl relative overflow-hidden group">
                         <div class="relative z-10">
                             <h3 class="text-gray-500 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Efisiensi Biaya</h3>
-                            <div class="text-xl sm:text-2xl font-black text-white tracking-tighter">{{ stats.rejected }} DITOLAK</div>
-                            <div class="text-[8px] sm:text-[9px] font-black text-pail-gold uppercase tracking-widest mt-2">Optimalisasi Aset</div>
+                            <div class="text-xl font-black text-white tracking-tighter">{{ stats.rejected }} DITOLAK</div>
+                            <div class="text-[8px] sm:text-[9px] font-black text-pail-gold uppercase tracking-widest mt-1.5">Optimalisasi Aset</div>
                         </div>
-                        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
+                        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/5 rounded-full group-hover:scale-110 transition-transform duration-700"></div>
                     </div>
                 </div>
 
@@ -109,69 +109,68 @@ const getStatusColor = (status) => {
                 </div>
 
                 <!-- Desktop Table -->
-                <div class="hidden md:block bg-white dark:bg-gray-800 shadow-2xl rounded-[3rem] border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="hidden md:block bg-white dark:bg-gray-800 shadow-2xl rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <table class="min-w-full">
                         <thead>
                             <tr class="text-[10px] font-black uppercase text-gray-400 tracking-[0.2em] border-b border-gray-50 dark:border-gray-700">
-                                <th class="px-8 py-8 text-left">Unit Lembaga</th>
-                                <th class="px-8 py-8 text-left">Informasi Pengajuan</th>
-                                <th class="px-8 py-8 text-left">Estimasi Biaya</th>
-                                <th class="px-8 py-8 text-left">Status Progres</th>
-                                <th class="px-8 py-8 text-right">Opsi</th>
+                                <th class="px-6 py-6 text-left">Unit Lembaga</th>
+                                <th class="px-6 py-6 text-left">Informasi Pengajuan</th>
+                                <th class="px-6 py-6 text-left">Estimasi Biaya</th>
+                                <th class="px-6 py-6 text-left">Status Progres</th>
+                                <th class="px-6 py-6 text-right">Opsi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
                             <tr v-for="(req, index) in requests.data" :key="req.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-all group">
-                                <td class="px-8 py-10 whitespace-nowrap">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center font-black text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all shadow-inner border border-gray-100/50 dark:border-gray-700">
+                                <td class="px-6 py-6 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center font-black text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all shadow-inner border border-gray-100/50 dark:border-gray-700 text-xs">
                                             {{ req.institution?.code?.substring(0,2) || '??' }}
                                         </div>
                                         <div>
-                                            <span class="px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 border border-gray-200/50 block w-fit mb-1">
+                                            <span class="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 border border-gray-200/50 block w-fit mb-0.5">
                                                 {{ req.institution?.code || '-' }}
                                             </span>
-                                            <p class="text-[10px] font-bold text-gray-400 truncate max-w-[120px]">{{ req.institution?.name }}</p>
+                                            <p class="text-[9px] font-bold text-gray-400 truncate max-w-[100px]">{{ req.institution?.name }}</p>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-8 py-10">
+                                <td class="px-6 py-6">
                                     <div class="flex flex-col">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span class="text-[9px] uppercase font-black text-pail-gold tracking-[0.2em]">{{ req.type }}</span>
-                                            <span v-if="req.photo_evidence" class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[8px] uppercase font-black text-pail-gold tracking-[0.2em]">{{ req.type }}</span>
+                                            <span v-if="req.photo_evidence" class="w-1 h-1 rounded-full bg-blue-500"></span>
                                         </div>
-                                        <span class="font-black text-gray-900 dark:text-white text-base leading-tight mb-2 tracking-tight group-hover:text-pail-gold transition-colors">{{ req.title }}</span>
-                                        <p class="text-[10px] text-gray-400 font-medium leading-relaxed line-clamp-1 italic max-w-xs">{{ req.description }}</p>
+                                        <span class="font-black text-gray-900 dark:text-white text-sm leading-tight mb-1 tracking-tight group-hover:text-pail-gold transition-colors">{{ req.title }}</span>
+                                        <p class="text-[9px] text-gray-400 font-medium leading-relaxed line-clamp-1 italic max-w-xs">{{ req.description }}</p>
                                     </div>
                                 </td>
-                                <td class="px-8 py-10 whitespace-nowrap">
-                                    <div class="space-y-1">
-                                        <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest text">Estimasi</p>
-                                        <span class="font-mono font-black text-gray-900 dark:text-white tracking-tighter text-lg leading-none block">
+                                <td class="px-6 py-6 whitespace-nowrap">
+                                    <div class="space-y-0.5">
+                                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Estimasi</p>
+                                        <span class="font-mono font-black text-gray-900 dark:text-white tracking-tighter text-base leading-none block">
                                             {{ formatRupiah(req.estimated_cost) }}
                                         </span>
                                     </div>
                                 </td>
-                                <td class="px-8 py-10 whitespace-nowrap text-center">
-                                    <span class="px-5 py-2.5 rounded-2xl text-[9px] font-black uppercase tracking-widest shadow-sm border inline-block min-w-[110px]"
+                                <td class="px-6 py-6 whitespace-nowrap text-center">
+                                    <span class="px-4 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-widest shadow-sm border inline-block min-w-[90px]"
                                         :class="req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100 dark:bg-yellow-900/10 dark:text-yellow-500' : 
                                                 req.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100 dark:bg-green-900/10 dark:text-green-500' : 
                                                 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/10 dark:text-red-500'">
                                         Menunggu
                                     </span>
-                                    <p v-if="req.status !== 'pending'" class="text-[9px] font-bold text-gray-400 mt-2 italic uppercase tracking-widest">Selesai Diproses</p>
                                 </td>
-                                <td class="px-8 py-10 text-right whitespace-nowrap">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-900 text-gray-400 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-gray-100 dark:border-gray-700">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <td class="px-6 py-6 text-right whitespace-nowrap">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <a v-if="req.photo_evidence" :href="`/storage/${req.photo_evidence}`" target="_blank" class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-400 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-gray-100 dark:border-gray-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                         </a>
                                         <Link 
                                             :href="route('admin.requests.edit', req.id)"
-                                            class="h-12 px-6 bg-gray-900 text-white rounded-2xl hover:bg-pail-gold transition-all shadow-xl shadow-black/10 font-black text-[10px] uppercase tracking-[0.2em] flex items-center"
+                                            class="h-10 px-5 bg-gray-900 text-white rounded-xl hover:bg-pail-gold transition-all shadow-xl shadow-black/10 font-black text-[9px] uppercase tracking-[0.2em] flex items-center"
                                         >
-                                            {{ req.status === 'pending' ? 'Proses Tinjauan' : 'Lihat Detail' }}
+                                            {{ req.status === 'pending' ? 'Proses' : 'Detail' }}
                                         </Link>
                                     </div>
                                 </td>
@@ -190,13 +189,13 @@ const getStatusColor = (status) => {
 
                 <!-- Mobile Card Layout -->
                 <div class="md:hidden space-y-6">
-                    <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-gray-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
-                        <div class="p-6 sm:p-10">
-                            <div class="flex items-center justify-between mb-6">
-                                <span class="px-3 py-1.5 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] bg-gray-50 dark:bg-gray-900 text-gray-500 border border-gray-100 dark:border-gray-700 shadow-inner">
+                    <div v-for="req in requests.data" :key="req.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] bg-gray-50 dark:bg-gray-900 text-gray-500 border border-gray-100 dark:border-gray-700 shadow-inner">
                                     {{ req.institution?.code || '-' }}
                                 </span>
-                                <span class="px-3 py-1.5 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] border shadow-sm"
+                                <span class="px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-[0.2em] border shadow-sm"
                                     :class="req.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' : 
                                             req.status === 'approved' ? 'bg-green-50 text-green-700 border-green-100' : 
                                             'bg-red-50 text-red-700 border-red-100'">
@@ -204,39 +203,39 @@ const getStatusColor = (status) => {
                                 </span>
                             </div>
 
-                            <div class="mb-8">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-[8px] sm:text-[9px] uppercase font-black text-pail-gold tracking-[0.3em] block">{{ req.type }}</span>
-                                    <span v-if="req.photo_evidence" class="text-[8px] sm:text-[9px] font-black text-blue-500 uppercase tracking-widest">📸 GAMBAR</span>
+                            <div class="mb-6">
+                                <div class="flex items-center gap-2 mb-1.5">
+                                    <span class="text-[8px] uppercase font-black text-pail-gold tracking-[0.3em] block">{{ req.type }}</span>
+                                    <span v-if="req.photo_evidence" class="text-[8px] font-black text-blue-500 uppercase tracking-widest">📸 GAMBAR</span>
                                 </div>
-                                <h3 class="font-black text-gray-900 dark:text-white text-xl sm:text-2xl leading-tight mb-3 tracking-tighter truncate">{{ req.title }}</h3>
-                                <p class="text-[10px] sm:text-xs text-gray-500 font-medium line-clamp-2 leading-relaxed italic mb-6 border-l-2 border-gray-100 dark:border-gray-700 pl-4">{{ req.description }}</p>
+                                <h3 class="font-black text-gray-900 dark:text-white text-lg leading-tight mb-2 tracking-tighter truncate">{{ req.title }}</h3>
+                                <p class="text-[10px] text-gray-500 font-medium line-clamp-2 leading-relaxed italic mb-4 border-l-2 border-gray-100 dark:border-gray-700 pl-3">{{ req.description }}</p>
                             </div>
 
-                            <div class="p-5 sm:p-8 bg-gray-50 dark:bg-gray-900/50 rounded-[2rem] mb-8 border border-gray-100 dark:border-gray-700/50">
+                            <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl mb-6 border border-gray-100 dark:border-gray-700/50">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-[8px] sm:text-[9px] uppercase font-black text-gray-400 tracking-widest">Serapan Biaya</span>
-                                    <span class="font-mono font-black text-gray-900 dark:text-white text-lg sm:text-xl">
+                                    <span class="text-[8px] uppercase font-black text-gray-400 tracking-widest">Serapan Biaya</span>
+                                    <span class="font-mono font-black text-gray-900 dark:text-white text-base">
                                         {{ formatRupiah(req.estimated_cost) }}
                                     </span>
                                 </div>
                             </div>
 
-                            <div class="flex gap-3">
+                            <div class="flex gap-2">
                                 <a 
                                     v-if="req.photo_evidence" 
                                     :href="`/storage/${req.photo_evidence}`" 
                                     target="_blank"
-                                    class="w-14 h-14 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-2xl flex items-center justify-center border border-gray-200 dark:border-gray-800 transition shadow-sm"
+                                    class="w-12 h-12 bg-gray-100 dark:bg-gray-900 text-gray-400 rounded-xl flex items-center justify-center border border-gray-200 dark:border-gray-800 transition shadow-sm"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                 </a>
                                 <Link 
                                     :href="route('admin.requests.edit', req.id)"
-                                    class="flex-1 py-4 bg-gray-900 text-white rounded-full text-center font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 group hover:bg-pail-gold transition-all flex items-center justify-center gap-2"
+                                    class="flex-1 py-3.5 bg-gray-900 text-white rounded-xl text-center font-black text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-black/20 group hover:bg-pail-gold transition-all flex items-center justify-center gap-2"
                                 >
-                                    {{ req.status === 'pending' ? 'Tinjau Pengajuan' : 'Detail Lengkap' }}
-                                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                                    {{ req.status === 'pending' ? 'Tinjau' : 'Detail' }}
+                                    <svg class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                                 </Link>
                             </div>
                         </div>

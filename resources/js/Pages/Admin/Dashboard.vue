@@ -53,11 +53,11 @@ const formatDateDay = (dateString) => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-12">
                 
                 <!-- Ultra-Premium Welcome Hub -->
-                <div class="relative bg-white dark:bg-gray-800 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden group">
+                <div class="relative bg-white dark:bg-gray-800 rounded-3xl p-6 sm:p-7 shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden group">
                     <div class="absolute -right-24 -top-24 w-96 h-96 bg-pail-gold opacity-5 rounded-full blur-[100px] group-hover:opacity-10 transition-opacity duration-1000"></div>
                     <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-pail-gold opacity-5 rounded-full blur-[100px]"></div>
                     
-                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8 sm:gap-10">
+                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6 sm:gap-8">
                         <div class="flex-1 text-center lg:text-left">
                             <div class="flex items-center justify-center lg:justify-start gap-4 mb-4">
                                 <div class="w-8 sm:w-12 h-[2px] bg-pail-gold"></div>
@@ -69,18 +69,18 @@ const formatDateDay = (dateString) => {
                             </p>
                         </div>
                         <div class="flex items-center justify-center gap-6">
-                            <Link :href="route('admin.requests.index')" class="w-full sm:w-auto px-6 py-4 bg-gray-900 text-pail-gold rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center justify-center gap-3 group/btn">
+                            <Link :href="route('admin.requests.index')" class="w-full sm:w-auto px-5 py-3.5 bg-gray-900 text-pail-gold rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center justify-center gap-3 group/btn">
                                 Pusat Intelijen
-                                <svg class="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                <svg class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </Link>
                         </div>
                     </div>
                 </div>
 
                 <!-- Strategic Intelligence Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
                         <h4 class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">Lembaga</h4>
                         <div class="flex items-end gap-2 relative z-10 leading-none">
                             <div class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_institutions }}</div>
@@ -88,8 +88,8 @@ const formatDateDay = (dateString) => {
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-purple-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-purple-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
                         <h4 class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">SDM & Personil</h4>
                         <div class="flex items-end gap-2 relative z-10 leading-none">
                             <div class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_users }}</div>
@@ -97,8 +97,8 @@ const formatDateDay = (dateString) => {
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
-                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-orange-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative group overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1">
+                        <div class="absolute -right-4 -top-4 w-20 h-20 bg-orange-50/50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-700 scale-0 group-hover:scale-110"></div>
                         <h4 class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 relative z-10">Total Inventaris</h4>
                         <div class="flex items-end gap-2 relative z-10 leading-none">
                             <div class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total_items }}</div>
@@ -106,7 +106,7 @@ const formatDateDay = (dateString) => {
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 sm:p-10 rounded-3xl sm:rounded-[3rem] shadow-2xl shadow-red-500/20 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-3xl shadow-2xl shadow-red-500/20 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
                         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <h4 class="text-[8px] sm:text-[10px] font-black text-red-100 uppercase tracking-[0.3em] mb-4 relative z-10 italic">Peringatan Stok Kritis</h4>
                         <div class="text-2xl sm:text-3xl font-black text-white tracking-tighter relative z-10 leading-none">{{ stats.low_stock_items }}</div>
@@ -118,8 +118,8 @@ const formatDateDay = (dateString) => {
                 </div>
 
                 <!-- Financial Architecture -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
                         <div>
                             <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3">Liabilitas Finansial Tertunda</h4>
                             <div class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter group-hover:text-pail-gold transition-colors leading-none mb-2">{{ formatRupiah(stats.total_cost_pending) }}</div>
@@ -131,7 +131,7 @@ const formatDateDay = (dateString) => {
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-br from-[#D4B876] via-pail-gold to-[#B89648] p-6 rounded-[2rem] shadow-2xl shadow-pail-gold/30 flex flex-col justify-between relative overflow-hidden group hover:-translate-y-1 transition-all duration-500">
+                    <div class="bg-gradient-to-br from-[#D4B876] via-pail-gold to-[#B89648] p-6 rounded-3xl shadow-2xl shadow-pail-gold/30 flex flex-col justify-between relative overflow-hidden group hover:-translate-y-1 transition-all duration-500">
                         <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:rotate-12 transition-transform duration-700">
                             <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                         </div>
@@ -148,7 +148,7 @@ const formatDateDay = (dateString) => {
                         </Link>
                     </div>
 
-                    <div class="bg-gray-900 dark:bg-black p-6 rounded-[2rem] shadow-2xl flex flex-col justify-center border border-white/5 relative group overflow-hidden">
+                    <div class="bg-gray-900 dark:bg-black p-6 rounded-3xl shadow-2xl flex flex-col justify-center border border-white/5 relative group overflow-hidden">
                         <div class="absolute inset-0 bg-pail-gold/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div class="relative z-10 flex items-center gap-6">
                             <div class="w-16 h-16 rounded-[1.5rem] bg-pail-gold/10 border border-pail-gold/20 flex items-center justify-center text-pail-gold group-hover:scale-110 transition-transform shadow-2xl shadow-pail-gold/20">
@@ -181,7 +181,7 @@ const formatDateDay = (dateString) => {
                             </Link>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-800 rounded-[2rem] sm:rounded-[3.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+                        <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden relative">
                             <div v-if="recent_requests.length === 0" class="p-20 sm:p-40 text-center relative overflow-hidden">
                                 <div class="absolute inset-0 bg-gray-50/50 opacity-20 dark:bg-transparent"></div>
                                 <div class="relative z-10 flex flex-col items-center text-gray-400">
@@ -191,14 +191,14 @@ const formatDateDay = (dateString) => {
                                 </div>
                             </div>
                             <div v-else class="p-2 sm:p-4 space-y-3 sm:space-y-4">
-                                <div v-for="req in recent_requests" :key="req.id" class="p-4 sm:p-8 hover:bg-gray-50/80 dark:hover:bg-gray-900/50 rounded-3xl sm:rounded-[2.5rem] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 group border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
-                                    <div class="flex items-center gap-4 sm:gap-8 w-full sm:w-auto">
-                                        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-[1.75rem] bg-gray-900 flex flex-col items-center justify-center border-2 border-pail-gold/30 shadow-2xl shadow-black/20 shrink-0">
-                                            <span class="text-[7px] sm:text-[9px] font-black text-pail-gold uppercase leading-none mb-1 opacity-70 font-mono">{{ formatDateDay(req.created_at).split(' ')[1] }}</span>
-                                            <span class="text-lg sm:text-2xl font-black text-white leading-none tracking-tighter font-mono">{{ formatDateDay(req.created_at).split(' ')[0] }}</span>
+                                <div v-for="req in recent_requests" :key="req.id" class="p-4 sm:p-5 hover:bg-gray-50/80 dark:hover:bg-gray-900/50 rounded-2xl sm:rounded-3xl transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group border border-transparent hover:border-gray-100 dark:hover:border-gray-700">
+                                    <div class="flex items-center gap-4 sm:gap-6 w-full sm:w-auto">
+                                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gray-900 flex flex-col items-center justify-center border-2 border-pail-gold/30 shadow-2xl shadow-black/20 shrink-0">
+                                            <span class="text-[7px] sm:text-[8px] font-black text-pail-gold uppercase leading-none mb-1 opacity-70 font-mono">{{ formatDateDay(req.created_at).split(' ')[1] }}</span>
+                                            <span class="text-lg sm:text-xl font-black text-white leading-none tracking-tighter font-mono">{{ formatDateDay(req.created_at).split(' ')[0] }}</span>
                                         </div>
                                         <div class="min-w-0 flex-1">
-                                            <h4 class="font-black text-gray-900 dark:text-white text-sm sm:text-lg tracking-tight uppercase leading-none mb-2 sm:mb-3 group-hover:text-pail-gold transition-colors truncate">{{ req.title }}</h4>
+                                            <h4 class="font-black text-gray-900 dark:text-white text-sm sm:text-base tracking-tight uppercase leading-none mb-1.5 sm:mb-2 group-hover:text-pail-gold transition-colors truncate">{{ req.title }}</h4>
                                             <div class="flex flex-wrap items-center gap-2 sm:gap-4">
                                                 <div class="flex items-center gap-1.5 bg-gray-50 dark:bg-gray-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-gray-100 dark:border-gray-600 shadow-sm">
                                                     <span class="text-[7px] sm:text-[10px] font-black uppercase text-gray-500 dark:text-gray-300 tracking-widest">{{ req.type }}</span>
@@ -212,11 +212,11 @@ const formatDateDay = (dateString) => {
                                     </div>
                                     <div class="flex items-center justify-between sm:justify-end gap-4 sm:gap-8 w-full sm:w-auto border-t sm:border-0 pt-4 sm:pt-0 border-gray-50 dark:border-gray-700/50">
                                         <div class="text-left sm:text-right">
-                                            <div class="text-[8px] sm:text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] mb-1">Estimasi Biaya</div>
-                                            <div class="text-lg sm:text-xl font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(req.estimated_cost) }}</div>
+                                            <div class="text-[8px] sm:text-[9px] font-black text-gray-300 uppercase tracking-[0.2em] mb-1">Estimasi Biaya</div>
+                                            <div class="text-base sm:text-lg font-black text-gray-900 dark:text-white font-mono tracking-tighter">{{ formatRupiah(req.estimated_cost) }}</div>
                                         </div>
-                                        <Link :href="route('admin.requests.edit', req.id)" class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-400 hover:bg-pail-gold hover:text-white hover:scale-110 transition-all shadow-inner border border-gray-100 dark:border-gray-600 group/btn">
-                                            <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
+                                        <Link :href="route('admin.requests.edit', req.id)" class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-400 hover:bg-pail-gold hover:text-white hover:scale-110 transition-all shadow-inner border border-gray-100 dark:border-gray-600 group/btn">
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path></svg>
                                         </Link>
                                     </div>
                                 </div>
@@ -231,7 +231,7 @@ const formatDateDay = (dateString) => {
                             <button class="text-[10px] font-black text-gray-300 uppercase tracking-widest hover:text-gray-500 transition-colors italic">Realtime Trace</button>
                         </div>
 
-                        <div class="bg-gray-900 dark:bg-black rounded-[2rem] sm:rounded-[3.5rem] shadow-2xl p-6 sm:p-10 relative overflow-hidden group">
+                        <div class="bg-gray-900 dark:bg-black rounded-3xl shadow-2xl p-6 sm:p-8 relative overflow-hidden group">
                             <div class="absolute inset-0 bg-pail-gold/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             
                             <div class="space-y-8 sm:space-y-10 relative z-10">

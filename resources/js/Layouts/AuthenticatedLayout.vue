@@ -304,36 +304,51 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                 </div>
 
                 <div class="flex items-center gap-6">
-                    <Dropdown align="right" width="60">
+                    <Dropdown align="right" width="64" contentClasses="py-2 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border border-gray-100 dark:border-gray-700/50 shadow-2xl rounded-2xl overflow-hidden ring-0">
                         <template #trigger>
-                            <button class="flex items-center gap-3 transition-opacity hover:opacity-80 group">
+                            <button class="flex items-center gap-3 transition-all hover:scale-105 active:scale-95 group">
                                 <div class="hidden md:flex flex-col items-end">
                                     <span class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-tighter">{{ user.name }}</span>
-                                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ user.role }}</span>
+                                    <span class="text-[9px] font-black text-pail-gold uppercase tracking-widest opacity-80">{{ user.role }}</span>
                                 </div>
-                                <div class="w-10 h-10 rounded-2xl bg-pail-gold/10 text-pail-gold flex items-center justify-center font-black shadow-inner border border-pail-gold/20 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500">
+                                <div class="w-10 h-10 rounded-2xl bg-pail-gold/10 text-pail-gold flex items-center justify-center font-black shadow-inner border border-pail-gold/20 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 transform group-hover:rotate-6">
                                     {{ user.name.charAt(0) }}
                                 </div>
                             </button>
                         </template>
                         <template #content>
-                            <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Masuk sebagai</p>
-                                <p class="text-xs font-bold text-gray-900 dark:text-white truncate">{{ user.email }}</p>
+                            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/50">
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Masuk sebagai</p>
+                                <p class="text-[11px] font-black text-gray-900 dark:text-white truncate tracking-tighter">{{ user.email }}</p>
                             </div>
-                            <DropdownLink :href="route('profile.edit')">
-                                <div class="flex items-center gap-3 py-1">
-                                    <SettingsIcon class="w-4 h-4 text-gray-400 group-hover:text-pail-gold" />
-                                    <span>Konfigurasi Profil</span>
-                                </div>
-                            </DropdownLink>
-                            <div class="border-t border-gray-100 dark:border-gray-700"></div>
-                            <DropdownLink :href="route('logout')" method="post" as="button" class="text-red-500 font-bold">
-                                <div class="flex items-center gap-3 py-1">
-                                    <LogOutIcon class="w-4 h-4 text-red-400 group-hover:text-red-600" />
-                                    <span>Keluar Sistem</span>
-                                </div>
-                            </DropdownLink>
+                            
+                            <div class="p-2">
+                                <DropdownLink :href="route('profile.edit')" class="rounded-xl transition-all duration-300">
+                                    <div class="flex items-center gap-4 py-2 px-1 group">
+                                        <div class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:text-pail-gold group-hover:bg-pail-gold/10 transition-all border border-transparent group-hover:border-pail-gold/20">
+                                            <SettingsIcon class="w-4 h-4 transition-transform group-hover:rotate-45" />
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-[11px] font-black text-gray-700 dark:text-gray-200 uppercase tracking-tight">Konfigurasi Profil</span>
+                                            <span class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Pengaturan akun anda</span>
+                                        </div>
+                                    </div>
+                                </DropdownLink>
+
+                                <div class="my-2 border-t border-gray-100 dark:border-gray-700/50"></div>
+
+                                <DropdownLink :href="route('logout')" method="post" as="button" class="w-full text-left rounded-xl transition-all duration-300">
+                                    <div class="flex items-center gap-4 py-2 px-1 group">
+                                        <div class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 group-hover:text-white group-hover:bg-red-500 transition-all shadow-sm">
+                                            <LogOutIcon class="w-4 h-4" />
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-[11px] font-black text-red-600 dark:text-red-400 uppercase tracking-tight">Keluar Sistem</span>
+                                            <span class="text-[8px] font-bold text-red-300 dark:text-red-900/40 uppercase tracking-widest mt-0.5">Selesaikan sesi aktif</span>
+                                        </div>
+                                    </div>
+                                </DropdownLink>
+                            </div>
                         </template>
                     </Dropdown>
                 </div>
@@ -397,31 +412,32 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
 
             <!-- Sticky Footer Signature -->
             <footer class="shrink-0 px-4 sm:px-8 lg:px-14 py-8 pb-32 lg:pb-8 border-t border-gray-100 dark:border-gray-700/50 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm">
-                <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
-                    <div class="flex flex-col items-center lg:items-start gap-1">
-                        <p class="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em]">
-                            © {{ new Date().getFullYear() }} Pondok Pesantren Abu Hurairah Mataram
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-4 lg:gap-8">
+                    <div class="flex items-center gap-4">
+                        <p class="text-[10px] font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                            © {{ new Date().getFullYear() }} <span class="hidden sm:inline">Pondok Pesantren Abu Hurairah Mataram</span><span class="sm:hidden">PP Abu Hurairah</span>
                         </p>
-                        <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest leading-none">
-                            Sistem Informasi Manajemen - Unit Rumah Tangga
+                        <div class="w-px h-3 bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
+                        <p class="text-[8px] font-black text-pail-gold uppercase tracking-widest leading-none hidden sm:block">
+                            SIM - URT
                         </p>
                     </div>
                     
-                    <div class="flex flex-col lg:flex-row items-center gap-3 lg:gap-6 bg-gray-50 dark:bg-gray-900/50 px-6 py-3 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-inner">
-                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Development By</span>
-                        <div class="flex items-center gap-4">
-                            <a href="https://instagram.com/iq_html" target="_blank" class="group flex items-center gap-2 transition-all">
-                                <div class="w-6 h-6 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-500 group-hover:bg-pink-500 group-hover:text-white transition-all shadow-sm">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.848 0-3.204.012-3.584.07-4.849.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    <div class="flex items-center gap-4 bg-gray-50/50 dark:bg-gray-900/30 px-5 py-2 rounded-xl border border-gray-100 dark:border-gray-700/50 shadow-inner">
+                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Dev by</span>
+                        <div class="flex items-center gap-3">
+                            <a href="https://instagram.com/iq_html" target="_blank" class="group flex items-center gap-1.5 transition-all">
+                                <div class="w-5 h-5 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-500 group-hover:bg-pink-500 group-hover:text-white transition-all">
+                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.848 0-3.204.012-3.584.07-4.849.149-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                                 </div>
-                                <span class="text-[10px] font-black text-gray-500 group-hover:text-pink-600 transition-colors tracking-tighter">@iq_html</span>
+                                <span class="text-[9px] font-bold text-gray-500 group-hover:text-pink-600 transition-colors tracking-tighter">@iq_html</span>
                             </a>
                             <div class="w-1 h-1 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                            <a href="https://linkedin.com/in/Iqbaladiatma" target="_blank" class="group flex items-center gap-2 transition-all">
-                                <div class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
-                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg>
+                            <a href="https://linkedin.com/in/Iqbaladiatma" target="_blank" class="group flex items-center gap-1.5 transition-all">
+                                <div class="w-5 h-5 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg>
                                 </div>
-                                <span class="text-[10px] font-black text-gray-500 group-hover:text-blue-600 transition-colors tracking-tighter">@Iqbaladiatma</span>
+                                <span class="text-[9px] font-bold text-gray-500 group-hover:text-blue-600 transition-colors tracking-tighter">@Iqbaladiatma</span>
                             </a>
                         </div>
                     </div>
