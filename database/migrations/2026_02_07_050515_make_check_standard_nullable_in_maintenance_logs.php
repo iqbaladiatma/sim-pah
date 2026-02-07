@@ -11,11 +11,14 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('maintenance_logs', function (Blueprint $table) {
-            if (!Schema::hasColumn('maintenance_logs', 'condition')) {
-                $table->string('condition', 5)->nullable()->after('brand'); // 'B', 'KB', 'R'
+            if (Schema::hasColumn('maintenance_logs', 'check_standard')) {
+                $table->text('check_standard')->nullable()->change();
             }
-            if (!Schema::hasColumn('maintenance_logs', 'condition_notes')) {
-                $table->text('condition_notes')->nullable()->after('condition');
+            if (Schema::hasColumn('maintenance_logs', 'check_method')) {
+                $table->text('check_method')->nullable()->change();
+            }
+            if (Schema::hasColumn('maintenance_logs', 'check_frequency')) {
+                $table->text('check_frequency')->nullable()->change();
             }
         });
     }
@@ -26,7 +29,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('maintenance_logs', function (Blueprint $table) {
-            $table->dropColumn(['condition', 'condition_notes']);
+            //
         });
     }
 };

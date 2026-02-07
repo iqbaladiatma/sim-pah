@@ -20,6 +20,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\IsoProcedureExport;
 
 class UrtProcedureController extends Controller
 {
@@ -239,6 +240,43 @@ class UrtProcedureController extends Controller
 
         if (isset($procedure['category']) && Schema::hasColumn($tableName, 'category')) {
             $data['category'] = $procedure['category'];
+        }
+
+        if (Schema::hasColumn($tableName, 'title') && empty($data['title'])) {
+            $data['title'] = $procedure['title'];
+        }
+
+        if (Schema::hasColumn($tableName, 'description') && empty($data['description'])) {
+            $data['description'] = 'Pencatatan data untuk ' . $procedure['title'];
+        }
+
+        // Mandatory Validation for Vehicle Requests
+        if ($procedure['model'] === \App\Models\VehicleRequest::class) {
+            if (empty($data['vehicle_id'])) {
+                return back()->withErrors(['vehicle_id' => 'Kendaraan wajib dipilih.']);
+            }
+            if (empty($data['destination'])) {
+                return back()->withErrors(['destination' => 'Tujuan wajib diisi.']);
+            }
+            if (empty($data['purpose'])) {
+                return back()->withErrors(['purpose' => 'Keperluan wajib diisi.']);
+            }
+        }
+
+        // Auto-fill or Validate Institution ID
+        if (Schema::hasColumn($tableName, 'institution_id')) {
+            if (empty($data['institution_id'])) {
+                if (auth()->user()->institution_id) {
+                    $data['institution_id'] = auth()->user()->institution_id;
+                } else {
+                    return back()->withErrors(['institution_id' => 'Lembaga wajib dipilih.']);
+                }
+            }
+        }
+
+        // Auto-fill User ID
+        if (Schema::hasColumn($tableName, 'user_id') && empty($data['user_id'])) {
+            $data['user_id'] = auth()->id();
         }
 
         // Handle photo uploads

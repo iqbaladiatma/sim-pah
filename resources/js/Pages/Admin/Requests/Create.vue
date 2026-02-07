@@ -56,9 +56,9 @@ const submit = () => {
                     
                     <div class="p-6 sm:p-12 relative z-10">
                         <header class="mb-10 sm:mb-14">
-                            <div class="flex items-center gap-4 mb-3">
-                                <div class="w-10 h-[2px] bg-pail-gold"></div>
-                                <span class="text-[10px] font-black text-pail-gold uppercase tracking-[0.3em]">Operational Portal</span>
+                            <div class="flex items-center gap-3 sm:gap-4 mb-2 sm:mb-3">
+                                <div class="w-8 h-[2px] sm:w-10 sm:h-[2px] bg-pail-gold"></div>
+                                <span class="text-[8px] sm:text-[10px] font-black text-pail-gold uppercase tracking-[0.3em]">Operational Portal</span>
                             </div>
                             <h3 class="text-2xl sm:text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase mb-3">Form Pengajuan</h3>
                             <p class="text-xs sm:text-sm text-gray-400 font-medium leading-relaxed max-w-xl">
@@ -75,7 +75,7 @@ const submit = () => {
                                         :options="institutions"
                                         placeholder="- Pilih Lembaga Unit -"
                                         :customLabel="(opt) => `${opt.code} - ${opt.name}`"
-                                        class="premium-select"
+                                        class="premium-select text-xs sm:text-sm"
                                     />
                                     <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.institution_id }}</div>
                                 </div>
@@ -83,7 +83,7 @@ const submit = () => {
                                 <div>
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Klasifikasi Tipe</label>
                                     <input v-model="form.type" type="text" list="type-suggestions" 
-                                        class="w-full h-16 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-8 transition-all" 
+                                        class="w-full h-12 sm:h-16 border-gray-100 rounded-xl sm:rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xs sm:text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-4 sm:px-8 transition-all" 
                                         placeholder="E.g. Utilitas, B7" required />
                                     <datalist id="type-suggestions">
                                         <option value="Utilitas"></option>
@@ -97,7 +97,7 @@ const submit = () => {
                                 <div>
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Judul Pengajuan</label>
                                     <input v-model="form.title" type="text" 
-                                        class="w-full h-16 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-8 transition-all" 
+                                        class="w-full h-12 sm:h-16 border-gray-100 rounded-xl sm:rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xs sm:text-sm focus:ring-pail-gold focus:border-pail-gold font-bold px-4 sm:px-8 transition-all" 
                                         placeholder="Ringkasan singkat..." required />
                                     <div v-if="form.errors.title" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.title }}</div>
                                 </div>
@@ -105,7 +105,7 @@ const submit = () => {
                                 <div class="col-span-2">
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Deskripsi & Justifikasi</label>
                                     <textarea v-model="form.description" rows="5" 
-                                        class="w-full border-gray-100 rounded-[2.5rem] bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-bold p-8 leading-relaxed transition-all" 
+                                        class="w-full border-gray-100 rounded-[1.5rem] sm:rounded-[2.5rem] bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xs sm:text-sm focus:ring-pail-gold focus:border-pail-gold font-bold p-5 sm:p-8 leading-relaxed transition-all" 
                                         placeholder="Berikan rincian lengkap mengenai kebutuhan ini..." required></textarea>
                                     <div v-if="form.errors.description" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.description }}</div>
                                 </div>
@@ -113,9 +113,9 @@ const submit = () => {
                                 <div>
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Estimasi Anggaran</label>
                                     <div class="relative group">
-                                        <div class="absolute left-6 top-1/2 -translate-y-1/2 text-pail-gold font-black text-lg">Rp</div>
+                                        <div class="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-pail-gold font-black text-sm sm:text-lg">Rp</div>
                                         <input v-model="costDisplay" type="text" 
-                                            class="w-full h-20 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-3xl font-black font-mono tracking-tighter text-gray-900 dark:text-white pl-16 pr-8 focus:ring-pail-gold focus:border-pail-gold" 
+                                            class="w-full h-14 sm:h-20 border-gray-100 rounded-xl sm:rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-xl sm:text-3xl font-black font-mono tracking-tighter text-gray-900 dark:text-white pl-12 sm:pl-16 pr-4 sm:pr-8 focus:ring-pail-gold focus:border-pail-gold" 
                                             required />
                                     </div>
                                     <div v-if="form.errors.estimated_cost" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.estimated_cost }}</div>
@@ -125,7 +125,7 @@ const submit = () => {
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-1">Bukti Foto / Lampiran</label>
                                     <div class="relative group">
                                         <input type="file" @change="onFileChange" 
-                                            class="w-full text-[10px] text-gray-400 file:mr-6 file:py-5 file:px-8 file:rounded-2xl file:border-0 file:text-[10px] file:font-black file:bg-gray-900 file:text-pail-gold hover:file:bg-pail-gold hover:file:text-white file:transition-all bg-gray-50/50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 h-20 flex items-center" />
+                                            class="w-full text-[8px] sm:text-[10px] text-gray-400 file:mr-3 sm:file:mr-6 file:py-3 sm:file:py-5 file:px-4 sm:file:px-8 file:rounded-xl sm:file:rounded-2xl file:border-0 file:text-[8px] sm:file:text-[10px] file:font-black file:bg-gray-900 file:text-pail-gold hover:file:bg-pail-gold hover:file:text-white file:transition-all bg-gray-50/50 dark:bg-gray-900 rounded-xl sm:rounded-2xl border border-gray-100 dark:border-gray-700 h-14 sm:h-20 flex items-center" />
                                     </div>
                                     <div v-if="form.errors.photo_evidence" class="text-red-500 text-[10px] font-black uppercase mt-3 ml-1 tracking-widest">{{ form.errors.photo_evidence }}</div>
                                 </div>

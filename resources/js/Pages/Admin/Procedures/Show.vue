@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref, watch, computed } from 'vue';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { ref, watch, computed, onMounted } from 'vue';
 
 // Use local icons from the project
 import DownloadIcon from '@/Components/Icons/DownloadIcon.vue';
@@ -12,6 +12,8 @@ import PencilIcon from '@/Components/Icons/EditIcon.vue';
 import PhotographIcon from '@/Components/Icons/SparklesIcon.vue';
 import XIcon from '@/Components/Icons/XIcon.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import ConfirmModal from "@/Components/ConfirmModal.vue";
+import Modal from "@/Components/Modal.vue";
 
 const props = defineProps({
     type: String,
@@ -31,19 +33,21 @@ const grandTotal = computed(() => {
 const tableColspan = computed(() => {
     const t = props.type;
     if (t === 'buku-induk') return 20;
+    if (t === 'berita-acara-pemeriksaan') return 20;
     if (t === 'kir-ruangan') return 14;
     if (t === 'pendataan-aset') return 12;
     if (t === 'pemeliharaan-gedung') return 18;
     if (t === 'pemeliharaan-ac') return 10;
     if (t === 'pemeliharaan-kamar-mandi') return 16;
-    if (['pemeliharaan-pompa', 'pemeliharaan-air-bersih'].includes(t)) return 42;
-    if (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(t)) return 30;
-    if (t === 'pemeliharaan-kipas') return 8;
-    if (t === 'pemeliharaan-septik') return 10;
-    if (t === 'pemeliharaan-sarpras') return 9;
-    if (t === 'agenda-perbaikan') return 7;
-    if (['pengajuan-rab', 'analisis-kebutuhan'].includes(t)) return 7;
-    if (['pengadaan-sarpras', 'berita-acara-pemeriksaan', 'penerimaan-barang'].includes(t)) return 10;
+    if (['pemeliharaan-pompa', 'pemeliharaan-air-bersih'].includes(t)) return 41;
+    if (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(t)) return 29;
+    if (t === 'pemeliharaan-kipas') return 9;
+    if (t === 'pemeliharaan-septik') return 11;
+    if (t === 'pemeliharaan-sarpras') return 10;
+    if (t === 'agenda-perbaikan') return 8;
+    if (t === 'pengajuan-rab') return 9;
+    if (t === 'analisis-kebutuhan') return 7;
+    if (['pengadaan-sarpras', 'penerimaan-barang'].includes(t)) return 10;
     if (t === 'penyerahan-barang') return 8;
     if (t === 'jadwal-token') return 9;
     if (t === 'pemeliharaan-kebersihan') return 17;
@@ -59,9 +63,43 @@ const tableColspan = computed(() => {
     if (t === 'peminjaman-barang') return 11;
     if (t === 'laporan-proyek') return 11;
     if (t === 'rekapan-pengajuan') return 10;
+    if (t === 'penggunaan-kendaraan') return 8;
+    if (t === 'parkir-area') return 8;
+    if (t === 'ceklist-iso') return 7;
     if (t.includes('kendaraan')) return 5;
     return 7; // default
 });
+
+const formatDate = (dateString, withDay = false) => {
+    if (!dateString) return '-';
+    
+    // If it's a simple YYYY-MM-DD, it might be parsed as UTC and shift the day.
+    // We append a time or use a different separator to force local time parsing.
+    let normalized = dateString;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        normalized = dateString.replace(/-/g, '/');
+    }
+    
+    try {
+        const date = new Date(normalized);
+        if (isNaN(date.getTime())) return dateString;
+        
+        const options = {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        };
+        
+        if (withDay) {
+            options.weekday = 'long';
+        }
+        
+        // Use Indonesian format (e.g., Sabtu, 7 Feb 2026)
+        return date.toLocaleDateString('id-ID', options);
+    } catch (e) {
+        return dateString;
+    }
+};
 
 const airBersihItems = [
     { title: 'Sumber air bersih', standard: 'Debit air yang cukup', method: 'Alat Ukur ( ltr / dtk )', frequency: 'Harian' },
@@ -139,6 +177,9 @@ const form = useForm({
     description: '',
     subcategory: '',
     location: '',
+    type: '',
+    name: '', // Added missing field
+    note: '', // Added missing field
     cost: 0,
     scheduled_at: '',
     status: 'pending',
@@ -209,8 +250,8 @@ const form = useForm({
     jul_status: '', aug_status: '', sep_status: '', oct_status: '', nov_status: '', dec_status: '',
     jan_status: '', feb_status: '', mar_status: '', apr_status: '', may_status: '', jun_status: '',
     performed_by: '',
-    completed_at: new Date().toISOString().split('T')[0],
-    request_date: new Date().toISOString().split('T')[0],
+    completed_at: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
+    request_date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     damage_type: '',
     follow_up_date: '',
     remarks: '',
@@ -227,7 +268,7 @@ const form = useForm({
     user_id: '',
     institution_id: '',
     quantity: 1,
-    borrow_date: new Date().toISOString().split('T')[0],
+    borrow_date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     borrow_condition: '',
     borrower_paraf: '',
     actual_return_date: '',
@@ -235,7 +276,31 @@ const form = useForm({
     returner_paraf: '',
     value: 0,
     reason: '',
-    action_date: new Date().toISOString().split('T')[0]
+    action_date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
+    // Parking Log Fields
+    vehicle_type: 'Motor',
+    plate_number: '',
+    owner_name: '',
+    entry_time: '',
+    exit_time: '',
+    gate_name: '',
+    // ISO Checklist Fields
+    category: '',
+    frequency: 'daily',
+    items: [],
+    is_active: true,
+    // Vehicle Request Fields
+    destination: '',
+    purpose: '',
+    start_time: '',
+    end_time: '',
+    start_mileage: null,
+    end_mileage: null,
+    admin_note: '',
+    institution_name: '',
+    time_range: '',
+    fuel_level_before: '',
+    condition_before: ''
 });
 
 watch([() => form.volume, () => form.unit_price], ([vol, price]) => {
@@ -255,10 +320,39 @@ watch([() => form.budget_amount, () => form.actual_amount], ([budget, actual]) =
     }
 });
 
+const newItem = ref('');
+const addItem = () => {
+    if (newItem.value.trim()) {
+        form.items.push(newItem.value.trim());
+        newItem.value = '';
+    }
+};
+const removeItem = (index) => {
+    form.items.splice(index, 1);
+};
+
 const openCreateModal = () => {
     isEdit.value = false;
     editId.value = null;
     form.reset();
+    
+    // ISO Checklist Helpers
+    newItem.value = '';
+    
+    // Auto-fill time for Parking Log
+    if (props.type === 'parkir-area') {
+        form.entry_time = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    }
+
+    if (props.type === 'penggunaan-kendaraan') {
+        form.start_time = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    }
+
+    if (props.type === 'registrasi-kendaraan') {
+        form.status = 'available';
+        form.type = 'Mobil';
+    }
+    
     showCreateModal.value = true;
 };
 
@@ -278,6 +372,18 @@ const openEditModal = (item) => {
     if (item.institution_id) form.institution_id = item.institution_id;
     if (item.room_id) form.room_id = item.room_id;
     if (item.vehicle_id) form.vehicle_id = item.vehicle_id;
+
+    // Format dates for parkir-area (datetime-local needs YYYY-MM-DDTHH:mm)
+    if (props.type === 'parkir-area') {
+        if (item.entry_time) form.entry_time = new Date(new Date(item.entry_time).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        if (item.exit_time) form.exit_time = new Date(new Date(item.exit_time).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    }
+
+    // Format dates for penggunaan-kendaraan
+    if (props.type === 'penggunaan-kendaraan') {
+        if (item.start_time) form.start_time = new Date(new Date(item.start_time).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        if (item.end_time) form.end_time = new Date(new Date(item.end_time).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    }
 
     showCreateModal.value = true;
 };
@@ -300,9 +406,22 @@ const submit = () => {
     }
 };
 
+const showConfirmModal = ref(false);
+const itemToDelete = ref(null);
+
 const deleteItem = (id) => {
-    if (confirm('Yakin ingin menghapus data ini?')) {
-        form.delete(route('admin.procedures.destroy', { type: props.type, id }));
+    itemToDelete.value = id;
+    showConfirmModal.value = true;
+};
+
+const confirmDelete = () => {
+    if (itemToDelete.value) {
+        form.delete(route('admin.procedures.destroy', { type: props.type, id: itemToDelete.value }), {
+            onSuccess: () => {
+                showConfirmModal.value = false;
+                itemToDelete.value = null;
+            }
+        });
     }
 };
 
@@ -326,6 +445,17 @@ const importExcel = (event) => {
 
 <template>
     <Head :title="procedure.title" />
+    
+    <ConfirmModal
+        :show="showConfirmModal"
+        title="Hapus Data"
+        message="Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan."
+        confirm-text="Ya, Hapus"
+        cancel-text="Batal"
+        variant="danger"
+        @close="showConfirmModal = false"
+        @confirm="confirmDelete"
+    />
 
     <AuthenticatedLayout>
         <template #header>
@@ -343,7 +473,7 @@ const importExcel = (event) => {
                 <div class="flex flex-wrap items-center gap-2">
                     <div v-if="type === 'pemeliharaan-septik'" class="px-3 py-1.5 bg-pail-gold/10 rounded-lg border border-pail-gold/20 flex items-center gap-2 mr-1">
                         <span class="text-[8px] font-black text-pail-gold uppercase tracking-widest">TGL:</span>
-                        <span class="text-[9px] font-black text-gray-900 dark:text-white uppercase">{{ new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) }}</span>
+                        <span class="text-[9px] font-black text-gray-900 dark:text-white uppercase">{{ formatDate(new Date()) }}</span>
                     </div>
                     <button @click="exportExcel" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm">
                         <DownloadIcon class="w-3.5 h-3.5" /> <span class="hidden sm:inline">Export</span>
@@ -363,7 +493,7 @@ const importExcel = (event) => {
             <div class="max-w-7xl mx-auto">
                 <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                     <!-- Desktop Table View -->
-                    <div class="hidden md:block overflow-x-auto scrollbar-hide">
+                    <div class="hidden md:block overflow-x-auto border-b border-gray-100 dark:border-gray-700">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <!-- Row 1 for Specialized & Double Headers -->
@@ -436,7 +566,7 @@ const importExcel = (event) => {
                                     <div class="flex flex-col items-center gap-2">
                                         <div class="flex gap-12">
                                             <span>AREA : {{ data.data[0]?.subcategory || '........................' }}</span>
-                                            <span>TANGGAL KEGIATAN : {{ data.data[0]?.completed_at ? new Date(data.data[0]?.completed_at).toLocaleDateString() : '........................' }}</span>
+                                            <span>TANGGAL KEGIATAN : {{ formatDate(data.data[0]?.completed_at) }}</span>
                                         </div>
                                     </div>
                                 </th>
@@ -497,8 +627,6 @@ const importExcel = (event) => {
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">JENIS BARANG / MERK</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">LOKASI / RUANGAN</th>
                                 <th colspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap">KONDISI</th>
-                                <th colspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap">KONDISI</th>
-                                <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                             </template>
 
                             <template v-if="type === 'electrical-maintenance'">
@@ -575,9 +703,9 @@ const importExcel = (event) => {
 
                             <template v-else-if="type === 'agenda-perbaikan'">
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">No.</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tanggal</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Lokasi / Ruangan</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Uraian Pekerjaan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanggal</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi / Ruangan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Uraian Pekerjaan</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">Status</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">Petugas</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 border-r">Keterangan</th>
@@ -585,24 +713,24 @@ const importExcel = (event) => {
 
                             <template v-else-if="type === 'pemeliharaan-sarpras'">
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">No.</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Nama Sarana/Prasarana</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Jenis Pekerjaan</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Lokasi/Ruangan</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Kondisi Sebelum</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tindakan Pemeliharaan</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center font-mono">Kondisi Sesudah</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Sarana/Prasarana</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jenis Pekerjaan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Lokasi/Ruangan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Kondisi Sebelum</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tindakan Pemeliharaan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center font-mono whitespace-nowrap">Kondisi Sesudah</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Petugas</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-r dark:border-gray-700">Keterangan</th>
                             </template>
 
                             <template v-else-if="type === 'pemeliharaan-kipas'">
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No.</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal Pemeriksaan</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Lokasi / Ruangan</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tipe Kipas</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis Pemeliharaan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tanggal Pemeriksaan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi / Ruangan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tipe Kipas</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Jenis Pemeliharaan</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kondisi</th>
-                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tindakan / Perbaikan</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tindakan / Perbaikan</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Petugas</th>
                             </template>
                         </tr>
@@ -621,26 +749,28 @@ const importExcel = (event) => {
                         <!-- specialized for Rekapan Pengajuan Perbaikan (Single Row Header) -->
                         <tr v-if="type === 'rekapan-pengajuan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
-                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tgl Pengajuan</th>
-                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Divisi Pemohon</th>
-                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Permintaan Perbaikan</th>
-                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Lokasi</th>
-                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis Kerusakan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tgl Pengajuan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Divisi Pemohon</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Permintaan Perbaikan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Jenis Kerusakan</th>
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
-                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tgl di TL</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tgl di TL</th>
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Ket</th>
-                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                         </tr>
 
                         <!-- specialized for Pengajuan RAB -->
                         <tr v-if="type === 'pengajuan-rab'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
-                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Uraian Proyek</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tgl Pengajuan</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lembaga Pemohon</th>
+                            <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Uraian Proyek</th>
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Volume</th>
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Satuan</th>
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Harga</th>
                             <th class="px-4 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Jumlah</th>
-                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                         </tr>
 
                         <!-- specialized for Laporan Proyek Kegiatan -->
@@ -935,15 +1065,224 @@ const importExcel = (event) => {
                             <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                         </tr>
 
+                        <!-- specialized for Parkir Area -->
+                        <tr v-if="type === 'parkir-area'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tipe Kendaraan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">No Plast / TNKB</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Pemilik</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jam Masuk</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Jam Keluar</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">Gerbang/Gate</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Penggunaan Kendaraan -->
+                        <tr v-if="type === 'penggunaan-kendaraan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tanggal</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Armada</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">User/Lembaga</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tujuan & Keperluan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Berangkat</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Pulang</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for ISO Checklist -->
+                        <tr v-if="type === 'ceklist-iso'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Judul Ceklist</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kategori</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Frekuensi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Item</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
                         <!-- Standard Row for Other Types -->
-                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance', 'monitoring-aset'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance', 'monitoring-aset', 'parkir-area', 'penggunaan-kendaraan', 'ceklist-iso', 'agenda-perbaikan'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <!-- Dynamic Headers based on Type -->
                             <template v-if="type.includes('kendaraan')">
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Armada / Plat</th>
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Detail & Merk</th>
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
                             </template>
-                            <template v-else-if="type === 'buku-induk'">
+                            <!-- specialized for Pemeliharaan Kamar Mandi -->
+                        <tr v-if="type === 'pemeliharaan-kamar-mandi'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanggal</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Kran</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Lampu</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Fiting</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Saklar</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Ember</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Gayung</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Closet</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Pintu</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Grendel</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Petugas</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tindakan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Ket</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pemeliharaan AC -->
+                        <tr v-if="type === 'pemeliharaan-ac'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi / Ruangan</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Indoor PC</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Indoor SW</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Outdoor Freon</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Outdoor Ampere</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Listrik Jaringan</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Listrik Tegangan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Petugas</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pemeliharaan Septik Tank -->
+                        <tr v-if="type === 'pemeliharaan-septik'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanggal</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Baik</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Penuh</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Bocor</th>
+                            <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Bau</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tindakan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Hasil</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Petugas</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pemeliharaan Kipas Angin -->
+                        <tr v-if="type === 'pemeliharaan-kipas'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Tanggal</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tipe</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Jenis</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Kondisi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tindakan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Petugas</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pemeliharaan Gedung -->
+                        <tr v-if="type === 'pemeliharaan-gedung'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Item Pengecekan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Std</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Metode</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Freq</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jul</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Agu</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Sep</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Okt</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Nov</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Des</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jan</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Feb</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Mar</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Apr</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Mei</th>
+                            <th class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jun</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pemeliharaan Pompa, Air, Genset (Matrix) -->
+                        <template v-if="['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)">
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Item Pengecekan</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Std</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Mtd/Freq</th>
+                                <th colspan="12" class="px-4 py-3 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Rekap Monitoring (PA = Putra, PI = Putri, LT = Lawata / P1 = Pekan 1, P2 = Pekan 2)</th>
+                                <th rowspan="2" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                            </tr>
+                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[7px] text-gray-400 font-black uppercase tracking-wider">
+                                <th v-for="m in ['Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun']" :key="m" class="px-1 py-2 text-center border-l dark:border-gray-700">
+                                    {{ m }}
+                                </th>
+                            </tr>
+                        </template>
+
+                        <!-- specialized for Pemeliharaan Sarpras -->
+                        <tr v-if="type === 'pemeliharaan-sarpras'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Prasarana</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jenis</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Kondisi Sblm</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Tindakan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Kondisi Ssdh</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Petugas</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Ket</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Agenda Perbaikan -->
+                        <tr v-if="type === 'agenda-perbaikan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Waktu</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Lokasi</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Uraian Pekerjaan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Petugas</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for KIR Ruangan -->
+                        <tr v-if="type === 'kir-ruangan'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Nama Barang</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Merk/Unit</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">No Seri</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Ukuran</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Bahan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Thn</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kode</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jml</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">B</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">KB</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">RB</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Ket</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Pendataan Aset -->
+                        <tr v-if="type === 'pendataan-aset'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap">Lembaga</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center whitespace-nowrap">Jml</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap">Satuan</th>
+                            <th class="px-4 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center border-l dark:border-gray-700">Baik</th>
+                            <th class="px-4 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center border-l dark:border-gray-700">Kurang</th>
+                            <th class="px-4 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center border-l dark:border-gray-700">Rusak</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap">Tgl Update</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap">P.Jawab</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest text-right whitespace-nowrap">Harga</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap">Ket</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+                        
+                        <!-- specialized for Pengadaan Sarpras (Missing Header) -->
+                         <tr v-if="type === 'pengadaan-sarpras'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Judul Pengadaan</th>
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Merk</th>
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Ukuran</th>
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Qty</th>
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Satuan</th>
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Deskripsi</th>
+                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
+                             <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                         </tr>
+
+                        <template v-else-if="type === 'buku-induk' || type === 'berita-acara-pemeriksaan'">
                                 <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">No.</th>
                                 <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Satuan Kerja</th>
                                 <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Ruangan</th>
@@ -984,8 +1323,8 @@ const importExcel = (event) => {
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                         <tr v-for="(item, index) in data.data" :key="item.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-900/30 transition-colors group">
-                            <!-- Specialized Columns for VEHICLES -->
-                            <template v-if="type.includes('kendaraan')">
+                            <!-- Specialized Columns for REGISTRASI KENDARAAN -->
+                            <template v-if="type === 'registrasi-kendaraan'">
                                 <td class="px-8 py-6">
                                     <div class="flex flex-col">
                                         <span class="text-sm font-black text-gray-900 dark:text-white uppercase">{{ item.name }}</span>
@@ -1006,12 +1345,71 @@ const importExcel = (event) => {
                                 </td>
                             </template>
 
+                            <!-- Specialized Columns for PENGGUNAAN KENDARAAN -->
+                            <template v-else-if="type === 'penggunaan-kendaraan'">
+                                <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.request_date || '-' }}</td>
+                                <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">
+                                    {{ item.vehicle?.name || '-' }}
+                                    <div class="text-[9px] text-gray-400 font-bold tracking-wider">{{ item.vehicle?.plate_number || '' }}</div>
+                                </td>
+                                <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">
+                                    {{ item.institution_name || item.user?.name || '-' }}
+                                </td>
+                                <td class="px-4 py-6 border-l border-gray-100 dark:border-gray-800">
+                                    <div class="flex flex-col">
+                                        <span class="text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.destination }}</span>
+                                        <span class="text-[9px] text-gray-400 mt-1 italic">{{ item.purpose }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-6 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[10px] font-black text-gray-900 dark:text-white">{{ item.start_time ? new Date(item.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-' }}</span>
+                                        <span class="text-[8px] text-gray-400 uppercase tracking-widest mt-0.5 whitespace-nowrap">Berangkat</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-6 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <span class="text-[10px] font-black text-gray-900 dark:text-white">{{ item.end_time ? new Date(item.end_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-' }}</span>
+                                        <span class="text-[8px] text-gray-400 uppercase tracking-widest mt-0.5 whitespace-nowrap">Pulang</span>
+                                    </div>
+                                </td>
+                            </template>
+
+                            <!-- Specialized Columns for ISO CHECKLIST -->
+                            <template v-else-if="type === 'ceklist-iso'">
+                                <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                <td class="px-4 py-6">
+                                    <div class="flex flex-col">
+                                        <span class="text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.title }}</span>
+                                        <span class="text-[9px] text-gray-400 mt-0.5 uppercase tracking-widest font-bold font-mono">{{ item.frequency }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">
+                                    {{ item.category }}
+                                </td>
+                                <td class="px-4 py-6 text-center text-[10px] font-black text-gray-900 dark:text-white uppercase">
+                                    {{ item.frequency === 'daily' ? 'Harian' : item.frequency === 'weekly' ? 'Pekanan' : item.frequency === 'monthly' ? 'Bulanan' : 'Tahunan' }}
+                                </td>
+                                <td class="px-4 py-6 text-center">
+                                    <div class="inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                        <span class="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase">{{ Array.isArray(item.items) ? item.items.length : 0 }} Item</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-6 text-center">
+                                    <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                        :class="item.is_active ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'">
+                                        {{ item.is_active ? 'Aktif' : 'Non-Aktif' }}
+                                    </span>
+                                </td>
+                            </template>
+
                             <!-- Generic Content for Others -->
                             <template v-else>
                                 <!-- Specialized Content for REKAPAN PENGAJUAN -->
                                 <template v-if="type === 'rekapan-pengajuan'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.request_date || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ formatDate(item.request_date, true) }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.description || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.room?.name || item.location || '-' }}</td>
@@ -1026,13 +1424,15 @@ const importExcel = (event) => {
                                             {{ item.status || 'PENDING' }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ item.follow_up_date || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ formatDate(item.follow_up_date, true) }}</td>
                                      <td class="px-4 py-6 text-[9px] text-gray-400 italic text-right">{{ item.remarks || '-' }}</td>
                                 </template>
 
                                 <!-- Specialized Content for Pengajuan RAB -->
                                 <template v-else-if="type === 'pengajuan-rab'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ formatDate(item.request_date) }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center">{{ item.volume || 0 }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.unit || '-' }}</td>
@@ -1044,13 +1444,13 @@ const importExcel = (event) => {
                                 <template v-else-if="type === 'laporan-proyek'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center">{{ item.completed_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center">{{ formatDate(item.completed_at) }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.room?.name || item.location || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.responsible_person || '-' }}</td>
                                     <td class="px-4 py-6 text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase leading-tight">{{ item.team_members || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-right">Rp {{ (parseFloat(item.budget_amount) || 0).toLocaleString('id-ID') }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right whitespace-nowrap">Rp {{ (parseFloat(item.actual_amount) || 0).toLocaleString('id-ID') }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right whitespace-nowrap">Rp {{ (parseFloat(item.actual_amount) || 0).toLocaleString('id-ID') }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-right whitespace-nowrap">Rp {{ (parseFloat(item.budget_amount || 0) - parseFloat(item.actual_amount || 0)).toLocaleString('id-ID') }}</td>
                                     <td class="px-4 py-6 text-center">
                                         <div class="flex flex-col items-center">
                                             <span class="text-[10px] font-black text-pail-gold">{{ item.attainment_percentage || 0 }}%</span>
@@ -1076,12 +1476,12 @@ const importExcel = (event) => {
                                     
                                     <!-- Saat Peminjaman -->
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center border-l border-gray-100 dark:border-gray-700 uppercase">{{ item.borrow_condition || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase">{{ item.borrow_date ? new Date(item.borrow_date).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase">{{ formatDate(item.borrow_date, true) }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-center uppercase">{{ item.borrower_paraf || '-' }}</td>
 
                                     <!-- Saat Kembali -->
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center border-l border-gray-100 dark:border-gray-700 uppercase">{{ item.return_condition || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase">{{ item.actual_return_date ? new Date(item.actual_return_date).toLocaleDateString('id-ID', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase">{{ formatDate(item.actual_return_date, true) }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-center uppercase">{{ item.returner_paraf || '-' }}</td>
                                  </template>
 
@@ -1167,7 +1567,7 @@ const importExcel = (event) => {
 
                                 <!-- Specialized Content for Vehicle Log -->
                                 <template v-else-if="type === 'vehicle-log'">
-                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.request_date ? new Date(item.request_date).toLocaleDateString('id-ID') : '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ formatDate(item.request_date) }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-pail-gold uppercase">{{ item.vehicle?.name || '-' }} ({{ item.vehicle?.plate_number || '-' }})</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.time_range || '-' }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution_name || item.user?.institution?.name || '-' }}</td>
@@ -1270,7 +1670,7 @@ const importExcel = (event) => {
                                 <template v-else-if="type === 'jadwal-token'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">
-                                        {{ item.completed_at ? new Date(item.completed_at).toLocaleDateString('id-ID') : '-' }}
+                                        {{ formatDate(item.completed_at) }}
                                     </td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">
                                         {{ item.title || '-' }}<br>
@@ -1308,7 +1708,7 @@ const importExcel = (event) => {
                                 <template v-else-if="type === 'penerimaan-barang'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">
-                                        {{ item.completed_at ? new Date(item.completed_at).toLocaleDateString('id-ID') : '-' }}
+                                        {{ formatDate(item.completed_at) }}
                                     </td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">
@@ -1384,8 +1784,19 @@ const importExcel = (event) => {
                                     </td>
                                 </template>
 
+                                <!-- Specialized Content for Parkir Area -->
+                                <template v-else-if="type === 'parkir-area'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.vehicle_type || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.plate_number || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.owner_name || '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-700 dark:text-gray-300 text-center">{{ item.entry_time ? new Date(item.entry_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-700 dark:text-gray-300 text-center">{{ item.exit_time ? new Date(item.exit_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-' }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight text-center">{{ item.gate_name || '-' }}</td>
+                                </template>
+
                                 <!-- Specialized Content for BUKU INDUK -->
-                                <template v-else-if="type === 'buku-induk'">
+                                <template v-else-if="type === 'buku-induk' || type === 'berita-acara-pemeriksaan'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400">{{ index + 1 }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase">{{ item.room?.name || 'Gudang' }}</td>
@@ -1415,7 +1826,9 @@ const importExcel = (event) => {
                                 <!-- Specialized Content for PEMELIHARAAN KAMAR MANDI -->
                                 <template v-else-if="type === 'pemeliharaan-kamar-mandi'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.completed_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">
+                                        {{ formatDate(item.completed_at) }}
+                                    </td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.location || '-' }}</td>
                                     
                                     <!-- 9 Bathroom Component Columns -->
@@ -1425,7 +1838,7 @@ const importExcel = (event) => {
                                     
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center">{{ item.performer?.name || 'Staff URT' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center">{{ item.action_taken || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic truncate max-w-[100px]">{{ item.description || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic whitespace-normal min-w-[150px]">{{ item.description || '-' }}</td>
                                 </template>
 
                                 <!-- Specialized Content for MONITORING ASET -->
@@ -1479,7 +1892,7 @@ const importExcel = (event) => {
                                 <!-- Specialized Content for PEMELIHARAAN KIPAS -->
                                 <template v-else-if="type === 'pemeliharaan-kipas'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.completed_at || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ formatDate(item.completed_at) }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.fan_type || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.subcategory || '-' }}</td>
@@ -1495,7 +1908,7 @@ const importExcel = (event) => {
                                  <!-- Specialized Content for FORMULIR PEMELIHARAAN SEPTIK TANK -->
                                  <template v-else-if="type === 'pemeliharaan-septik'">
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center whitespace-nowrap">{{ item.completed_at || '-' }}</td>
+                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center whitespace-nowrap">{{ formatDate(item.completed_at) }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
                                      
                                      <td v-for="col in ['st_baik', 'st_penuh', 'st_bocor', 'st_bau']" :key="col" class="px-1 py-6 text-center border-l dark:border-gray-700">
@@ -1511,22 +1924,83 @@ const importExcel = (event) => {
                                  <!-- Specialized Content for JADWAL AGENDA PERBAIKAN SARPRAS -->
                                  <template v-else-if="type === 'agenda-perbaikan'">
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center border-l dark:border-gray-700">{{ index + 1 }}</td>
-                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ item.scheduled_at || item.created_at || '-' }}</td>
+                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ formatDate(item.scheduled_at || item.created_at) }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.title || '-' }}</td>
-                                     <td class="px-4 py-6 text-center border-l dark:border-gray-700">
-                                         <span class="inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest" 
-                                               :class="{
-                                                   'bg-yellow-100 text-yellow-600': item.status === 'pending',
-                                                   'bg-blue-100 text-blue-600': (item.status === 'proses' || item.status === 'processing'),
-                                                   'bg-green-100 text-green-600': (item.status === 'selesai' || item.status === 'completed')
-                                               }">
-                                             {{ item.status || 'PENDING' }}
-                                         </span>
-                                     </td>
-                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-l dark:border-gray-700">{{ item.performer?.name || 'Staff URT' }}</td>
-                                     <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-l border-r dark:border-gray-700">{{ item.description || '-' }}</td>
-                                 </template>
+                                     <td class="px-4 py-6 text-[10px] font-black text-center border-l dark:border-gray-700">
+                                        <span :class="{
+                                             'bg-yellow-100 text-yellow-600 p-2 rounded-full font-black': item.status === 'pending',
+                                             'bg-blue-100 text-blue-600 p-2 rounded-full font-black': (item.status === 'proses' || item.status === 'processing'),
+                                             'bg-green-100 text-green-600 p-2 rounded-full font-black': (item.status === 'selesai' || item.status === 'completed')
+                                         }">
+                                       {{ item.status || 'PENDING' }}
+                                   </span>
+                               </td>
+                               <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-l dark:border-gray-700">{{ item.performer?.name || 'Staff URT' }}</td>
+                               <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-l border-r dark:border-gray-700">{{ item.description || '-' }}</td>
+                               <td class="px-8 py-6 text-right border-l dark:border-gray-700">
+                                   <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                       <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
+                                           <PencilIcon class="w-4 h-4" />
+                                       </button>
+                                       <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
+                                           <TrashIcon class="w-4 h-4" />
+                                       </button>
+                                   </div>
+                               </td>
+                           </template>
+
+                                <!-- Specialized Content for KIR RUANGAN -->
+                                <template v-else-if="type === 'kir-ruangan'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center border-l dark:border-gray-700">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.name || item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase">{{ item.brand || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase font-mono">{{ item.serial_number || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase text-center">{{ item.size || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 uppercase text-center">{{ item.material || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ item.year || (item.purchased_at ? new Date(item.purchased_at).getFullYear() : '-') }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center font-mono">{{ item.code || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ item.stock || 0 }} {{ item.unit || 'Unit' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-green-600 uppercase text-center font-bold">{{ item.condition === 'B' ? (item.stock || 0) : 0 }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-yellow-600 uppercase text-center font-bold">{{ item.condition === 'KB' ? (item.stock || 0) : 0 }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-red-600 uppercase text-center font-bold">{{ item.condition === 'RB' ? (item.stock || 0) : 0 }}</td>
+                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic whitespace-normal min-w-[150px]">{{ item.note || item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right border-l dark:border-gray-700">
+                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for PENDATAAN ASET -->
+                                <template v-else-if="type === 'pendataan-aset'">
+                                    <td class="px-6 py-4 text-[10px] font-black text-gray-400 text-center border-l dark:border-gray-700">{{ index + 1 }}</td>
+                                    <td class="px-6 py-4 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center border-l dark:border-gray-700">{{ item.stock || 0 }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center border-l dark:border-gray-700">{{ item.unit || 'Unit' }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-green-600 text-center border-l dark:border-gray-700">{{ item.condition === 'B' ? (item.stock || 0) : 0 }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-yellow-600 text-center border-l dark:border-gray-700">{{ item.condition === 'KB' ? (item.stock || 0) : 0 }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-red-600 text-center border-l dark:border-gray-700">{{ item.condition === 'RB' ? (item.stock || 0) : 0 }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center border-l dark:border-gray-700">{{ formatDate(item.updated_at) }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center border-l dark:border-gray-700">{{ item.responsible_person || item.person_in_charge || '-' }}</td>
+                                    <td class="px-4 py-4 text-[10px] font-black text-gray-900 dark:text-white text-right border-l dark:border-gray-700">Rp {{ item.price ? Number(item.price).toLocaleString() : '-' }}</td>
+                                    <td class="px-4 py-4 text-[9px] text-gray-400 italic text-center border-l dark:border-gray-700 whitespace-normal min-w-[150px]">{{ item.note || item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right border-l dark:border-gray-700">
+                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
 
                                  <!-- Specialized Content for FORMULIR LAPORAN PEMELIHARAAN SARANA PRASARANA -->
                                  <template v-else-if="type === 'pemeliharaan-sarpras'">
@@ -1539,6 +2013,16 @@ const importExcel = (event) => {
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center font-mono">{{ item.after_condition || '-' }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center whitespace-nowrap">{{ item.performer?.name || 'Staff URT' }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-r dark:border-gray-700">{{ item.description || '-' }}</td>
+                                     <td class="px-8 py-6 text-right border-l dark:border-gray-700">
+                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
                                  </template>
 
                                 <!-- Specialized Content for PEMELIHARAAN GEDUNG -->
@@ -1578,55 +2062,7 @@ const importExcel = (event) => {
                                     </template>
                                 </template>
 
-                                <!-- Specialized Content for KIR RUANGAN -->
-                                <template v-else-if="type === 'kir-ruangan'">
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.name || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.brand || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.serial_number || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.size || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.material || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.purchased_at || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.code || '-' }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-center">{{ item.stock || 0 }} {{ item.unit }}</td>
-                                    
-                                    <!-- 3 Columns for Condition -->
-                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
-                                        <span v-if="item.condition === 'B'" class="text-green-500 font-black">V</span>
-                                    </td>
-                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
-                                        <span v-if="item.condition === 'KB'" class="text-yellow-500 font-black">V</span>
-                                    </td>
-                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
-                                        <span v-if="item.condition === 'RB'" class="text-red-500 font-black">V</span>
-                                    </td>
-                                    
-                                    <td class="px-4 py-6 text-[9px] text-gray-400 italic truncate max-w-[100px]">{{ item.note || '-' }}</td>
-                                </template>
 
-                                <!-- Specialized Content for PENDATAAN ASET -->
-                                <template v-else-if="type === 'pendataan-aset'">
-                                    <td class="px-6 py-4 text-[10px] font-black text-gray-400 text-center whitespace-nowrap">{{ index + 1 }}</td>
-                                    <td class="px-6 py-4 text-[10px] font-black text-gray-900 dark:text-white uppercase whitespace-nowrap">{{ item.institution?.name || '-' }}</td>
-                                    <td class="px-6 py-4 text-center text-[10px] font-black text-gray-900 dark:text-white whitespace-nowrap">{{ item.stock || 0 }}</td>
-                                    <td class="px-6 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase whitespace-nowrap">{{ item.unit || '-' }}</td>
-                                    
-                                    <!-- 3 Columns for Condition -->
-                                    <td class="px-4 py-4 text-center border-l dark:border-gray-700">
-                                        <span v-if="item.condition === 'B'" class="text-green-500 font-black">V</span>
-                                    </td>
-                                    <td class="px-4 py-4 text-center border-l dark:border-gray-700">
-                                        <span v-if="item.condition === 'KB'" class="text-yellow-500 font-black">V</span>
-                                    </td>
-                                    <td class="px-4 py-4 text-center border-l dark:border-gray-700">
-                                        <span v-if="item.condition === 'RB'" class="text-red-500 font-black">V</span>
-                                    </td>
-
-                                    <td class="px-6 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ item.updated_at ? new Date(item.updated_at).toLocaleDateString() : '-' }}</td>
-                                    <td class="px-6 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase whitespace-nowrap">{{ item.responsible_person || '-' }}</td>
-                                    <td class="px-6 py-4 text-right text-xs font-mono font-black text-gray-900 dark:text-white whitespace-nowrap">Rp {{ Number(item.price || 0).toLocaleString() }}</td>
-                                    <td class="px-6 py-4 text-[9px] text-gray-400 italic whitespace-nowrap">{{ item.note || '-' }}</td>
-                                </template>
 
                                 <!-- Generic Item Display -->
                                 <template v-else-if="procedure?.model?.includes('Item')">
@@ -1656,12 +2092,76 @@ const importExcel = (event) => {
                                     </td>
                                 </template>
 
+                                <!-- Specialized Content for MONITORING ASET -->
+                                <template v-else-if="type === 'monitoring-aset'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-black text-gray-900 dark:text-white uppercase">{{ item.name || item.title || '-' }}</span>
+                                            <span class="text-[9px] text-gray-400 uppercase mt-0.5">{{ item.brand || '-' }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase">{{ item.location || item.room?.name || '-' }}</td>
+                                    
+                                    <!-- 3 Columns for Condition Checks -->
+                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
+                                        <span v-if="item.condition === 'B'" class="text-green-500 font-black">V</span>
+                                    </td>
+                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
+                                        <span v-if="item.condition === 'KB'" class="text-yellow-500 font-black">V</span>
+                                    </td>
+                                    <td class="px-4 py-6 text-center border-l dark:border-gray-700">
+                                        <span v-if="item.condition === 'R' || item.condition === 'RB'" class="text-red-500 font-black">V</span>
+                                    </td>
+
+                                    <td class="px-8 py-6 text-[9px] text-gray-400 italic whitespace-normal min-w-[150px]">{{ item.note || item.description || '-' }}</td>
+                                    <td class="px-8 py-6 text-right border-l dark:border-gray-700">
+                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
+                                                <PencilIcon class="w-4 h-4" />
+                                            </button>
+                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
+                                                <TrashIcon class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </template>
+
+                                <!-- Specialized Content for BERITA ACARA PEMERIKSAAN -->
+                                <template v-else-if="type === 'berita-acara-pemeriksaan'">
+                                    <td class="px-8 py-6">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-black text-gray-900 dark:text-white uppercase truncate max-w-xs">{{ item.title || item.name }}</span>
+                                            <span class="text-[10px] text-gray-400 mt-1 truncate max-w-xs">{{ item.description || item.condition_notes || 'Pemeriksaan Aset' }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase">{{ item.location || item.room?.name || 'Lokasi Tidak Spesifik' }}</span>
+                                            <span class="text-[9px] text-pail-gold font-bold uppercase tracking-widest mt-1">{{ item.institution?.name || 'Pusat' }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                                :class="{
+                                                    'bg-green-50 text-green-600 border-green-100': item.condition === 'B',
+                                                    'bg-yellow-50 text-yellow-600 border-yellow-100': item.condition === 'KB',
+                                                    'bg-red-50 text-red-600 border-red-100': item.condition === 'R' || item.condition === 'RB'
+                                                }">
+                                                {{ item.condition === 'B' ? 'BAIK' : (item.condition === 'KB' ? 'KURANG BAIK' : (item.condition === 'R' || item.condition === 'RB' ? 'RUSAK' : (item.condition || '-'))) }}
+                                            </span>
+                                            <span class="text-[8px] font-black text-gray-400 uppercase mt-1">{{ item.completed_at || '-' }}</span>
+                                        </div>
+                                    </td>
+                                </template>
+
                                 <!-- Maintenance / Other Display -->
                                 <template v-else>
                                     <td class="px-8 py-6">
                                         <div class="flex flex-col">
-                                            <span class="text-sm font-black text-gray-900 dark:text-white uppercase truncate max-w-xs">{{ item.title || item.name }}</span>
-                                            <span class="text-[10px] text-gray-400 mt-1 truncate max-w-xs">{{ item.action_taken || item.description || 'Sesuai Prosedur URT' }}</span>
+                                            <span class="text-sm font-black text-gray-900 dark:text-white uppercase whitespace-normal min-w-[200px]">{{ item.title || item.name }}</span>
+                                            <span class="text-[10px] text-gray-400 mt-1 whitespace-normal min-w-[200px]">{{ item.action_taken || item.description || 'Sesuai Prosedur URT' }}</span>
                                         </div>
                                     </td>
                                     <td class="px-8 py-6">
@@ -1679,21 +2179,12 @@ const importExcel = (event) => {
                                 </template>
                             </template>
                             
-                            <td v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan' && type !== 'pemeliharaan-gedung' && type !== 'pemeliharaan-kipas' && type !== 'agenda-perbaikan'" class="px-8 py-6 text-right">
+                            <td v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan' && type !== 'pemeliharaan-gedung' && type !== 'pemeliharaan-kipas' && type !== 'agenda-perbaikan' && type !== 'pemilihan-evaluasi'" class="px-8 py-6 text-right">
                                 <span class="text-xs font-mono font-black text-gray-900 dark:text-white">
                                     Rp {{ Number(item.price || item.cost || item.amount || 0).toLocaleString() }}
                                 </span>
                             </td>
-                            <td class="px-8 py-6 text-right">
-                                <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
-                                        <PencilIcon class="w-4 h-4" />
-                                    </button>
-                                    <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
-                                        <TrashIcon class="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </td>
+                            <td v-else class="hidden"></td>
                         </tr>
                         <tr v-if="data.data.length === 0">
                             <td :colspan="tableColspan" class="px-8 py-24 text-center">
@@ -1701,7 +2192,7 @@ const importExcel = (event) => {
                             </td>
                         </tr>
                         <tr v-if="type === 'pengajuan-rab' && data.data.length > 0" class="bg-gray-900 text-white font-black">
-                            <td colspan="5" class="px-4 py-8 text-[12px] uppercase tracking-widest text-right">TOTAL</td>
+                            <td colspan="7" class="px-4 py-8 text-[12px] uppercase tracking-widest text-right">TOTAL</td>
                             <td class="px-4 py-8 text-[12px] text-pail-gold text-right">Rp {{ grandTotal.toLocaleString('id-ID') }}</td>
                             <td></td>
                         </tr>
@@ -1765,7 +2256,7 @@ const importExcel = (event) => {
                             <div v-if="item.completed_at || item.request_date || item.borrow_date || item.scheduled_at || item.purchased_at" class="space-y-1">
                                 <p class="text-[7px] font-black text-gray-400 uppercase tracking-widest">Tanggal</p>
                                 <p class="text-[9px] font-black text-gray-700 dark:text-gray-300">
-                                    {{ item.completed_at || item.request_date || item.borrow_date || item.scheduled_at || item.purchased_at }}
+                                    {{ formatDate(item.completed_at || item.request_date || item.borrow_date || item.scheduled_at || item.purchased_at) }}
                                 </p>
                             </div>
 
@@ -1850,8 +2341,8 @@ const importExcel = (event) => {
 
                         <form @submit.prevent="submit" class="space-y-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <!-- Field Khusus KENDARAAN -->
-                                <template v-if="type.includes('kendaraan') && !type.includes('pengajuan')">
+                                <!-- Field Khusus REGISTRASI KENDARAAN -->
+                                <template v-if="type === 'registrasi-kendaraan'">
                                     <div class="sm:col-span-2">
                                         <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Kendaraan</label>
                                         <input v-model="form.name" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Bus Sekolah Hino">
@@ -1863,6 +2354,116 @@ const importExcel = (event) => {
                                     <div>
                                         <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Merk / Tipe</label>
                                         <input v-model="form.brand" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Toyota / Mitsubishi">
+                                    </div>
+                                    <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tipe Armada</label>
+                                            <select v-model="form.type" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                <option value="Mobil">Mobil</option>
+                                                <option value="Motor">Motor</option>
+                                                <option value="Bus">Bus</option>
+                                                <option value="Pick Up">Pick Up</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Status Unit</label>
+                                            <select v-model="form.status" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                <option value="available">Tersedia (Ready)</option>
+                                                <option value="in_use">Sedang Digunakan</option>
+                                                <option value="maintenance">Dalam Perbaikan</option>
+                                                <option value="retired">Rusak / Tidak Layak</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Field Khusus PENGGUNAAN KENDARAAN -->
+                                <template v-else-if="type === 'penggunaan-kendaraan'">
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Pilih Armada (Kendaraan)</label>
+                                        <SearchableSelect
+                                            v-model="form.vehicle_id"
+                                            :options="vehicles"
+                                            placeholder="Pilih Armada"
+                                            :customLabel="(opt) => `${opt.name} - ${opt.plate_number}`"
+                                        />
+                                        <div v-if="form.errors.vehicle_id" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.vehicle_id }}</div>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga / Unit Pemakai</label>
+                                        <input v-model="form.institution_name" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: KMI Putra / URT">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tujuan Perjalanan</label>
+                                        <input v-model="form.destination" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                        <div v-if="form.errors.destination" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.destination }}</div>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keperluan / Acara</label>
+                                        <textarea v-model="form.purpose" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2"></textarea>
+                                        <div v-if="form.errors.purpose" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.purpose }}</div>
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jam Berangkat (Estimasi)</label>
+                                        <input v-model="form.start_time" type="datetime-local" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jam Pulang (Estimasi)</label>
+                                        <input v-model="form.end_time" type="datetime-local" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Penanggung Jawab / Sopir</label>
+                                        <input v-model="form.responsible_person" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                    </div>
+                                </template>
+
+                                <!-- Field Khusus ISO CHECKLIST -->
+                                <template v-else-if="type === 'ceklist-iso'">
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Judul Ceklist (ISO Name)</label>
+                                        <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Ceklist Kebersihan Gedung">
+                                        <div v-if="form.errors.title" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.title }}</div>
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kategori</label>
+                                        <select v-model="form.category" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            <option value="">Pilih Kategori</option>
+                                            <option value="Kebersihan">Kebersihan</option>
+                                            <option value="Keamanan">Keamanan</option>
+                                            <option value="Sarpras">Sarpras</option>
+                                            <option value="Kendaraan">Kendaraan</option>
+                                            <option value="Umum">Umum</option>
+                                        </select>
+                                        <div v-if="form.errors.category" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.category }}</div>
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Frekuensi Cek</label>
+                                        <select v-model="form.frequency" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            <option value="daily">Harian</option>
+                                            <option value="weekly">Pekanan</option>
+                                            <option value="monthly">Bulanan</option>
+                                            <option value="yearly">Tahunan</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-2 space-y-4">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Daftar Item / Kegiatan</label>
+                                        <div class="flex gap-2">
+                                            <input v-model="newItem" @keyup.enter="addItem" type="text" class="flex-1 bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Ketik item checklist lalu tekan Enter">
+                                            <button type="button" @click="addItem" class="px-6 rounded-2xl bg-pail-gold text-white font-bold text-xs hover:bg-pail-gold/80 transition-colors">Tambah</button>
+                                        </div>
+                                        <div class="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                            <div v-for="(item, idx) in form.items" :key="idx" class="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ idx + 1 }}. {{ item }}</span>
+                                                <button type="button" @click="removeItem(idx)" class="text-red-500 hover:text-red-700 p-1">
+                                                    <TrashIcon class="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <div v-if="form.items.length === 0" class="text-center py-8 text-gray-400 text-[10px] uppercase font-bold tracking-widest border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-2xl">
+                                                Belum ada item ditambahkan
+                                            </div>
+                                        </div>
+                                        <div v-if="form.errors.items" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.items }}</div>
                                     </div>
                                 </template>
 
@@ -1878,6 +2479,7 @@ const importExcel = (event) => {
                                                 :options="institutions"
                                                 placeholder="Pilih Lembaga"
                                             />
+                                            <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.institution_id }}</div>
                                         </div>
 
                                         <div :class="type === 'pendataan-aset' || type === 'kir-ruangan' ? 'sm:col-span-2' : ''">
@@ -2025,6 +2627,14 @@ const importExcel = (event) => {
                                         <!-- Specialized fields for Pemeliharaan Kamar Mandi -->
                                         <template v-if="type === 'pemeliharaan-kamar-mandi'">
                                             <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
+                                            <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">AREA (Grup Lokasi)</label>
                                                 <input v-model="form.subcategory" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: AREA MASJID / AREA ASRAMA">
                                             </div>
@@ -2060,7 +2670,15 @@ const importExcel = (event) => {
                                         <!-- Specialized fields for Pemeliharaan AC -->
                                         <template v-else-if="type === 'pemeliharaan-ac'">
                                             <div class="sm:col-span-2">
-                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi (Lembaga)</label>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Divisi (Unit/Lembaga)</label>
                                                 <input v-model="form.ac_divisi" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                             </div>
                                             <div>
@@ -2113,6 +2731,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for FORMULIR PEMELIHARAAN SEPTIK TANK -->
                                         <template v-else-if="type === 'pemeliharaan-septik'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Pemeriksaan</label>
                                                 <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
@@ -2160,6 +2786,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Pemeliharaan Kipas Angin -->
                                         <template v-else-if="type === 'pemeliharaan-kipas'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Pemeriksaan</label>
                                                 <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
@@ -2213,6 +2847,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Pemeliharaan Gedung (Checklist Style) -->
                                         <template v-else-if="type === 'pemeliharaan-gedung'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Gedung</label>
                                                 <input v-model="form.subcategory" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Gedung A">
@@ -2267,7 +2909,15 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Pemeliharaan Pompa, Air Bersih, Air Minum & Genset -->
                                         <template v-if="['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)">
-                                            <div class="sm:col-span-2 grid grid-cols-2 gap-4">
+                                            <div class="sm:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div class="sm:col-span-2">
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                    <SearchableSelect
+                                                        v-model="form.institution_id"
+                                                        :options="institutions"
+                                                        placeholder="Pilih Satuan Kerja..."
+                                                    />
+                                                </div>
                                                 <div v-if="type === 'pemeliharaan-genset'">
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kegiatan</label>
                                                     <input v-model="form.subcategory" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
@@ -2356,6 +3006,14 @@ const importExcel = (event) => {
                                         <!-- Specialized fields for Pemeliharaan Sarana Prasarana -->
                                         <template v-else-if="type === 'pemeliharaan-sarpras'">
                                             <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
+                                            <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block tracking-widest font-black">Pemeliharaan (Kategori/Tag)</label>
                                                 <input v-model="form.subcategory" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold font-black uppercase text-pail-gold" placeholder="CONTOH: GEDUNG / MEP / ELEKTRONIK">
                                             </div>
@@ -2415,6 +3073,10 @@ const importExcel = (event) => {
                                                 />
                                             </div>
                                             <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Judul/Subjek Pengajuan</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Perbaikan Genteng Bocor">
+                                            </div>
+                                            <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Permintaan Perbaikan</label>
                                                 <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail permintaan perbaikan..."></textarea>
                                             </div>
@@ -2444,8 +3106,8 @@ const importExcel = (event) => {
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Status Progres</label>
                                                 <select v-model="form.status" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                                     <option value="pending">Pending</option>
-                                                    <option value="proses">Proses</option>
-                                                    <option value="selesai">Selesai</option>
+                                                    <option value="ongoing">Proses</option>
+                                                    <option value="completed">Selesai</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -2467,6 +3129,18 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Pengajuan RAB -->
                                         <template v-else-if="type === 'pengajuan-rab'">
+                                            <div class="sm:col-span-1">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tgl Pengajuan</label>
+                                                <input v-model="form.request_date" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+                                            <div class="sm:col-span-1">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga Pemohon</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Lembaga..."
+                                                />
+                                            </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Proyek</label>
                                                 <textarea v-model="form.title" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail uraian proyek / pekerjaan..."></textarea>
@@ -2537,8 +3211,75 @@ const importExcel = (event) => {
                                             </div>
                                         </template>
 
+                                        <!-- Specialized fields for Berita Acara Pemeriksaan -->
+                                        <template v-else-if="type === 'berita-acara-pemeriksaan'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Judul Berita Acara</label>
+                                                <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Pemeriksaan Aset Tahunan 2024">
+                                            </div>
+                                            
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Pemeriksaan</label>
+                                                <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            </div>
+
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pemeriksa</label>
+                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Petugas...</option>
+                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi / Ruangan</label>
+                                                <SearchableSelect
+                                                    v-model="form.room_id"
+                                                    :options="rooms"
+                                                    placeholder="Pilih Ruangan..."
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Umum</label>
+                                                <select v-model="form.condition" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option value="">Pilih Kondisi</option>
+                                                    <option value="B">Baik</option>
+                                                    <option value="KB">Kurang Baik</option>
+                                                    <option value="RB">Rusak Berat</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Hasil Pemeriksaan (Detail)</label>
+                                                <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="4" placeholder="Uraian hasil pemeriksaan..."></textarea>
+                                            </div>
+                                            
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tindak Lanjut / Rekomendasi</label>
+                                                <textarea v-model="form.action_taken" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Rekomendasi tindakan..."></textarea>
+                                            </div>
+                                        </template>
+
                                         <!-- Specialized fields for Electrical Maintenance -->
                                         <template v-else-if="type === 'electrical-maintenance'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tahun</label>
@@ -2583,6 +3324,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Laporan Proyek Kegiatan -->
                                         <template v-else-if="type === 'laporan-proyek'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Proyek Kegiatan</label>
                                                 <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Nama proyek/kegiatan...">
@@ -2798,6 +3547,15 @@ const importExcel = (event) => {
                                                     <h4 class="text-[10px] font-black uppercase tracking-widest text-pail-gold mb-6">Section 1: Informasi Supplier</h4>
                                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <div class="sm:col-span-2">
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lembaga Pemohon / Terkait <span class="text-red-500">*Wajib</span></label>
+                                                            <SearchableSelect
+                                                                v-model="form.institution_id"
+                                                                :options="institutions"
+                                                                placeholder="Pilih Lembaga..."
+                                                            />
+                                                            <div v-if="form.errors.institution_id" class="text-red-500 text-[10px] font-bold mt-1 uppercase">{{ form.errors.institution_id }}</div>
+                                                        </div>
+                                                        <div class="sm:col-span-2">
                                                             <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kategori Supplier</label>
                                                             <input v-model="form.subcategory" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Bengkel Las">
                                                         </div>
@@ -2816,6 +3574,13 @@ const importExcel = (event) => {
                                                         <div>
                                                             <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Produk/Jasa</label>
                                                             <input v-model="form.supplier_product" type="text" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        </div>
+                                                        <div class="sm:col-span-2">
+                                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Penilai (Staff URT)</label>
+                                                            <select v-model="form.performed_by" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                                <option value="">Pilih Petugas...</option>
+                                                                <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                            </select>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2875,6 +3640,14 @@ const importExcel = (event) => {
                                         <!-- Specialized fields for Pengajuan RAB -->
                                         <template v-else-if="type === 'pengajuan-rab'">
                                             <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
+                                            <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kebutuhan Proyek</label>
                                                 <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Pembelian Semen Gresik">
                                             </div>
@@ -2900,6 +3673,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Pemeliharaan Kebersihan (Timeline) -->
                                         <template v-else-if="type === 'pemeliharaan-kebersihan'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Pemeliharaan</label>
                                                 <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Pembersihan AC Tahunan">
@@ -2928,6 +3709,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Jadwal Token -->
                                         <template v-else-if="type === 'jadwal-token'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Pengisian</label>
                                                 <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
@@ -2962,6 +3751,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Jadwal Kebersihan -->
                                         <template v-else-if="type === 'jadwal-kebersihan'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Hari</label>
@@ -3004,6 +3801,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Monitoring Kebersihan -->
                                         <template v-else-if="type === 'monitoring-kebersihan'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
@@ -3124,6 +3929,14 @@ const importExcel = (event) => {
 
                                         <!-- Specialized fields for Penerimaan Barang -->
                                         <template v-else-if="type === 'penerimaan-barang'">
+                                            <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Penerimaan</label>
                                                 <input v-model="form.completed_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
@@ -3219,6 +4032,14 @@ const importExcel = (event) => {
                                         <!-- Specialized fields for Agenda Perbaikan Sarpras -->
                                         <template v-else-if="type === 'agenda-perbaikan'">
                                             <div class="sm:col-span-2">
+                                                <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja (Lembaga)</label>
+                                                <SearchableSelect
+                                                    v-model="form.institution_id"
+                                                    :options="institutions"
+                                                    placeholder="Pilih Satuan Kerja..."
+                                                />
+                                            </div>
+                                            <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Uraian Pekerjaan</label>
                                                 <input v-model="form.title" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                             </div>
@@ -3238,8 +4059,8 @@ const importExcel = (event) => {
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Status</label>
                                                 <select v-model="form.status" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                                     <option value="pending">Pending</option>
-                                                    <option value="proses">Proses</option>
-                                                    <option value="selesai">Selesai</option>
+                                                    <option value="ongoing">Proses</option>
+                                                    <option value="completed">Selesai</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -3253,6 +4074,41 @@ const importExcel = (event) => {
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
                                                 <textarea v-model="form.description" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" rows="2" placeholder="Detail tambahan..."></textarea>
+                                            </div>
+                                        </template>
+
+                                        <!-- Specialized fields for Parkir Area -->
+                                        <template v-else-if="type === 'parkir-area'">
+                                            <div class="sm:col-span-2 grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tipe Kendaraan</label>
+                                                    <select v-model="form.vehicle_type" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option value="Motor">Motor</option>
+                                                        <option value="Mobil">Mobil</option>
+                                                        <option value="Bus">Bus</option>
+                                                        <option value="Lainnya">Lainnya</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nomor Plat (TNKB)</label>
+                                                    <input v-model="form.plate_number" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="DR 1234 XY">
+                                                </div>
+                                                <div class="sm:col-span-2">
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Pemilik / Pengendara</label>
+                                                    <input v-model="form.owner_name" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jam Masuk</label>
+                                                    <input v-model="form.entry_time" type="datetime-local" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                </div>
+                                                <div>
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Jam Keluar (Opsional)</label>
+                                                    <input v-model="form.exit_time" type="datetime-local" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                </div>
+                                                <div class="sm:col-span-2">
+                                                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Gerbang / Area Parkir</label>
+                                                    <input v-model="form.gate_name" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Gerbang Depan / Parkir Guru">
+                                                </div>
                                             </div>
                                         </template>
 
@@ -3303,7 +4159,7 @@ const importExcel = (event) => {
                                 </template>
 
                                 <!-- Common Selectors for Vehicles Only -->
-                                <div v-if="type.includes('kendaraan') && type.includes('pengajuan')">
+                                <div v-if="type.includes('kendaraan') && type.includes('pengajuan') && type !== 'penggunaan-kendaraan'">
                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Pilih Kendaraan</label>
                                     <SearchableSelect
                                         v-model="form.vehicle_id"

@@ -17,18 +17,18 @@
         <div class="fixed inset-0 bg-black/50 backdrop-blur-sm"></div>
 
         <!-- Modal Container -->
-        <div class="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="flex min-h-full items-center justify-center p-4">
           <Transition
             enter-active-class="transition ease-out duration-300"
-            enter-from-class="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95"
-            enter-to-class="opacity-100 translate-y-0 sm:scale-100"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
             leave-active-class="transition ease-in duration-200"
-            leave-from-class="opacity-100 translate-y-0 sm:scale-100"
-            leave-to-class="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
           >
             <div
               v-if="show"
-              class="relative w-full max-w-md transform overflow-hidden rounded-t-[2rem] sm:rounded-2xl bg-white dark:bg-gray-800 shadow-2xl transition-all"
+              class="relative w-full max-w-sm transform overflow-hidden rounded-[2rem] bg-white dark:bg-gray-800 shadow-2xl transition-all border border-gray-100 dark:border-gray-700"
               @click.stop
             >
               <!-- Icon -->
@@ -57,10 +57,10 @@
 
               <!-- Content -->
               <div class="px-6 pb-6 text-center">
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                <h3 class="text-xl font-black text-gray-900 dark:text-white mb-2 uppercase tracking-tighter">
                   {{ title }}
                 </h3>
-                <p class="text-sm text-gray-600 dark:text-gray-400">
+                <p class="text-[10px] sm:text-xs text-gray-500 font-bold leading-relaxed">
                   {{ message }}
                 </p>
               </div>
@@ -70,7 +70,7 @@
                 <button
                   type="button"
                   @click="close()"
-                  class="flex-1 rounded-full px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                  class="flex-1 rounded-xl px-4 py-3 text-[10px] sm:text-xs font-black text-gray-400 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200 uppercase tracking-widest border border-gray-100 dark:border-gray-600"
                 >
                   {{ cancelText }}
                 </button>
@@ -78,7 +78,7 @@
                   type="button"
                   @click="confirm()"
                   :class="[
-                    'flex-1 rounded-full px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-200',
+                    'flex-1 rounded-xl px-4 py-3 text-[10px] sm:text-xs font-black text-white transition-colors duration-200 uppercase tracking-widest shadow-lg',
                     variantClasses.button
                   ]"
                 >
@@ -143,14 +143,14 @@ const iconPath = computed(() => {
 const variantClasses = computed(() => {
   const variants = {
     danger: {
-      bg: 'bg-red-100 dark:bg-red-900/20',
-      icon: 'text-red-600 dark:text-red-400',
-      button: 'bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600'
+      bg: 'bg-red-50 dark:bg-red-900/10 border border-red-100',
+      icon: 'text-red-500',
+      button: 'bg-red-500 hover:bg-red-600 shadow-red-500/30'
     },
     warning: {
-      bg: 'bg-yellow-100 dark:bg-yellow-900/20',
-      icon: 'text-yellow-600 dark:text-yellow-400',
-      button: 'bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-500 dark:hover:bg-yellow-600'
+      bg: 'bg-pail-gold/10 border border-pail-gold/20',
+      icon: 'text-pail-gold',
+      button: 'bg-pail-gold hover:bg-yellow-600 shadow-pail-gold/30'
     },
     success: {
       bg: 'bg-green-100 dark:bg-green-900/20',

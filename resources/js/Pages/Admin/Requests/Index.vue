@@ -66,7 +66,7 @@ const getStatusColor = (status) => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-8">
                 
                 <!-- Stats Carousel Style Overview -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div class="grid grid-cols-2 gap-3 sm:gap-6">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm relative overflow-hidden group">
                         <div class="relative z-10">
                             <h3 class="text-gray-400 font-black uppercase tracking-widest text-[8px] sm:text-[9px] mb-1">Menunggu Review</h3>
