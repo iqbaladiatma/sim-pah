@@ -15,26 +15,26 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Super Admin (Akses Penuh)
         User::updateOrCreate(
-        ['email' => 'admin@sim-pah.com'],
-        [
-            'name' => 'Super Admin',
-            'password' => bcrypt('password'),
-            'role' => 'super admin',
-            'institution_id' => null,
-        ]
+            ['email' => 'admin@sim-pah.com'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+                'role' => 'super admin',
+                'institution_id' => null,
+            ]
         );
 
         // 2. Admin URT (Operasional Pusat)
         $urt = Institution::where('code', 'URT')->first();
         if ($urt) {
             User::updateOrCreate(
-            ['email' => 'urt@sim-pah.com'],
-            [
-                'name' => 'Admin URT',
-                'password' => bcrypt('password'),
-                'role' => 'admin',
-                'institution_id' => $urt->id,
-            ]
+                ['email' => 'urt@sim-pah.com'],
+                [
+                    'name' => 'Admin URT',
+                    'password' => bcrypt('password'),
+                    'role' => 'admin',
+                    'institution_id' => $urt->id,
+                ]
             );
         }
 
@@ -42,14 +42,17 @@ class DatabaseSeeder extends Seeder
         $sd = Institution::where('code', 'SD_PA')->first();
         if ($sd) {
             User::updateOrCreate(
-            ['email' => 'sdputra@sim-pah.com'],
-            [
-                'name' => 'Admin SD Putra',
-                'password' => bcrypt('password'),
-                'role' => 'lembaga',
-                'institution_id' => $sd->id,
-            ]
+                ['email' => 'sdputra@sim-pah.com'],
+                [
+                    'name' => 'Admin SD Putra',
+                    'password' => bcrypt('password'),
+                    'role' => 'lembaga',
+                    'institution_id' => $sd->id,
+                ]
             );
         }
+
+        // 4. Prosedur ISO Data
+        $this->call(ProcedureSeeder::class);
     }
 }

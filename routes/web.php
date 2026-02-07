@@ -69,6 +69,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::patch('/system-control/{setting}', [\App\Http\Controllers\Admin\SystemControlController::class, 'update'])->name('system_control.update');
                 Route::post('/system-control/command', [\App\Http\Controllers\Admin\SystemControlController::class, 'runCommand'])->name('system_control.command');
                 Route::get('/system-control/playground', [\App\Http\Controllers\Admin\PlaygroundController::class, 'index'])->name('system_control.playground');
+                Route::get('/system-control/playground/error/{status}', [\App\Http\Controllers\Admin\PlaygroundController::class, 'showError'])->name('system_control.playground.error');
             });
 
             Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');

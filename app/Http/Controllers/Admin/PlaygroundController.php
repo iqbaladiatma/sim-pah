@@ -13,4 +13,11 @@ class PlaygroundController extends Controller
     {
         return Inertia::render('Admin/SystemControl/Playground');
     }
+
+    public function showError($status)
+    {
+        return Inertia::render('Error', ['status' => (int) $status])
+            ->toResponse(request())
+            ->setStatusCode((int) $status);
+    }
 }

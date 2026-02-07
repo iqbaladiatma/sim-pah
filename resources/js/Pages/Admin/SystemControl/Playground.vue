@@ -349,6 +349,16 @@ const formatRupiah = (number) => {
                                 <SecondaryButton>Breeze Secondary</SecondaryButton>
                                 <DangerButton @click="showConfirmModal = true">Breeze Danger</DangerButton>
                              </div>
+
+                             <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] pt-6">Security & Error Protocols</h4>
+                             <div class="grid grid-cols-2 gap-4">
+                                <Link :href="route('admin.system_control.playground.error', 404)" class="px-6 py-4 bg-red-500/10 border border-red-500/20 text-red-600 rounded-2xl text-[10px] font-black uppercase tracking-widest text-center hover:bg-red-500 hover:text-white transition-all">
+                                    Simulate 404 (Not Found)
+                                </Link>
+                                <Link :href="route('admin.system_control.playground.error', 403)" class="px-6 py-4 bg-gray-900 border border-white/5 text-pail-gold rounded-2xl text-[10px] font-black uppercase tracking-widest text-center hover:scale-105 transition-all">
+                                    Simulate 403 (Forbidden)
+                                </Link>
+                             </div>
                              
                              <!-- Special Custom Button -->
                              <button class="w-full px-8 py-5 bg-gray-900 text-pail-gold rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center justify-center gap-4 group">
