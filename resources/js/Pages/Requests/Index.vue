@@ -33,13 +33,22 @@ const getStatusColor = (status) => {
                     </h2>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Utilitas, Biaya & Darurat</p>
                 </div>
-                <Link
-                    :href="route('requests.create')"
-                    class="px-6 py-4 bg-gray-900 text-pail-gold rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center gap-3 group"
-                >
-                    <svg class="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                    Buat Pengajuan
-                </Link>
+                <div v-if="$page.props.system_settings.allow_new_requests === '1'">
+                    <Link
+                        :href="route('requests.create')"
+                        class="px-6 py-4 bg-gray-900 text-pail-gold rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] hover:bg-black transition-all shadow-2xl shadow-black/20 flex items-center gap-3 group"
+                    >
+                        <svg class="w-5 h-5 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                        Buat Pengajuan
+                    </Link>
+                </div>
+                <div v-else class="flex flex-col items-end">
+                    <div class="px-6 py-4 bg-gray-100 dark:bg-gray-800 text-gray-400 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] flex items-center gap-3 cursor-not-allowed border border-gray-200 dark:border-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                        Fitur Dinonaktifkan
+                    </div>
+                    <span class="text-[8px] font-black text-red-500 uppercase tracking-widest mt-2 animate-pulse text-right">Ditutup Sementara oleh Admin URT</span>
+                </div>
             </div>
         </template>
 

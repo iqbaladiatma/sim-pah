@@ -264,6 +264,10 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                         <div class="px-3 lg:px-5 mt-6 lg:mt-10 mb-3 lg:mb-4" v-if="!isSidebarCollapsed">
                             <p class="text-[9px] lg:text-[10px] font-black uppercase text-gray-400 tracking-[0.25em] lg:tracking-[0.3em]">Intelijen Sistem</p>
                         </div>
+                        <NavLink v-if="user.role === 'super admin'" :href="route('admin.system_control.index')" :active="route().current('admin.system_control.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                            <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase text-pail-gold">System Orchestrator</span>
+                        </NavLink>
                         <NavLink :href="route('admin.activity_log.index')" :active="route().current('admin.activity_log.*')" @click="closeSidebarOnMobile" :collapsed="isSidebarCollapsed">
                             <svg class="w-4 h-4 lg:w-5 lg:h-5 shrink-0 transition-transform group-hover:scale-110" :class="isSidebarCollapsed ? '' : 'mr-3 lg:mr-4'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <span v-if="!isSidebarCollapsed" class="font-black tracking-tighter text-xs lg:text-sm uppercase">Audit Trail</span>
@@ -460,11 +464,11 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
                                 <span class="text-[9px] font-bold text-gray-500 group-hover:text-pink-600 transition-colors tracking-tighter hidden sm:inline">@iq_html</span>
                             </a>
                             <div class="w-1 h-1 rounded-full bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
-                            <a href="https://linkedin.com/in/Iqbaladiatma" target="_blank" class="group flex items-center gap-1.5 transition-all">
-                                <div class="w-5 h-5 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/></svg>
+                            <a :href="'https://wa.me/' + $page.props.system_settings.emergency_contact.replace(/[^0-9]/g, '')" target="_blank" class="group flex items-center gap-1.5 transition-all">
+                                <div class="w-5 h-5 rounded-lg bg-green-500/10 flex items-center justify-center text-green-500 group-hover:bg-green-500 group-hover:text-white transition-all">
+                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.484 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.309 1.656zm6.29-4.143c1.589.943 3.133 1.415 4.75 1.416 5.482.002 9.944-4.461 9.947-9.945.001-2.657-1.034-5.155-2.913-7.034-1.879-1.878-4.377-2.913-7.033-2.913-5.483 0-9.944 4.461-9.947 9.945 0 1.791.47 3.536 1.359 5.062l-1.063 3.886 3.987-1.047zm11.452-6.559c-.303-.151-1.788-.882-2.065-.982-.277-.1-.478-.151-.68.151-.202.302-.782 1.007-.959 1.208-.177.201-.353.226-.656.075-.302-.151-1.277-.47-2.433-1.498-.899-.803-1.506-1.795-1.683-2.097-.177-.301-.019-.465.132-.615.136-.134.302-.353.454-.529.151-.176.201-.302.302-.503.101-.201.05-.378-.026-.529-.075-.151-.68-1.637-.933-2.249-.246-.596-.499-.515-.68-.525l-.58-.01c-.201 0-.53.075-.806.378-.277.302-1.058 1.033-1.058 2.52 0 1.488 1.084 2.922 1.235 3.123s2.132 3.256 5.166 4.569c.721.312 1.284.499 1.721.639.723.23 1.381.197 1.902.12.58-.087 1.788-.731 2.041-1.439.252-.707.252-1.314.177-1.438s-.278-.225-.58-.376z"/></svg>
                                 </div>
-                                <span class="text-[9px] font-bold text-gray-500 group-hover:text-blue-600 transition-colors tracking-tighter hidden sm:inline">@Iqbaladiatma</span>
+                                <span class="text-[9px] font-bold text-gray-500 group-hover:text-green-600 transition-colors tracking-tighter hidden sm:inline">WhatsApp URT</span>
                             </a>
                         </div>
                     </div>

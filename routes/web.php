@@ -63,6 +63,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/online-users', [\App\Http\Controllers\Admin\OnlineUsersController::class, 'index'])->name('online_users.index');
             Route::delete('/online-users/{session}', [\App\Http\Controllers\Admin\OnlineUsersController::class, 'kick'])->name('online_users.kick');
 
+            // System Orchestrator (Super Admin only)
+            Route::middleware('role:super admin')->group(function () {
+                Route::get('/system-control', [\App\Http\Controllers\Admin\SystemControlController::class, 'index'])->name('system_control.index');
+                Route::patch('/system-control/{setting}', [\App\Http\Controllers\Admin\SystemControlController::class, 'update'])->name('system_control.update');
+                Route::post('/system-control/command', [\App\Http\Controllers\Admin\SystemControlController::class, 'runCommand'])->name('system_control.command');
+                Route::get('/system-control/playground', [\App\Http\Controllers\Admin\PlaygroundController::class, 'index'])->name('system_control.playground');
+            });
+
             Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
 
             // URT ISO Procedures

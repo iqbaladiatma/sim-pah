@@ -38,6 +38,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+            'system_settings' => \App\Models\SystemSetting::all()->pluck('value', 'key')->toArray(),
         ];
     }
 }
