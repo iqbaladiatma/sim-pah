@@ -10,10 +10,12 @@ use Illuminate\Support\Str;
 class GenericImport implements ToModel, WithHeadingRow
 {
     protected $modelClass;
+    protected $mapping;
 
-    public function __construct(string $modelClass)
+    public function __construct(string $modelClass, array $mapping = [])
     {
         $this->modelClass = $modelClass;
+        $this->mapping = $mapping;
     }
 
     /**
@@ -31,19 +33,29 @@ class GenericImport implements ToModel, WithHeadingRow
         $model = new $this->modelClass;
         $fillable = $model->getFillable();
 
-        foreach ($row as $key => $value) {
-            // Convert excel header (often snake_case or slug-case) to attribute name
-            // Basic matching: if key exists in fillable
-            $key = str_replace(' ', '_', $key);
+        // 1. Use Mapping if available
+        if (!empty($this->mapping)) {
+            foreach ($this->mapping as $dbField => $header) {
+                if (empty($header))
+                    continue;
 
-            if (in_array($key, $fillable)) {
-                $attributes[$key] = $value;
+                $slug = Str::slug($header, '_');
+                if (isset($row[$slug])) {
+                    $attributes[$dbField] = $row[$slug];
+                }
+            }
+        } else {
+            // 2. Fallback: Auto-match keys to fillable attributes
+            foreach ($row as $key => $value) {
+                // Convert excel header (often snake_case or slug-case) to attribute name
+                $key = str_replace(' ', '_', $key);
+                if (in_array($key, $fillable)) {
+                    $attributes[$key] = $value;
+                }
             }
         }
 
         if (empty($attributes)) {
-            // Try to map loosely if strict match fails? 
-            // For now, let's keep it safe. 
             return null;
         }
 

@@ -20,6 +20,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\HeadingRowImport;
 use App\Exports\IsoProcedureExport;
 
 class UrtProcedureController extends Controller
@@ -192,6 +193,17 @@ class UrtProcedureController extends Controller
             $query->where('category', $procedure['category']);
         }
 
+        // Filter by Year (for specific types)
+        if (Schema::hasColumn($tableName, 'period_year')) {
+            $year = request('year', date('Y'));
+            $query->where('period_year', $year);
+        }
+
+        // Filter by Location
+        if (request('location') && Schema::hasColumn($tableName, 'location')) {
+            $query->where('location', 'LIKE', '%' . request('location') . '%');
+        }
+
         // Smartly load relationships based on model availability
         $availableRelations = ['institution', 'room', 'vehicle', 'performer', 'item', 'user'];
         $loadRelations = [];
@@ -203,7 +215,16 @@ class UrtProcedureController extends Controller
             }
         }
 
-        $data = $query->with($loadRelations)->latest()->paginate(20);
+        $query->with($loadRelations);
+
+        // Sort by ID asc for checklist items to keep order
+        if ($type === 'pemeliharaan-listrik') {
+            $query->orderBy('id', 'asc');
+        } else {
+            $query->latest();
+        }
+
+        $data = $query->paginate(20);
 
         // Additional data for forms
         $rooms = Room::all();
@@ -220,7 +241,8 @@ class UrtProcedureController extends Controller
             'institutions' => $institutions,
             'items' => $items,
             'users' => $users,
-            'vehicles' => $vehicles
+            'vehicles' => $vehicles,
+            'filters' => request()->all() // Pass filters back
         ]);
     }
 
@@ -244,6 +266,10 @@ class UrtProcedureController extends Controller
 
         if (Schema::hasColumn($tableName, 'title') && empty($data['title'])) {
             $data['title'] = $procedure['title'];
+        }
+
+        if (Schema::hasColumn($tableName, 'period_year') && empty($data['period_year'])) {
+            $data['period_year'] = date('Y');
         }
 
         if (Schema::hasColumn($tableName, 'description') && empty($data['description'])) {
@@ -348,6 +374,59 @@ class UrtProcedureController extends Controller
         return \App\Exports\IsoProcedureExport::downloadAll();
     }
 
+    public function checkImportHeaders(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv',
+            'type' => 'required|string',
+            'sheet' => 'nullable|string'
+        ]);
+
+        try {
+            // Read the headers (first row of each sheet)
+            $headings = (new HeadingRowImport)->toArray($request->file('file'));
+
+            // Extract sheet names -> keys of the headings array are often sheet names or indices
+            // If it's a single sheet, it might be [0 => [...]] or ['Sheet1' => [...]]
+            // We normalize this.
+            $sheets = [];
+            foreach (array_keys($headings) as $key) {
+                // If key is string, it's likely a sheet name. If int, we might need to assume 'Sheet'.
+                // HeadingRowImport usually returns sheet names as keys if multiple.
+                $sheets[] = (string) $key;
+            }
+
+            // Determine selected sheet
+            $selectedSheet = $request->input('sheet');
+            if (!$selectedSheet || !isset($headings[$selectedSheet])) {
+                $selectedSheet = $sheets[0] ?? null;
+            }
+
+            $fileHeaders = [];
+            if ($selectedSheet && isset($headings[$selectedSheet])) {
+                // The import usually returns [ [row1], [row2] ] for each sheet? 
+                // HeadingRowImport returns [ [ 'col1', 'col2' ] ] (wrapped in array)
+                // Let's verify structure: $headings['Sheet1'][0] should be the array of column names
+                $fileHeaders = $headings[$selectedSheet][0] ?? [];
+            }
+
+            // Normalize headers: flatten if necessary or filter nulls
+            $fileHeaders = array_filter($fileHeaders);
+
+            // Get required DB fields configuration
+            $config = $this->getImportFields($request->type);
+
+            return response()->json([
+                'sheets' => $sheets,
+                'selected_sheet' => $selectedSheet,
+                'headers' => array_values($fileHeaders),
+                'fields' => $config
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Gagal membaca file: ' . $e->getMessage()], 422);
+        }
+    }
+
     public function import(Request $request, $type)
     {
         if (!isset($this->procedures[$type]))
@@ -355,47 +434,105 @@ class UrtProcedureController extends Controller
         $procedure = $this->procedures[$type];
 
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+            'file' => 'required|mimes:xlsx,xls,csv',
+            'mapping' => 'nullable|array',
+            'sheet' => 'nullable|string'
         ]);
 
+        $mapping = $request->input('mapping', []);
+        $sheet = $request->input('sheet');
+        $file = $request->file('file');
+
+        $importer = null;
         if ($procedure['model'] === MaintenanceLog::class) {
-            Excel::import(new \App\Imports\MaintenanceLogImport($procedure['type'] ?? null), $request->file('file'));
-            return back()->with('success', "Data prosedur {$type} berhasil di-import.");
+            $importer = new \App\Imports\MaintenanceLogImport($procedure['type'] ?? null, $mapping);
+        } elseif ($procedure['model'] === Item::class) {
+            $importer = new \App\Imports\ItemImport($mapping);
+        } else {
+            $importer = new \App\Imports\GenericImport($procedure['model'], $mapping);
         }
 
-        if ($procedure['model'] === Item::class) {
-            Excel::import(new \App\Imports\ItemImport(), $request->file('file'));
-            return back()->with('success', "Data aset {$type} berhasil di-import.");
+        if ($sheet) {
+            Excel::selectSheets($sheet)->import($importer, $file);
+        } else {
+            Excel::import($importer, $file);
         }
 
-        // Generic Import Fallback
-        Excel::import(new \App\Imports\GenericImport($procedure['model']), $request->file('file'));
         return back()->with('success', "Data {$type} berhasil di-import.");
+    }
 
+    private function getImportFields($type)
+    {
+        // Default common fields
+        if (!isset($this->procedures[$type]))
+            return [];
+        $procedure = $this->procedures[$type];
+        $model = $procedure['model'];
+
+        $fields = [];
+
+        if ($model === MaintenanceLog::class) {
+            $fields = [
+                ['key' => 'judul', 'label' => 'Judul / Uraian', 'required' => true],
+                ['key' => 'deskripsi', 'label' => 'Deskripsi / Keterangan', 'required' => false],
+                ['key' => 'lokasi', 'label' => 'Lokasi / Ruangan', 'required' => false],
+                ['key' => 'biaya', 'label' => 'Biaya (Rp)', 'required' => false],
+                ['key' => 'status', 'label' => 'Status', 'required' => false],
+                ['key' => 'jadwal', 'label' => 'Tanggal Jadwal', 'required' => false],
+                ['key' => 'petugas', 'label' => 'Petugas', 'required' => false],
+            ];
+            // Add specialized fields based on type
+            if ($type === 'pemeliharaan-ac') {
+                $fields[] = ['key' => 'ac_pk', 'label' => 'PK (AC)', 'required' => false];
+            }
+        } elseif ($model === Item::class) {
+            $fields = [
+                ['key' => 'code', 'label' => 'Kode Barang', 'required' => false],
+                ['key' => 'brand', 'label' => 'Merk', 'required' => false],
+                ['key' => 'name', 'label' => 'Nama Barang', 'required' => true],
+                ['key' => 'stock', 'label' => 'Jumlah Stock', 'required' => true],
+                ['key' => 'unit', 'label' => 'Satuan', 'required' => true],
+                ['key' => 'condition', 'label' => 'Kondisi (B/KB/RB)', 'required' => false],
+                ['key' => 'location', 'label' => 'Lokasi / Ruangan', 'required' => false],
+                ['key' => 'institution_code', 'label' => 'Kode Lembaga', 'required' => false],
+                ['key' => 'purchase_date', 'label' => 'Tanggal Pembelian', 'required' => false],
+                ['key' => 'price', 'label' => 'Harga Perolehan', 'required' => false],
+                ['key' => 'source', 'label' => 'Sumber Dana', 'required' => false],
+                ['key' => 'specification', 'label' => 'Spesifikasi', 'required' => false],
+            ];
+        } elseif ($model === VehicleRequest::class) {
+            $fields = [
+                ['key' => 'vehicle_plate', 'label' => 'Plat Nomor', 'required' => true],
+                ['key' => 'start_time', 'label' => 'Waktu Mulai', 'required' => true],
+                ['key' => 'end_time', 'label' => 'Waktu Selesai', 'required' => true],
+                ['key' => 'destination', 'label' => 'Tujuan', 'required' => true],
+                ['key' => 'purpose', 'label' => 'Keperluan', 'required' => true],
+            ];
+        } elseif ($model === BorrowingRecord::class) {
+            $fields = [
+                ['key' => 'item_code', 'label' => 'Kode Barang', 'required' => true],
+                ['key' => 'borrow_date', 'label' => 'Tanggal Pinjam', 'required' => true],
+                ['key' => 'return_date', 'label' => 'Tanggal Kembali', 'required' => false],
+                ['key' => 'borrower_name', 'label' => 'Peminjam', 'required' => true],
+                ['key' => 'status', 'label' => 'Status', 'required' => false],
+            ];
+        }
+
+        return $fields;
     }
 
     public function downloadTemplate($type)
     {
         if (!isset($this->procedures[$type]))
             abort(404);
-        $procedure = $this->procedures[$type];
 
-        $headers = [];
-        if ($procedure['model'] === MaintenanceLog::class) {
-            $headers = ['judul', 'deskripsi', 'lokasi', 'biaya', 'status', 'jadwal', 'kategori'];
-        } elseif ($procedure['model'] === BorrowingRecord::class) {
-            $headers = ['user_email', 'item_code', 'borrow_date', 'return_date', 'reason', 'status'];
-        } elseif ($procedure['model'] === VehicleRequest::class) {
-            $headers = ['user_email', 'vehicle_plate', 'start_time', 'end_time', 'destination', 'description'];
-        } elseif ($procedure['model'] === Vehicle::class) {
-            $headers = ['name', 'plate_number', 'type', 'brand', 'year', 'condition', 'status'];
-        } elseif ($procedure['model'] === IsoChecklist::class) {
-            $headers = ['code', 'question', 'category', 'standard_ref'];
-        } elseif ($procedure['model'] === Item::class) {
-            $headers = ['name', 'code', 'brand', 'specification', 'stock', 'unit', 'condition', 'location'];
-        } else {
-            // Fallback generic headers
-            $headers = ['title', 'description', 'status', 'created_at'];
+        // Generate simple headers array from getImportFields
+        $fields = $this->getImportFields($type);
+        $headers = array_map(fn($f) => $f['key'], $fields);
+
+        // Fallback if empty (shouldn't differ much from previous logic, but safer)
+        if (empty($headers)) {
+            $headers = ['title', 'description', 'status'];
         }
 
         return Excel::download(
@@ -403,12 +540,10 @@ class UrtProcedureController extends Controller
             protected $h;
             public function __construct($h)
             {
-                $this->h = $h;
-            }
+                $this->h = $h; }
             public function array(): array
             {
-                return [$this->h];
-            }
+                return [$this->h]; }
             },
             "template-{$type}.xlsx"
         );

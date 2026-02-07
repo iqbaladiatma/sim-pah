@@ -77,6 +77,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 // Excel Import/Export
                 Route::get('/export-all', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'exportAll'])->name('export_all');
                 Route::get('/export/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'export'])->name('export');
+                Route::post('/check-import-headers', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'checkImportHeaders'])->name('check_import_headers');
                 Route::post('/import/{type}', [\App\Http\Controllers\Admin\UrtProcedureController::class, 'import'])->name('import');
 
                 // Specific helpers

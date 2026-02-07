@@ -14,6 +14,8 @@ import XIcon from '@/Components/Icons/XIcon.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import ConfirmModal from "@/Components/ConfirmModal.vue";
 import Modal from "@/Components/Modal.vue";
+import ImportMappingModal from "@/Components/ImportMappingModal.vue";
+import axios from 'axios';
 
 const props = defineProps({
     type: String,
@@ -24,6 +26,7 @@ const props = defineProps({
     items: Array,
     users: Array,
     vehicles: Array,
+    filters: Object,
 });
 
 const grandTotal = computed(() => {
@@ -54,7 +57,7 @@ const tableColspan = computed(() => {
     if (t === 'detailed-monitoring') return 26;
     if (t === 'weekly-activity') return 10;
     if (t === 'vehicle-log') return 10;
-    if (t === 'electrical-maintenance') return 18;
+    if (t === 'pemeliharaan-listrik') return 18;
     if (t === 'kelengkapan-alat') return 9;
     if (t === 'monitoring-kebersihan') return 17;
     if (t === 'monitoring-aset') return 7;
@@ -142,12 +145,40 @@ const gensetItems = [
     { title: 'Accu/batre', standard: 'Voltase aki normal', method: 'Alat ukur', frequency: 'Bulanan' },
 ];
 
+const listrikItems = [
+    { title: 'Pemeriksaan instalasi', standard: 'Kabel tidak terkelupas, konek bagus', method: 'Visual', frequency: '3 Bulan' },
+    { title: 'Pemeriksaan panel listrik', standard: 'Tidak ada komponen terbakar', method: 'Visual', frequency: 'Bulanan' },
+    { title: 'Pengecekan arus listrik', standard: 'Stabil di 220 Volt', method: 'Alat ukur', frequency: 'Bulanan' },
+    { title: 'Pengecekan ampere meter', standard: 'Berfungsi normal', method: 'Visual', frequency: 'Bulanan' },
+    { title: 'Pengecekan volt meter', standard: 'Berfungsi normal', method: 'Visual', frequency: 'Bulanan' },
+];
+
 const fiscalYears = [
     '2024 - 2025',
     '2025 - 2026',
     '2026 - 2027',
     '2027 - 2028',
 ];
+
+// Unit Options for Satuan Dropdown
+const unitOptions = [
+    'Buah',
+    'Unit',
+    'Pcs',
+    'Set',
+    'Zak',
+    'Lonjor',
+    'Meter',
+    'Kg',
+    'Liter',
+    'Dus',
+    'Box',
+    'Karton',
+    'Custom'
+];
+
+const showCustomUnit = ref(false);
+const customUnitValue = ref('');
 
 const handlePeriodicItemChange = () => {
     let selected = null;
@@ -159,12 +190,38 @@ const handlePeriodicItemChange = () => {
         selected = airMinumItems.find(i => i.title === form.title);
     } else if (props.type === 'pemeliharaan-genset') {
         selected = gensetItems.find(i => i.title === form.title);
+    } else if (props.type === 'pemeliharaan-listrik') {
+        selected = listrikItems.find(i => i.title === form.title);
     }
     
     if (selected) {
-        form.check_standard = selected.standard;
-        form.check_method = selected.method;
-        form.check_frequency = selected.frequency;
+        if (props.type === 'pemeliharaan-listrik') {
+            form.specification = selected.standard;
+            form.action_taken = selected.method;
+            form.frequency = selected.frequency;
+        } else {
+            form.check_standard = selected.standard;
+            form.check_method = selected.method;
+            form.check_frequency = selected.frequency;
+        }
+    }
+};
+
+const handleUnitChange = () => {
+    if (form.unit === 'Custom') {
+        showCustomUnit.value = true;
+        customUnitValue.value = '';
+    } else {
+        showCustomUnit.value = false;
+        customUnitValue.value = '';
+    }
+};
+
+const applyCustomUnit = () => {
+    if (customUnitValue.value.trim()) {
+        form.unit = customUnitValue.value.trim();
+        showCustomUnit.value = false;
+        customUnitValue.value = '';
     }
 };
 
@@ -174,6 +231,7 @@ const editId = ref(null);
 
 const form = useForm({
     title: '',
+    other_title: '',
     description: '',
     subcategory: '',
     location: '',
@@ -206,9 +264,13 @@ const form = useForm({
     depreciation_price: 0,
     responsible_person: '',
     stock: 1,
-    unit: 'Unit',
+    unit: 'Buah',
     received_at: '',
     serial_number: '',
+    // Electrical Maintenance Fields
+    monthly_data: {},
+    period_year: new Date().getFullYear().toString(),
+    frequency: 'Bulanan',
     size: '',
     // Specialized Maintenance Fields (Gedung, AC, Kamar Mandi)
     check_standard: '',
@@ -336,6 +398,10 @@ const openCreateModal = () => {
     editId.value = null;
     form.reset();
     
+    // Reset custom unit state
+    showCustomUnit.value = false;
+    customUnitValue.value = '';
+    
     // ISO Checklist Helpers
     newItem.value = '';
     
@@ -372,6 +438,9 @@ const openEditModal = (item) => {
     if (item.institution_id) form.institution_id = item.institution_id;
     if (item.room_id) form.room_id = item.room_id;
     if (item.vehicle_id) form.vehicle_id = item.vehicle_id;
+    if (props.type === 'pemeliharaan-listrik') {
+        form.monthly_data = item.monthly_data || {};
+    }
 
     // Format dates for parkir-area (datetime-local needs YYYY-MM-DDTHH:mm)
     if (props.type === 'parkir-area') {
@@ -389,6 +458,10 @@ const openEditModal = (item) => {
 };
 
 const submit = () => {
+    if (props.type === 'pemeliharaan-listrik' && form.title === 'Lainnya') {
+        form.title = form.other_title;
+    }
+
     if (isEdit.value) {
         form.put(route('admin.procedures.update', { type: props.type, id: editId.value }), {
             onSuccess: () => {
@@ -429,15 +502,59 @@ const exportExcel = () => {
     window.location.href = route('admin.procedures.export', props.type);
 };
 
-const fileInput = ref(null);
-const importExcel = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+const showImportModal = ref(false);
+const importHeaders = ref([]);
+const importFields = ref([]);
+const importSheets = ref([]); 
+const isAnalyzing = ref(false);
+
+const openImportModal = () => {
+    // Reset state for fresh start
+    importHeaders.value = [];
+    importFields.value = [];
+    importSheets.value = [];
+    showImportModal.value = true;
+};
+
+const onAnalyze = ({ file, sheet }) => {
+    isAnalyzing.value = true;
     
-    const importForm = useForm({ file });
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', props.type);
+    if (sheet) formData.append('sheet', sheet);
+    
+    axios.post(route('admin.procedures.check_import_headers'), formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    .then(response => {
+        importHeaders.value = response.data.headers;
+        importFields.value = response.data.fields;
+        importSheets.value = response.data.sheets || [];
+    })
+    .catch(error => {
+        console.error(error);
+        alert('Gagal membaca file: ' + (error.response?.data?.error || error.message));
+    })
+    .finally(() => {
+        isAnalyzing.value = false;
+    });
+};
+
+const handleImportSubmit = ({ file, mapping, sheet }) => {
+    const importForm = useForm({
+        file: file,
+        mapping: mapping,
+        sheet: sheet
+    });
+    
     importForm.post(route('admin.procedures.import', props.type), {
         onSuccess: () => {
-            if (fileInput.value) fileInput.value.value = '';
+            showImportModal.value = false;
+            // Success notification is handled by flash messages usually
+        },
+        onError: (errors) => {
+            console.error(errors);
         }
     });
 };
@@ -457,6 +574,17 @@ const importExcel = (event) => {
         @confirm="confirmDelete"
     />
 
+    <ImportMappingModal
+        :show="showImportModal"
+        :processing="isAnalyzing"
+        :file-headers="importHeaders"
+        :sheets="importSheets"
+        :required-fields="importFields"
+        @close="showImportModal = false"
+        @analyze="onAnalyze"
+        @submit="handleImportSubmit"
+    />
+
     <AuthenticatedLayout>
         <template #header>
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -471,6 +599,24 @@ const importExcel = (event) => {
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
+                    <div v-if="type === 'pemeliharaan-listrik'" class="flex flex-wrap items-center gap-2 mr-2">
+                         <div class="px-3 py-1.5 bg-pail-gold/10 rounded-lg border border-pail-gold/20 flex items-center gap-2">
+                            <span class="text-[8px] font-black text-pail-gold uppercase tracking-widest">TAHUN:</span>
+                            <select :value="filters.year || new Date().getFullYear()" @change="(e) => $inertia.get(route('admin.procedures.show', type), { ...filters, year: e.target.value }, { preserveState: true, replace: true })" class="bg-transparent border-0 p-0 text-[10px] font-black text-gray-900 dark:text-white uppercase focus:ring-0 cursor-pointer">
+                                <option v-for="y in [2024, 2025, 2026, 2027, 2028]" :key="y" :value="y">{{ y }}</option>
+                            </select>
+                        </div>
+                        <div class="px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 flex items-center gap-2">
+                            <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest">LOKASI:</span>
+                            <input 
+                                type="text" 
+                                :value="filters.location" 
+                                @input="(e) => $inertia.get(route('admin.procedures.show', type), { ...filters, location: e.target.value }, { preserveState: true, replace: true, preserveScroll: true })"
+                                placeholder="Cari Lokasi..."
+                                class="bg-transparent border-0 p-0 text-[10px] font-black text-gray-900 dark:text-white placeholder:text-gray-300 focus:ring-0 w-24 sm:w-32"
+                            >
+                        </div>
+                    </div>
                     <div v-if="type === 'pemeliharaan-septik'" class="px-3 py-1.5 bg-pail-gold/10 rounded-lg border border-pail-gold/20 flex items-center gap-2 mr-1">
                         <span class="text-[8px] font-black text-pail-gold uppercase tracking-widest">TGL:</span>
                         <span class="text-[9px] font-black text-gray-900 dark:text-white uppercase">{{ formatDate(new Date()) }}</span>
@@ -478,10 +624,9 @@ const importExcel = (event) => {
                     <button @click="exportExcel" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm">
                         <DownloadIcon class="w-3.5 h-3.5" /> <span class="hidden sm:inline">Export</span>
                     </button>
-                    <label class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm cursor-pointer">
+                    <button @click="openImportModal" class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm cursor-pointer">
                         <UploadIcon class="w-3.5 h-3.5" /> <span class="hidden sm:inline">Import</span>
-                        <input type="file" ref="fileInput" @change="importExcel" class="hidden" accept=".xlsx,.xls,.csv" />
-                    </label>
+                    </button>
                     <button @click="showCreateModal = true" class="px-5 py-2 bg-gray-900 dark:bg-pail-gold text-pail-gold dark:text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2 shadow-xl shadow-black/10">
                         <PlusIcon class="w-3.5 h-3.5" /> Tambah
                     </button>
@@ -494,10 +639,10 @@ const importExcel = (event) => {
                 <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                     <!-- Desktop Table View -->
                     <div class="hidden md:block overflow-x-auto border-b border-gray-100 dark:border-gray-700">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse min-w-max">
                     <thead>
                         <!-- Row 1 for Specialized & Double Headers -->
-                        <tr v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'agenda-perbaikan', 'monitoring-aset', 'electrical-maintenance'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <tr v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'agenda-perbaikan', 'monitoring-aset', 'pemeliharaan-listrik'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <template v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)">
                                 <th rowspan="2" v-if="!['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">No.</th>
                             </template>
@@ -521,6 +666,7 @@ const importExcel = (event) => {
                                         {{ type === 'pemeliharaan-pompa' ? 'CEKLIST PEMELIHARAAN POMPA & PANEL' : (type === 'pemeliharaan-air-bersih' ? 'FORMULIR PEMELIHARAAN AIR BERSIH' : 'FORMULIR PEMELIHARAAN AIR MINUM') }} (Lokasi: {{ data.data[0]?.location || '...' }}) - Tahun : {{ data.data[0]?.year || '...' }}
                                     </span>
                                 </th>
+                                <th rowspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Keterangan</th>
                                 <th rowspan="3" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                             </template>
                             
@@ -629,7 +775,7 @@ const importExcel = (event) => {
                                 <th colspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap">KONDISI</th>
                             </template>
 
-                            <template v-if="type === 'electrical-maintenance'">
+                            <template v-if="type === 'pemeliharaan-listrik'">
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No.</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Item Pengecekan</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Standard</th>
@@ -647,7 +793,7 @@ const importExcel = (event) => {
                                 <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Nilai Aset</th>
                             </template>
 
-                            <th v-if="!['pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-septik', 'pemeliharaan-sarpras'].includes(type)" rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
+                            <th v-if="!['pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)" rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Keterangan</th>
                             
                             <!-- Manajemen Alignment -->
                             <th v-if="type === 'pemeliharaan-ac'" rowspan="3" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
@@ -918,12 +1064,31 @@ const importExcel = (event) => {
                             <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-right">Manajemen</th>
                         </tr>
 
-                        <!-- specialized for Electrical Maintenance -->
-                        <tr v-if="type === 'electrical-maintenance'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <!-- specialized for Electrical Maintenance (Row 1 Header) -->
+                        <tr v-if="type === 'pemeliharaan-listrik'" class="bg-gray-100/30 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-700">
+                            <th colspan="18" class="px-6 py-6 text-center">
+                                <div class="flex flex-col gap-2">
+                                    <span class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">FORM PEMELIHARAAN JARINGAN LISTRIK</span>
+                                    <div class="flex items-center justify-center gap-8 text-[10px] font-black text-pail-gold uppercase tracking-widest">
+                                        <div class="flex items-center gap-2">
+                                            <span>LOKASI :</span>
+                                            <span class="text-gray-900 dark:text-white border-b border-dotted border-pail-gold pb-0.5 min-w-[150px] inline-block">{{ filters.location || '....................' }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span>TAHUN :</span>
+                                            <span class="text-gray-900 dark:text-white border-b border-dotted border-pail-gold pb-0.5 min-w-[80px] inline-block">{{ filters.year || new Date().getFullYear() }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+
+                        <!-- specialized for Electrical Maintenance (Row 2 Header) -->
+                        <tr v-if="type === 'pemeliharaan-listrik'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 font-mono">
                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Item Pengecekan</th>
                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Standard Pengecekan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest">Metode Pengecekan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Metode</th>
                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Frekuensi</th>
                             <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Jul</th>
                             <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Agust</th>
@@ -1107,6 +1272,7 @@ const importExcel = (event) => {
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Armada / Plat</th>
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Detail & Merk</th>
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
                             </template>
                             <!-- specialized for Pemeliharaan Kamar Mandi -->
                         <tr v-if="type === 'pemeliharaan-kamar-mandi'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
@@ -1200,6 +1366,7 @@ const importExcel = (event) => {
                                 <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Std</th>
                                 <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Mtd/Freq</th>
                                 <th colspan="12" class="px-4 py-3 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700">Rekap Monitoring (PA = Putra, PI = Putri, LT = Lawata / P1 = Pekan 1, P2 = Pekan 2)</th>
+                                <th rowspan="2" class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Keterangan</th>
                                 <th rowspan="2" class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                             </tr>
                             <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[7px] text-gray-400 font-black uppercase tracking-wider">
@@ -1544,8 +1711,26 @@ const importExcel = (event) => {
                                         </td>
                                     </template>
 
-                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                 </template>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
+                                </template>
+
+                                <!-- Specialized Content for Pemeliharaan Listrik -->
+                                <template v-else-if="type === 'pemeliharaan-listrik'">
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
+                                    <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase text-center">{{ item.specification || '-' }}</td> <!-- Standard -->
+                                    <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase text-center">{{ item.action_taken || '-' }}</td> <!-- Metode -->
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold uppercase text-center">{{ item.frequency || '-' }}</td>
+                                    
+                                    <!-- Months Loop -->
+                                    <td v-for="(monthKey, mIdx) in ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun']" :key="mIdx" class="px-2 py-6 text-center border-l dark:border-gray-700">
+                                        <div v-if="item.monthly_data && item.monthly_data[monthKey]" class="flex items-center justify-center">
+                                            <span v-if="item.monthly_data[monthKey] === 'V'" class="font-black text-green-600">V</span>
+                                            <span v-else-if="item.monthly_data[monthKey] === 'X'" class="font-black text-red-600">X</span>
+                                            <span v-else class="text-[9px] text-gray-400">{{ item.monthly_data[monthKey] }}</span>
+                                        </div>
+                                    </td>
+                                </template>
 
                                 <!-- Specialized Content for Weekly Activity -->
                                 <template v-else-if="type === 'weekly-activity'">
@@ -1938,16 +2123,6 @@ const importExcel = (event) => {
                                </td>
                                <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-l dark:border-gray-700">{{ item.performer?.name || 'Staff URT' }}</td>
                                <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-l border-r dark:border-gray-700">{{ item.description || '-' }}</td>
-                               <td class="px-8 py-6 text-right border-l dark:border-gray-700">
-                                   <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                       <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
-                                           <PencilIcon class="w-4 h-4" />
-                                       </button>
-                                       <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
-                                           <TrashIcon class="w-4 h-4" />
-                                       </button>
-                                   </div>
-                               </td>
                            </template>
 
                                 <!-- Specialized Content for KIR RUANGAN -->
@@ -1965,16 +2140,7 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[10px] font-black text-yellow-600 uppercase text-center font-bold">{{ item.condition === 'KB' ? (item.stock || 0) : 0 }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-red-600 uppercase text-center font-bold">{{ item.condition === 'RB' ? (item.stock || 0) : 0 }}</td>
                                     <td class="px-4 py-6 text-[9px] text-gray-400 italic whitespace-normal min-w-[150px]">{{ item.note || item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right border-l dark:border-gray-700">
-                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <!-- Action buttons moved to universal column -->
                                 </template>
 
                                 <!-- Specialized Content for PENDATAAN ASET -->
@@ -1990,16 +2156,7 @@ const importExcel = (event) => {
                                     <td class="px-4 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center border-l dark:border-gray-700">{{ item.responsible_person || item.person_in_charge || '-' }}</td>
                                     <td class="px-4 py-4 text-[10px] font-black text-gray-900 dark:text-white text-right border-l dark:border-gray-700">Rp {{ item.price ? Number(item.price).toLocaleString() : '-' }}</td>
                                     <td class="px-4 py-4 text-[9px] text-gray-400 italic text-center border-l dark:border-gray-700 whitespace-normal min-w-[150px]">{{ item.note || item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right border-l dark:border-gray-700">
-                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <!-- Action buttons moved to universal column -->
                                 </template>
 
                                  <!-- Specialized Content for FORMULIR LAPORAN PEMELIHARAAN SARANA PRASARANA -->
@@ -2013,16 +2170,7 @@ const importExcel = (event) => {
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center font-mono">{{ item.after_condition || '-' }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center whitespace-nowrap">{{ item.performer?.name || 'Staff URT' }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase text-center border-r dark:border-gray-700">{{ item.description || '-' }}</td>
-                                     <td class="px-8 py-6 text-right border-l dark:border-gray-700">
-                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <!-- Action buttons moved to universal column -->
                                  </template>
 
                                 <!-- Specialized Content for PEMELIHARAAN GEDUNG -->
@@ -2060,6 +2208,11 @@ const importExcel = (event) => {
                                             <span v-else class="text-gray-200 dark:text-gray-700">-</span>
                                         </td>
                                     </template>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-500 dark:text-gray-400 text-center border-l border-gray-100 dark:border-gray-700 max-w-[200px]">
+                                        <div class="truncate">{{ item.description || '-' }}</div>
+                                        <div v-if="item.action_taken" class="text-[8px] text-pail-gold truncate mt-1">{{ item.action_taken }}</div>
+                                    </td>
+                                    <!-- Action buttons moved to universal column -->
                                 </template>
 
 
@@ -2115,16 +2268,7 @@ const importExcel = (event) => {
                                     </td>
 
                                     <td class="px-8 py-6 text-[9px] text-gray-400 italic whitespace-normal min-w-[150px]">{{ item.note || item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right border-l dark:border-gray-700">
-                                        <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 hover:text-pail-gold">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <!-- Action buttons moved to universal column -->
                                 </template>
 
                                 <!-- Specialized Content for BERITA ACARA PEMERIKSAAN -->
@@ -2179,12 +2323,17 @@ const importExcel = (event) => {
                                 </template>
                             </template>
                             
-                            <td v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan' && type !== 'pemeliharaan-gedung' && type !== 'pemeliharaan-kipas' && type !== 'agenda-perbaikan' && type !== 'pemilihan-evaluasi'" class="px-8 py-6 text-right">
-                                <span class="text-xs font-mono font-black text-gray-900 dark:text-white">
-                                    Rp {{ Number(item.price || item.cost || item.amount || 0).toLocaleString() }}
-                                </span>
+                            <!-- Universal Action Column (Sticky Right) -->
+                            <td class="px-8 py-6 text-right sticky right-0 bg-white dark:bg-gray-800 shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.5)] z-10 border-l border-gray-50 dark:border-gray-700">
+                                <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-pail-gold hover:bg-pail-gold/10 transition-all">
+                                        <PencilIcon class="w-4 h-4" />
+                                    </button>
+                                    <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 transition-all">
+                                        <TrashIcon class="w-4 h-4" />
+                                    </button>
+                                </div>
                             </td>
-                            <td v-else class="hidden"></td>
                         </tr>
                         <tr v-if="data.data.length === 0">
                             <td :colspan="tableColspan" class="px-8 py-24 text-center">
@@ -2467,6 +2616,62 @@ const importExcel = (event) => {
                                     </div>
                                 </template>
 
+                                <!-- Field Khusus PEMELIHARAAN LISTRIK -->
+                                <template v-else-if="type === 'pemeliharaan-listrik'">
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Item Pengecekan</label>
+                                        <select v-model="form.title" @change="handlePeriodicItemChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            <option value="">Pilih Item</option>
+                                            <option v-for="item in listrikItems" :key="item.title" :value="item.title">{{ item.title }}</option>
+                                            <option value="Lainnya">Lainnya (Ketik Manual)</option>
+                                        </select>
+                                        <input v-if="form.title === 'Lainnya'" v-model="form.other_title" type="text" placeholder="Masukkan nama item..." class="mt-2 w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                        <div v-if="form.errors.title" class="text-red-500 text-[10px] font-bold mt-1">{{ form.errors.title }}</div>
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Lokasi / Area Jaringan</label>
+                                        <input v-model="form.location" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: Gedung A, Panel Utama">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Standard</label>
+                                        <input v-model="form.specification" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Metode</label>
+                                        <input v-model="form.action_taken" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Frekuensi</label>
+                                        <input v-model="form.frequency" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tahun Periode</label>
+                                        <select v-model="form.period_year" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                            <option v-for="y in [2024, 2025, 2026, 2027, 2028]" :key="y" :value="y.toString()">{{ y }}</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="sm:col-span-2 mt-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Checklist Bulanan</label>
+                                            <div class="flex gap-2">
+                                                <span class="text-[7px] font-black text-green-600 uppercase">V: OK</span>
+                                                <span class="text-[7px] font-black text-red-600 uppercase">X: NG</span>
+                                            </div>
+                                        </div>
+                                        <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                                            <div v-for="(monthKey, idx) in ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun']" :key="monthKey" class="p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-700 flex flex-col items-center gap-1">
+                                                <span class="text-[9px] font-black text-gray-400 uppercase whitespace-nowrap">{{ ['JUL', 'AGT', 'SEP', 'OKT', 'NOV', 'DES', 'JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN'][idx] }}</span>
+                                                <select v-model="form.monthly_data[monthKey]" class="w-full text-[10px] font-bold bg-white dark:bg-gray-800 border-0 rounded-lg py-1 px-0 focus:ring-1 focus:ring-pail-gold text-center">
+                                                    <option :value="undefined">-</option>
+                                                    <option value="V">V</option>
+                                                    <option value="X">X</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+
                                 <!-- Field Standar / MAINTENANCE -->
                                 <template v-else>
                                     <!-- ISO FIELDS FOR ITEMS (Buku Induk & Laporan Aset) -->
@@ -2523,14 +2728,23 @@ const importExcel = (event) => {
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Satuan</label>
-                                                    <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit/Pcs/dll">
+                                                    <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                    </select>
+                                                    <!-- Custom Unit Input -->
+                                                    <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                        <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                            OK
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
 
                                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:col-span-2">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">{{ type === 'kir-ruangan' ? 'Tahun Perolehan' : 'Tanggal Pengecekan' }}</label>
-                                                    <input v-model="form.purchased_at" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="DD-MM-YYYY">
+                                                    <input v-model="form.purchased_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                                 </div>
                                                 <div v-if="type === 'kir-ruangan'">
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">No. Kode Barang</label>
@@ -2558,11 +2772,11 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tgl Pembukuan / Pembelian</label>
-                                                <input v-model="form.purchased_at" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="DD-MM-YYYY">
+                                                <input v-model="form.purchased_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tgl Penyerahan</label>
-                                                <input v-model="form.received_at" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="DD-MM-YYYY">
+                                                <input v-model="form.received_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">No Urut Satker / Pondok</label>
@@ -2579,7 +2793,16 @@ const importExcel = (event) => {
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kuantitas & Satuan</label>
                                                 <div class="grid grid-cols-2 gap-2">
                                                     <input v-model="form.stock" type="number" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit">
+                                                    <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                    </select>
+                                                </div>
+                                                <!-- Custom Unit Input -->
+                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
                                                 </div>
                                             </div>
                                             <div>
@@ -2589,7 +2812,7 @@ const importExcel = (event) => {
 
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tahun Perolehan/Pengecekan</label>
-                                                <input v-model="form.purchased_at" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="DD-MM-YYYY">
+                                                <input v-model="form.purchased_at" type="date" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
                                             </div>
 
                                             <div>
@@ -2981,20 +3204,20 @@ const importExcel = (event) => {
                                                 <table class="w-full border-collapse">
                                                     <thead>
                                                         <tr>
-                                                            <th class="p-2 border bg-gray-100 text-[8px] font-black">BULAN</th>
-                                                            <th class="p-2 border bg-gray-100 text-[8px] font-black text-blue-600">{{ type === 'pemeliharaan-genset' ? 'PEKAN 1 (Pkn1)' : 'PUTRA' }}</th>
-                                                            <th class="p-2 border bg-gray-100 text-[8px] font-black text-pink-600">{{ type === 'pemeliharaan-genset' ? 'PEKAN 2 (Pkn2)' : 'PUTRI' }}</th>
-                                                            <th v-if="!['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)" class="p-2 border bg-gray-100 text-[8px] font-black text-green-600">LAWATA</th>
+                                                            <th class="p-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-[8px] font-black">BULAN</th>
+                                                            <th class="p-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-[8px] font-black text-blue-600 dark:text-blue-400">{{ type === 'pemeliharaan-genset' ? 'PEKAN 1 (Pkn1)' : 'PUTRA' }}</th>
+                                                            <th class="p-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-[8px] font-black text-pink-600 dark:text-pink-400">{{ type === 'pemeliharaan-genset' ? 'PEKAN 2 (Pkn2)' : 'PUTRI' }}</th>
+                                                            <th v-if="!['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)" class="p-2 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-[8px] font-black text-green-600 dark:text-green-400">LAWATA</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr v-for="m in ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun']" :key="m">
-                                                            <td class="p-2 border text-[10px] font-black uppercase bg-gray-50">{{ m }}</td>
-                                                            <td v-for="a in (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type) ? ['putra', 'putri'] : ['putra', 'putri', 'lawata'])" :key="a" class="p-1 border">
-                                                                <select v-model="form[`${m}_${a}`]" class="w-full border-0 bg-transparent text-[10px] focus:ring-0">
+                                                            <td class="p-2 border border-gray-300 dark:border-gray-600 text-[10px] font-black uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-200">{{ m }}</td>
+                                                            <td v-for="a in (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type) ? ['putra', 'putri'] : ['putra', 'putri', 'lawata'])" :key="a" class="p-1 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900">
+                                                                <select v-model="form[`${m}_${a}`]" class="w-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded px-2 py-1 text-[10px] font-bold focus:ring-2 focus:ring-pail-gold">
                                                                     <option value="">-</option>
-                                                                    <option value="V">V</option>
-                                                                    <option value="X">X</option>
+                                                                    <option value="V">✓ (V)</option>
+                                                                    <option value="X">✗ (X)</option>
                                                                 </select>
                                                             </td>
                                                         </tr>
@@ -3151,7 +3374,16 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Contoh: M2 / Ls / Unit">
+                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                </select>
+                                                <!-- Custom Unit Input -->
+                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Harga Satuan (Rp)</label>
@@ -3501,7 +3733,16 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit, Pcs, dll">
+                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                </select>
+                                                <!-- Custom Unit Input -->
+                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
@@ -3529,7 +3770,16 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit, Pcs, dll">
+                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                </select>
+                                                <!-- Custom Unit Input -->
+                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Pengadaan / Penggantian</label>
@@ -3657,7 +3907,16 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Zak, Lonjor, Pcs, dll">
+                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                </select>
+                                                <!-- Custom Unit Input -->
+                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Harga Satuan</label>
@@ -3911,7 +4170,16 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                </select>
+                                                <!-- Custom Unit Input -->
+                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Barang</label>
@@ -3966,7 +4234,16 @@ const importExcel = (event) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <input v-model="form.unit" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold" placeholder="Unit, Pcs, dll">
+                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
+                                                </select>
+                                                <!-- Custom Unit Input -->
+                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
+                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Asal Barang</label>

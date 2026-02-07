@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
@@ -14,6 +14,18 @@ const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 const isDarkMode = ref(false);
 const isIsoMenuOpen = ref(usePage().url.includes('procedures'));
+
+// Clock logic
+const currentTime = ref("");
+let timer = null;
+
+const updateClock = () => {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    currentTime.value = `${h}:${m}:${s}`;
+};
 
 // Auto-close sidebar on mobile when navigating
 const closeSidebarOnMobile = () => {
@@ -34,6 +46,9 @@ const toggleDarkMode = () => {
 };
 
 onMounted(() => {
+    updateClock();
+    timer = setInterval(updateClock, 1000);
+
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         isDarkMode.value = true;
         document.documentElement.classList.add('dark');
@@ -41,6 +56,10 @@ onMounted(() => {
         isDarkMode.value = false;
         document.documentElement.classList.remove('dark');
     }
+});
+
+onUnmounted(() => {
+    if (timer) clearInterval(timer);
 });
 
 const dashboardUrl = computed(() => {
@@ -296,9 +315,17 @@ const requestsUrl = computed(() => ['super admin', 'admin'].includes(user.value?
 
                     <nav class="hidden sm:flex items-center gap-3">
                         <span class="text-[9px] font-black text-gray-300 uppercase tracking-widest leading-none">Status</span>
-                        <div class="px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800 text-[8px] font-black text-green-600 dark:text-green-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                            <span class="w-1 h-1 rounded-full bg-green-500 animate-ping"></span>
-                            Node Aktif
+                        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700/50 shadow-inner">
+                            <div class="flex items-center gap-2 pr-2 border-r border-gray-200 dark:border-gray-700">
+                                <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                                <span class="text-[8px] font-black text-green-600 dark:text-green-500 uppercase tracking-[0.2em]">Node Aktif</span>
+                            </div>
+                            <div class="pl-1 flex items-center gap-2">
+                                <svg class="w-2.5 h-2.5 text-pail-gold opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span class="text-[9px] font-black text-gray-500 dark:text-gray-400 font-mono tracking-widest">{{ currentTime }}</span>
+                            </div>
                         </div>
                     </nav>
                 </div>

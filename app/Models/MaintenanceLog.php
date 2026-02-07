@@ -169,9 +169,12 @@ class MaintenanceLog extends Model
         'jun_status',
         'condition',
         'condition_notes',
+        'monthly_data',
+        'period_year'
     ];
 
     protected $casts = [
+        'monthly_data' => 'array',
         'is_checked' => 'boolean',
         'mon_status' => 'boolean',
         'tue_status' => 'boolean',
@@ -211,7 +214,7 @@ class MaintenanceLog extends Model
     }
     public function performer()
     {
-        return $this->belongsTo(User::class , 'performed_by');
+        return $this->belongsTo(User::class, 'performed_by');
     }
     public function item()
     {
