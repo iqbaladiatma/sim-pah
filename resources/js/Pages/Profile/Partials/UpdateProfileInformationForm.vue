@@ -25,7 +25,7 @@ const form = useForm({
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider">
                 Informasi Profil
             </h2>
 

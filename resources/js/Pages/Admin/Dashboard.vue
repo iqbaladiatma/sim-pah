@@ -45,16 +45,6 @@ const formatDateDay = (dateString) => {
                         <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
                     </div>
                 </div>
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
-                <div class="flex items-center gap-4">
-                    <div class="w-1.5 h-8 md:w-2 md:h-10 bg-pail-gold rounded-full shrink-0"></div>
-                    <div>
-                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-tight">
-                            Ikhtisar Dashboard
-                        </h2>
-                        <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
-                    </div>
-                </div>
                 <div class="flex items-center justify-center sm:justify-end gap-2">
                     <span class="relative flex h-3 w-3">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -125,10 +115,7 @@ const formatDateDay = (dateString) => {
                     <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-3xl shadow-2xl shadow-red-500/20 relative overflow-hidden group hover:scale-[1.02] transition-all duration-500">
                         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <h4 class="text-[8px] sm:text-[9px] font-black text-red-100 uppercase tracking-[0.3em] mb-2 relative z-10 italic">Peringatan Stok Kritis</h4>
-                        <h4 class="text-[8px] sm:text-[9px] font-black text-red-100 uppercase tracking-[0.3em] mb-2 relative z-10 italic">Peringatan Stok Kritis</h4>
                         <div class="text-2xl sm:text-3xl font-black text-white tracking-tighter relative z-10 leading-none">{{ stats.low_stock_items }}</div>
-                        <div class="mt-2 flex items-center gap-2 text-[8px] sm:text-[9px] font-black text-white uppercase relative z-10">
-                            <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
                         <div class="mt-2 flex items-center gap-2 text-[8px] sm:text-[9px] font-black text-white uppercase relative z-10">
                             <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
                             Pesanan Ulang Mendesak
@@ -139,18 +126,11 @@ const formatDateDay = (dateString) => {
                 <!-- Financial Architecture -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col justify-between group hover:shadow-xl transition-all">
                         <div>
-                            <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Liabilitas Finansial Tertunda</h4>
                             <h4 class="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Liabilitas Finansial Tertunda</h4>
                             <div class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter group-hover:text-pail-gold transition-colors leading-none mb-2">{{ formatRupiah(stats.total_cost_pending) }}</div>
                             <p class="text-[9px] font-black text-gray-300 uppercase">Estimasi pengeluaran antrian</p>
-                            <p class="text-[9px] font-black text-gray-300 uppercase">Estimasi pengeluaran antrian</p>
                         </div>
-                        <div class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700/50">
-                            <div class="text-[8px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">Pencairan Disetujui</div>
-                            <div class="text-lg font-black text-gray-700 dark:text-gray-300 tracking-tighter leading-none">{{ formatRupiah(stats.total_cost_approved) }}</div>
                         <div class="mt-4 pt-4 border-t border-gray-50 dark:border-gray-700/50">
                             <div class="text-[8px] font-black text-gray-400 uppercase tracking-[0.3em] mb-1">Pencairan Disetujui</div>
                             <div class="text-lg font-black text-gray-700 dark:text-gray-300 tracking-tighter leading-none">{{ formatRupiah(stats.total_cost_approved) }}</div>
@@ -160,21 +140,14 @@ const formatDateDay = (dateString) => {
                     <div class="bg-gradient-to-br from-[#D4B876] via-pail-gold to-[#B89648] p-6 rounded-3xl shadow-2xl shadow-pail-gold/30 flex flex-col justify-between relative overflow-hidden group hover:-translate-y-1 transition-all duration-500">
                         <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:rotate-12 transition-transform duration-700">
                             <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                         </div>
                         <div class="relative z-10">
                             <h4 class="text-[9px] font-black text-white/70 uppercase tracking-[0.3em] mb-2">Penyusutan Operasional</h4>
                             <div class="text-3xl font-black text-white tracking-tighter leading-none mb-2">{{ stats.out_of_stock }}</div>
                             <p class="text-[10px] text-black/40 font-black uppercase tracking-widest italic">Aset Stok Habis</p>
-                            <h4 class="text-[9px] font-black text-white/70 uppercase tracking-[0.3em] mb-2">Penyusutan Operasional</h4>
-                            <div class="text-3xl font-black text-white tracking-tighter leading-none mb-2">{{ stats.out_of_stock }}</div>
-                            <p class="text-[10px] text-black/40 font-black uppercase tracking-widest italic">Aset Stok Habis</p>
                         </div>
                         <Link :href="route('admin.items.index')" class="relative z-10 mt-6 text-[9px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-4 group/link">
-                        <Link :href="route('admin.items.index')" class="relative z-10 mt-6 text-[9px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-4 group/link">
                             Asesmen Inventaris
-                            <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md group-hover/link:bg-white group-hover/link:text-pail-gold transition-all">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7-7 7"></path></svg>
                             <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md group-hover/link:bg-white group-hover/link:text-pail-gold transition-all">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7-7 7"></path></svg>
                             </div>
@@ -186,16 +159,12 @@ const formatDateDay = (dateString) => {
                         <div class="relative z-10 flex items-center gap-6">
                             <div class="w-14 h-14 rounded-[1.25rem] bg-pail-gold/10 border border-pail-gold/20 flex items-center justify-center text-pail-gold group-hover:scale-110 transition-transform shadow-2xl shadow-pail-gold/20">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                            <div class="w-14 h-14 rounded-[1.25rem] bg-pail-gold/10 border border-pail-gold/20 flex items-center justify-center text-pail-gold group-hover:scale-110 transition-transform shadow-2xl shadow-pail-gold/20">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                             </div>
                             <div>
-                                <h4 class="text-[9px] font-black text-pail-gold/70 uppercase tracking-[0.3em] mb-2">Koneksi Aktif</h4>
                                 <h4 class="text-[9px] font-black text-pail-gold/70 uppercase tracking-[0.3em] mb-2">Koneksi Aktif</h4>
                                 <div class="text-2xl font-black text-white tracking-tighter leading-none mb-2">{{ stats.online_users }} Node</div>
                                 <div class="flex items-center gap-2">
                                     <span class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)] animate-pulse"></span>
-                                    <p class="text-[8px] text-green-500 font-black uppercase tracking-widest">Akses Terotorisasi</p>
                                     <p class="text-[8px] text-green-500 font-black uppercase tracking-widest">Akses Terotorisasi</p>
                                 </div>
                             </div>

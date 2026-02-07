@@ -41,7 +41,7 @@ const tableColspan = computed(() => {
     if (t === 'pemeliharaan-kipas') return 8;
     if (t === 'pemeliharaan-septik') return 10;
     if (t === 'pemeliharaan-sarpras') return 9;
-    if (t === 'agenda-perbaikan') return 5;
+    if (t === 'agenda-perbaikan') return 7;
     if (['pengajuan-rab', 'analisis-kebutuhan'].includes(t)) return 7;
     if (['pengadaan-sarpras', 'berita-acara-pemeriksaan', 'penerimaan-barang'].includes(t)) return 10;
     if (t === 'penyerahan-barang') return 8;
@@ -468,18 +468,11 @@ const importExcel = (event) => {
                             
                             <!-- specialized for Agenda Perbaikan Sarpras (Row 1) -->
                             <template v-else-if="type === 'agenda-perbaikan'">
-                                <th colspan="5" class="px-6 py-8 text-[10px] font-black uppercase tracking-widest text-center bg-gray-100/30 dark:bg-gray-800/30 border-b dark:border-gray-700">
+                                <th colspan="7" class="px-6 py-8 text-[10px] font-black uppercase tracking-widest text-center bg-gray-100/30 dark:bg-gray-800/30 border-b dark:border-gray-700">
                                     <div class="flex flex-col gap-4">
                                         <span class="text-lg md:text-xl text-pail-gold">JADWAL AGENDA PERBAIKAN SARPRAS</span>
                                         <div class="flex flex-col items-center gap-2 text-gray-400">
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-[9px] font-black uppercase tracking-widest">Lokasi :</span>
-                                                <span class="text-xs font-black text-gray-900 dark:text-white uppercase">{{ data.data[0]?.room?.name || data.data[0]?.location || '....................' }}</span>
-                                            </div>
-                                            <div class="flex items-center gap-2 border-t border-gray-100 dark:border-gray-700 pt-2 min-w-[200px] justify-center">
-                                                <span class="text-[9px] font-black uppercase tracking-widest">Tgl :</span>
-                                                <span class="text-xs font-black text-gray-900 dark:text-white uppercase">{{ data.data[0]?.scheduled_at || data.data[0]?.completed_at || '....................' }}</span>
-                                            </div>
+                                            <span class="text-[9px] font-black uppercase tracking-widest opacity-60">Jadwal Perbaikan & Maintenance Rutin</span>
                                         </div>
                                     </div>
                                 </th>
@@ -582,6 +575,8 @@ const importExcel = (event) => {
 
                             <template v-else-if="type === 'agenda-perbaikan'">
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">No.</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tanggal</th>
+                                <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Lokasi / Ruangan</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Uraian Pekerjaan</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">Status</th>
                                 <th class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">Petugas</th>
@@ -1459,7 +1454,6 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_frequency || '-' }}</td>
                                     
                                     <td v-for="month in ['jul_status', 'aug_status', 'sep_status', 'oct_status', 'nov_status', 'dec_status', 'jan_status', 'feb_status', 'mar_status', 'apr_status', 'may_status', 'jun_status']" :key="month" class="px-1 py-6 text-center border-l dark:border-gray-700 whitespace-nowrap">
-                                    <td v-for="month in ['jul_status', 'aug_status', 'sep_status', 'oct_status', 'nov_status', 'dec_status', 'jan_status', 'feb_status', 'mar_status', 'apr_status', 'may_status', 'jun_status']" :key="month" class="px-1 py-6 text-center border-l dark:border-gray-700 whitespace-nowrap">
                                         <span v-if="item[month] === 'V'" class="text-green-500 font-black text-[10px]">V</span>
                                         <span v-else-if="item[month] === 'X'" class="text-red-500 font-black text-[10px]">X</span>
                                          <span v-else class="text-gray-200 dark:text-gray-700">-</span>
@@ -1517,6 +1511,8 @@ const importExcel = (event) => {
                                  <!-- Specialized Content for JADWAL AGENDA PERBAIKAN SARPRAS -->
                                  <template v-else-if="type === 'agenda-perbaikan'">
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center border-l dark:border-gray-700">{{ index + 1 }}</td>
+                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase text-center">{{ item.scheduled_at || item.created_at || '-' }}</td>
+                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.room?.name || item.location || '-' }}</td>
                                      <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.title || '-' }}</td>
                                      <td class="px-4 py-6 text-center border-l dark:border-gray-700">
                                          <span class="inline-block px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest" 

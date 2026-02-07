@@ -36,12 +36,12 @@ const updatePassword = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider">
                 Perbarui Kata Sandi
             </h2>
 
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                Pastikan akun Anda menggunakan kata sandi yang panjang dan akak untuk menjaga keamanan.
+                Pastikan akun Anda menggunakan kata sandi yang panjang dan acak untuk menjaga keamanan.
             </p>
         </header>
 

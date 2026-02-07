@@ -41,7 +41,7 @@ const closeModal = () => {
 <template>
     <section class="space-y-6">
         <header>
-            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h2 class="text-lg font-black text-red-600 uppercase tracking-wider">
                 Hapus Akun
             </h2>
 

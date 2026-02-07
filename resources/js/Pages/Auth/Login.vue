@@ -98,9 +98,9 @@ const submit = () => {
             <!-- Credentials Block -->
             <div class="space-y-6">
                 <div class="group relative">
-                    <InputLabel for="email" value="Identitas Akses (Email)" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400 mb-3 px-2" />
+                    <InputLabel for="email" value="Email" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400 mb-3 px-2" />
                     <div class="relative">
-                        <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 transition-colors group-focus-within:text-pail-gold">
+                        <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 transition-colors group-focus-within:text-pail-gold z-10">
                             <UserIcon className="w-5 h-5" />
                         </div>
                         <TextInput
@@ -119,7 +119,7 @@ const submit = () => {
 
                 <div class="group relative">
                     <div class="flex items-center justify-between mb-3 px-2">
-                        <InputLabel for="password" value="Kunci Keamanan Terenkripsi" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400" />
+                        <InputLabel for="password" value="Password" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400" />
                         <Link
                             v-if="canResetPassword"
                             :href="route('password.request')"
@@ -129,7 +129,7 @@ const submit = () => {
                         </Link>
                     </div>
                     <div class="relative">
-                        <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 transition-colors group-focus-within:text-pail-gold">
+                        <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 transition-colors group-focus-within:text-pail-gold z-10">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                         </div>
                         <TextInput

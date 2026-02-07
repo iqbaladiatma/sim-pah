@@ -4,7 +4,6 @@ import { Head, Link, router } from "@inertiajs/vue3";
 import { ref } from "vue";
 import ConfirmModal from "@/Components/ConfirmModal.vue";
 import Pagination from "@/Components/Pagination.vue";
-import Pagination from "@/Components/Pagination.vue";
 
 const props = defineProps({
     users: Object,
@@ -59,25 +58,6 @@ const closeDeleteModal = () => {
                         Tambah User
                     </Link>
                 </div>
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
-                <div class="flex items-center gap-4">
-                    <div class="w-1.5 h-8 md:w-2 md:h-10 bg-pail-gold rounded-full shrink-0"></div>
-                    <div>
-                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-tight">
-                            Manajemen Pengguna
-                        </h2>
-                        <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <Link
-                        :href="route('admin.users.create')"
-                        class="px-6 py-2.5 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-xs uppercase tracking-widest flex items-center gap-2"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                        Tambah User
-                    </Link>
-                </div>
             </div>
         </template>
 
@@ -87,28 +67,20 @@ const closeDeleteModal = () => {
                 <!-- Stats Overview -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Total User</h3>
                         <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total }}</div>
-                        <div class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ stats.total }}</div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Admin Pusat</h3>
                         <div class="text-3xl font-black text-blue-600 tracking-tighter">{{ stats.admins }}</div>
-                        <div class="text-3xl font-black text-blue-600 tracking-tighter">{{ stats.admins }}</div>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm">
                         <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">User Lembaga</h3>
                         <div class="text-3xl font-black text-green-600 tracking-tighter">{{ stats.lembaga }}</div>
-                        <div class="text-3xl font-black text-green-600 tracking-tighter">{{ stats.lembaga }}</div>
                     </div>
-                    <div class="hidden md:block bg-gradient-to-br from-gray-900 to-black p-6 rounded-3xl shadow-xl col-span-1">
                     <div class="hidden md:block bg-gradient-to-br from-gray-900 to-black p-6 rounded-3xl shadow-xl col-span-1">
                         <div class="flex flex-col justify-center h-full">
                             <h3 class="text-gray-400 font-black uppercase tracking-widest text-[10px] mb-1">Keamanan</h3>
-                            <div class="text-xs font-black text-white uppercase tracking-widest">Akses Berlapis</div>
                             <div class="text-xs font-black text-white uppercase tracking-widest">Akses Berlapis</div>
                         </div>
                     </div>
@@ -219,9 +191,7 @@ const closeDeleteModal = () => {
                     <Pagination :links="users.links" />
                 </div>
 
-                <div class="mt-8 flex justify-center">
-                    <Pagination :links="users.links" />
-                </div>
+
             </div>
         </div>
 
