@@ -177,29 +177,29 @@ const filteredProcedures = computed(() => {
                 </div>
 
                 <!-- Procedures Grid -->
-                <div class="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6">
+                <div class="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-8">
                     <Link 
                         v-for="(proc, key) in filteredProcedures" 
                         :key="key"
                         :href="proc.url"
-                        class="bg-white dark:bg-gray-800 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col items-center text-center"
+                        class="bg-white dark:bg-gray-800 p-3 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col items-center text-center justify-between min-h-[120px] md:min-h-0"
                     >
                         <!-- Background Pattern -->
-                        <div class="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none font-black text-[60px] sm:text-[100px] select-none flex items-center justify-center text-gray-900 dark:text-white transform -rotate-12 translate-x-6 translate-y-6">
+                        <div class="hidden md:flex absolute inset-0 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none font-black text-[120px] select-none items-center justify-center text-gray-900 dark:text-white transform -rotate-12 translate-x-8 translate-y-8">
                              {{ (proc.id || '').charAt(0).toUpperCase() }}
                         </div>
 
-                        <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 mb-2 sm:mb-5 shadow-inner border border-gray-100 dark:border-gray-700 relative z-10">
-                            <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-5 h-5 sm:w-7 sm:h-7" />
+                        <div class="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 mb-2 md:mb-6 shadow-inner border border-gray-100 dark:border-gray-700 relative z-10 shrink-0">
+                            <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-5 h-5 md:w-8 md:h-8" />
                         </div>
                         
-                        <h4 class="text-[8px] sm:text-[13px] font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-1 sm:mb-2 relative z-10 leading-[1.1] group-hover:text-pail-gold transition-colors break-words">
+                        <h4 class="text-[9px] md:text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight md:tracking-tighter mb-1 md:mb-3 relative z-10 leading-tight group-hover:text-pail-gold transition-colors break-words w-full px-1">
                             {{ proc.title }}
                         </h4>
                         
-                        <div class="mt-auto pt-1 sm:pt-3 relative z-10 hidden sm:block">
-                            <span class="text-[8px] font-black text-pail-gold uppercase tracking-[0.3em] border-b-2 border-pail-gold/20 group-hover:border-pail-gold transition-all">
-                                Buka &rarr;
+                        <div class="mt-auto pt-2 md:pt-4 relative z-10 hidden md:block">
+                            <span class="text-[9px] font-black text-pail-gold uppercase tracking-[0.3em] border-b-2 border-pail-gold/20 group-hover:border-pail-gold transition-all">
+                                Buka Modul &rarr;
                             </span>
                         </div>
                     </Link>

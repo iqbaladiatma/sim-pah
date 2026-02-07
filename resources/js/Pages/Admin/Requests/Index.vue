@@ -30,12 +30,18 @@ const getStatusColor = (status) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-0 font-sans">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter text-center sm:text-left">
-                    Manajemen Pengajuan
-                </h2>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-1.5 h-8 md:w-2 md:h-10 bg-pail-gold rounded-full shrink-0"></div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-tight">
+                            Manajemen Pengajuan
+                        </h2>
+                        <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
+                    </div>
+                </div>
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-                    <span class="hidden lg:flex px-5 py-2.5 rounded-xl bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest border border-black shadow-lg shadow-black/20">
+                     <span class="hidden lg:flex px-5 py-2.5 rounded-xl bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest border border-black shadow-lg shadow-black/20">
                         Total Audit: {{ requests.total }}
                     </span>
                     <a 

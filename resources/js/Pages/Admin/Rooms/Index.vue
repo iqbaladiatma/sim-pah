@@ -48,10 +48,26 @@ const closeDeleteModal = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 sm:gap-0">
-                <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
-                    Master Data Ruangan
-                </h2>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-1.5 h-8 md:w-2 md:h-10 bg-pail-gold rounded-full shrink-0"></div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-tight">
+                            Master Data Ruangan
+                        </h2>
+                        <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
+                    </div>
+                </div>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-1.5 h-8 md:w-2 md:h-10 bg-pail-gold rounded-full shrink-0"></div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black text-gray-800 dark:text-gray-200 uppercase tracking-tighter leading-tight">
+                            Master Data Ruangan
+                        </h2>
+                        <p class="text-[8px] md:text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Sistem Informasi Manajemen Unit Rumah Tangga</p>
+                    </div>
+                </div>
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                     <Link
                         :href="route('admin.rooms.import_page')"
@@ -95,6 +111,8 @@ const closeDeleteModal = () => {
                         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div class="flex items-center justify-between h-full relative z-10">
                             <div>
+                                <h3 class="text-white/70 font-black uppercase tracking-[0.3em] text-[10px] mb-2">Asset Mapping</h3>
+                                <div class="text-2xl font-black text-white uppercase tracking-tighter leading-none">Pemetaan Geografis</div>
                                 <h3 class="text-white/70 font-black uppercase tracking-[0.3em] text-[10px] mb-2">Asset Mapping</h3>
                                 <div class="text-2xl font-black text-white uppercase tracking-tighter leading-none">Pemetaan Geografis</div>
                             </div>
@@ -181,14 +199,19 @@ const closeDeleteModal = () => {
                     </div>
 
                     <!-- Enhanced Empty State -->
-                    <div v-if="rooms.data.length === 0" class="bg-white dark:bg-gray-800 rounded-[3.5rem] shadow-2xl border border-gray-100 dark:border-gray-700 p-24 text-center relative overflow-hidden">
+                    <div v-if="rooms.data.length === 0" class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 p-12 text-center relative overflow-hidden">
+                    <div v-if="rooms.data.length === 0" class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 p-12 text-center relative overflow-hidden">
                         <div class="absolute -right-20 -top-20 w-64 h-64 bg-gray-50 opacity-50 rounded-full blur-3xl"></div>
                         <div class="relative z-10 flex flex-col items-center">
-                            <div class="w-24 h-24 bg-gray-50 dark:bg-gray-900 rounded-[2.5rem] flex items-center justify-center mb-8 border border-gray-100 dark:border-gray-700 shadow-inner">
-                                <svg class="w-10 h-10 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                            <div class="w-16 h-16 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-4 border border-gray-100 dark:border-gray-700 shadow-inner">
+                                <svg class="w-6 h-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                            <div class="w-16 h-16 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center mb-4 border border-gray-100 dark:border-gray-700 shadow-inner">
+                                <svg class="w-6 h-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
                             </div>
-                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-sm italic">Pusat Infrastruktur Kosong</p>
-                            <p class="text-[10px] text-gray-300 font-bold mt-2 uppercase">Definisikan area untuk mengorganisir aset.</p>
+                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-xs italic">Pusat Infrastruktur Kosong</p>
+                            <p class="text-[9px] text-gray-300 font-bold mt-1 uppercase">Definisikan area untuk mengorganisir aset.</p>
+                            <p class="text-gray-400 font-black uppercase tracking-[0.3em] text-xs italic">Pusat Infrastruktur Kosong</p>
+                            <p class="text-[9px] text-gray-300 font-bold mt-1 uppercase">Definisikan area untuk mengorganisir aset.</p>
                         </div>
                     </div>
                 </div>

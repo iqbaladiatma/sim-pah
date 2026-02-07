@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::with('institution')->latest()->paginate(10),
+            'users' => User::with('institution')->latest()->paginate(100),
             'stats' => [
                 'total' => User::count(),
                 'admins' => User::whereIn('role', ['admin', 'super admin'])->count(),

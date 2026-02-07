@@ -447,7 +447,8 @@ const importExcel = (event) => {
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No.</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Tanggal Pemeriksaan</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Lokasi</th>
-                                <th colspan="4" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">Kondisi Septik Tank</th>
+                                <th colspan="4" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap">Kondisi Septik Tank</th>
+                                <th colspan="4" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap">Kondisi Septik Tank</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Tindakan Pemeliharaan</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Hasil Tindakan</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center font-mono">Petugas</th>
@@ -502,7 +503,8 @@ const importExcel = (event) => {
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No.</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">JENIS BARANG / MERK</th>
                                 <th rowspan="2" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">LOKASI / RUANGAN</th>
-                                <th colspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">KONDISI</th>
+                                <th colspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap">KONDISI</th>
+                                <th colspan="3" class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap">KONDISI</th>
                                 <th rowspan="2" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                             </template>
 
@@ -888,16 +890,6 @@ const importExcel = (event) => {
                             </tr>
                         </template>
 
-                        <!-- specialized for Pengajuan RAB -->
-                        <tr v-if="type === 'pengajuan-rab'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Kebutuhan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Volume</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Satuan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Harga Satuan</th>
-                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Jumlah</th>
-                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
-                        </tr>
 
                         <!-- specialized for Jadwal Token -->
                         <tr v-if="type === 'jadwal-token'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
@@ -989,8 +981,10 @@ const importExcel = (event) => {
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Kondisi (Sblm/Ssdh)</th>
                             </template>
                             
-                            <th v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan'" class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Nilai / Sumber</th>
-                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                            <th v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan'" class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Nilai / Sumber</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                            <th v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan'" class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Nilai / Sumber</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
@@ -1060,7 +1054,8 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.responsible_person || '-' }}</td>
                                     <td class="px-4 py-6 text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase leading-tight">{{ item.team_members || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white text-right">Rp {{ (parseFloat(item.budget_amount) || 0).toLocaleString('id-ID') }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right">Rp {{ (parseFloat(item.actual_amount) || 0).toLocaleString('id-ID') }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right whitespace-nowrap">Rp {{ (parseFloat(item.actual_amount) || 0).toLocaleString('id-ID') }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-pail-gold text-right whitespace-nowrap">Rp {{ (parseFloat(item.actual_amount) || 0).toLocaleString('id-ID') }}</td>
                                     <td class="px-4 py-6 text-center">
                                         <div class="flex flex-col items-center">
                                             <span class="text-[10px] font-black text-pail-gold">{{ item.attainment_percentage || 0 }}%</span>
@@ -1209,16 +1204,6 @@ const importExcel = (event) => {
                                         </td>
                                     </template>
 
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Berita Acara Pemeriksaan Aset -->
@@ -1241,16 +1226,6 @@ const importExcel = (event) => {
                                         </span>
                                     </td>
                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Pemeliharaan Kebersihan (Timeline) -->
@@ -1265,16 +1240,6 @@ const importExcel = (event) => {
                                         {{ item[month] || '-' }}
                                     </td>
                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed border-l border-gray-50 dark:border-gray-800">{{ item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Jadwal Kebersihan -->
@@ -1286,16 +1251,6 @@ const importExcel = (event) => {
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white text-center uppercase">{{ item.scheduled_at || '-' }}</td>
                                     <td class="px-4 py-6 text-[11px] font-black text-gray-700 dark:text-gray-300 uppercase leading-tight">{{ item.title || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-medium text-gray-500 uppercase leading-relaxed">{{ item.description || '-' }}</td>
-                                    <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center text-gray-400 hover:text-pail-gold transition-all">
-                                                <PencilIcon class="w-4 h-4" />
-                                            </button>
-                                            <button @click="deleteItem(item.id)" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-400 hover:text-red-600 transition-all">
-                                                <TrashIcon class="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </td>
                                 </template>
 
                                 <!-- Specialized Content for Pengajuan RAB -->
@@ -1494,12 +1449,17 @@ const importExcel = (event) => {
                                 <!-- Specialized Content for ELECTRICAL MAINTENANCE -->
                                 <template v-else-if="type === 'electrical-maintenance'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.title || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.check_standard || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.check_method || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center">{{ item.check_frequency || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase whitespace-nowrap">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_standard || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_method || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_frequency || '-' }}</td>
+                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase whitespace-nowrap">{{ item.title || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_standard || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_method || '-' }}</td>
+                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_frequency || '-' }}</td>
                                     
-                                    <td v-for="month in ['jul_status', 'aug_status', 'sep_status', 'oct_status', 'nov_status', 'dec_status', 'jan_status', 'feb_status', 'mar_status', 'apr_status', 'may_status', 'jun_status']" :key="month" class="px-1 py-6 text-center border-l dark:border-gray-700">
+                                    <td v-for="month in ['jul_status', 'aug_status', 'sep_status', 'oct_status', 'nov_status', 'dec_status', 'jan_status', 'feb_status', 'mar_status', 'apr_status', 'may_status', 'jun_status']" :key="month" class="px-1 py-6 text-center border-l dark:border-gray-700 whitespace-nowrap">
+                                    <td v-for="month in ['jul_status', 'aug_status', 'sep_status', 'oct_status', 'nov_status', 'dec_status', 'jan_status', 'feb_status', 'mar_status', 'apr_status', 'may_status', 'jun_status']" :key="month" class="px-1 py-6 text-center border-l dark:border-gray-700 whitespace-nowrap">
                                         <span v-if="item[month] === 'V'" class="text-green-500 font-black text-[10px]">V</span>
                                         <span v-else-if="item[month] === 'X'" class="text-red-500 font-black text-[10px]">X</span>
                                          <span v-else class="text-gray-200 dark:text-gray-700">-</span>
