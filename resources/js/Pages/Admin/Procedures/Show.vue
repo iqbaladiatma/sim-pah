@@ -180,6 +180,41 @@ const unitOptions = [
 const showCustomUnit = ref(false);
 const customUnitValue = ref('');
 
+// Petugas Options - Default list with option to add custom
+const petugasOptions = ref([
+    'Admin URT',
+    'Admin Sarpras',
+    'Teknisi Listrik',
+    'Teknisi AC',
+    'Petugas Kebersihan',
+    'Security',
+    'Koordinator Gedung',
+]);
+const showCustomPetugas = ref(false);
+const customPetugasValue = ref('');
+
+const handlePetugasChange = (value) => {
+    if (value === '_custom_') {
+        showCustomPetugas.value = true;
+        customPetugasValue.value = '';
+    } else {
+        showCustomPetugas.value = false;
+    }
+};
+
+const applyCustomPetugas = () => {
+    if (customPetugasValue.value.trim()) {
+        const newPetugas = customPetugasValue.value.trim();
+        // Add to options if not exists
+        if (!petugasOptions.value.includes(newPetugas)) {
+            petugasOptions.value.push(newPetugas);
+        }
+        form.performed_by = newPetugas;
+        showCustomPetugas.value = false;
+        customPetugasValue.value = '';
+    }
+};
+
 const handlePeriodicItemChange = () => {
     let selected = null;
     if (props.type === 'pemeliharaan-air-bersih') {
@@ -311,7 +346,7 @@ const form = useForm({
     year: new Date().getFullYear(),
     jul_status: '', aug_status: '', sep_status: '', oct_status: '', nov_status: '', dec_status: '',
     jan_status: '', feb_status: '', mar_status: '', apr_status: '', may_status: '', jun_status: '',
-    performed_by: '',
+    performed_by: 'Admin URT',
     completed_at: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     request_date: new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0],
     damage_type: '',
@@ -2874,10 +2909,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             <div class="sm:col-span-2 mt-4 grid grid-cols-2 gap-4">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                    <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option value="">Pilih Petugas</option>
-                                                        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                    <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                        <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                     </select>
+                                                    <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                        <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tanggal Pengecekan</label>
@@ -2906,10 +2945,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Ruangan / Lokasi AC</label>
@@ -2999,10 +3042,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 </div>
                                                 <div class="sm:col-span-2">
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pemeriksa</label>
-                                                    <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option value="">Pilih Petugas</option>
-                                                        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                    <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                        <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                     </select>
+                                                    <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                        <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </template>
@@ -3061,10 +3108,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pemeriksa</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                         </template>
 
@@ -3123,10 +3174,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div class="sm:col-span-2 mt-4">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Penanggung Jawab (URT)</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                         </template>
 
@@ -3193,10 +3248,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas URT</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
 
                                             <!-- Matrix Input for 36 columns -->
@@ -3270,10 +3329,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
@@ -3339,10 +3402,17 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Perbaikan</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <!-- Custom Petugas Input -->
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
+                                                        OK
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan (Ket)</label>
@@ -3403,10 +3473,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas...</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan Kerja</label>
@@ -3457,10 +3531,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
 
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pemeriksa</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas...</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
 
                                             <div class="sm:col-span-2">
@@ -3827,10 +3905,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                         </div>
                                                         <div class="sm:col-span-2">
                                                             <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Penilai (Staff URT)</label>
-                                                            <select v-model="form.performed_by" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                                <option value="">Pilih Petugas...</option>
-                                                                <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                            <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                                <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                                <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                             </select>
+                                                            <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                                <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                                <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -3982,10 +4064,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas (Staff URT)</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Petugas...</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Meter / ID Pelanggan</label>
@@ -4028,10 +4114,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
-                                                    <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option value="">Pilih Petugas...</option>
-                                                        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                    <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                        <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                     </select>
+                                                    <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                        <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
@@ -4071,10 +4161,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
-                                                    <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option value="">Pilih Petugas...</option>
-                                                        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                    <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                        <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                     </select>
+                                                    <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                        <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                        <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                    </div>
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Area Kerja</label>
@@ -4211,10 +4305,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Penerima (Staff URT)</label>
-                                                <select v-model="form.performed_by" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option value="">Pilih Penerima...</option>
-                                                    <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
                                                 </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Barang</label>
@@ -4342,11 +4440,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <SearchableSelect
-                                                    v-model="form.performed_by"
-                                                    :options="users"
-                                                    placeholder="Pilih Petugas"
-                                                />
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
+                                                </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
@@ -4425,11 +4526,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <SearchableSelect
-                                                    v-model="form.performed_by"
-                                                    :options="users"
-                                                    placeholder="Pilih Petugas"
-                                                />
+                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
+                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
+                                                </select>
+                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
+                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
+                                                </div>
                                             </div>
                                         </template>
                                     </template>
