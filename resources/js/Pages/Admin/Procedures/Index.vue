@@ -177,28 +177,53 @@ const filteredProcedures = computed(() => {
                 </div>
 
                 <!-- Procedures Grid -->
-                <div class="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-8">
+                <div class="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                     <Link 
                         v-for="(proc, key) in filteredProcedures" 
                         :key="key"
                         :href="proc.url"
-                        class="bg-white dark:bg-gray-800 p-3 md:p-8 rounded-2xl md:rounded-[2.5rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col items-center text-center justify-between min-h-[120px] md:min-h-0"
+                        class="bg-white dark:bg-gray-800 p-3 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden flex flex-col items-center text-center justify-between min-h-[140px] md:min-h-[220px]"
                     >
                         <!-- Background Pattern -->
-                        <div class="hidden md:flex absolute inset-0 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none font-black text-[120px] select-none items-center justify-center text-gray-900 dark:text-white transform -rotate-12 translate-x-8 translate-y-8">
+                        <div class="hidden md:flex absolute inset-0 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity pointer-events-none font-black text-[100px] select-none items-center justify-center text-gray-900 dark:text-white transform -rotate-12 translate-x-8 translate-y-8">
                              {{ (proc.id || '').charAt(0).toUpperCase() }}
                         </div>
 
-                        <div class="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 mb-2 md:mb-6 shadow-inner border border-gray-100 dark:border-gray-700 relative z-10 shrink-0">
-                            <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-5 h-5 md:w-8 md:h-8" />
+                        <!-- Count Badge - Desktop -->
+                        <div class="hidden md:flex absolute top-4 right-4 items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black transition-all z-10"
+                             :class="proc.count > 0 ? 'bg-pail-gold/10 text-pail-gold' : 'bg-gray-100 dark:bg-gray-700 text-gray-400'">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>{{ proc.count }} data</span>
+                        </div>
+
+                        <!-- Count Badge - Mobile (compact) -->
+                        <div class="md:hidden absolute top-2 right-2 px-2 py-1 rounded-full text-[9px] font-black z-10"
+                             :class="proc.count > 0 ? 'bg-pail-gold text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'">
+                            {{ proc.count }}
+                        </div>
+
+                        <!-- Icon -->
+                        <div class="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 group-hover:bg-pail-gold group-hover:text-white transition-all duration-500 mb-2 md:mb-4 shadow-inner border border-gray-100 dark:border-gray-700 relative z-10 shrink-0 mt-2 md:mt-0">
+                            <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-5 h-5 md:w-7 md:h-7" />
                         </div>
                         
-                        <h4 class="text-[9px] md:text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight md:tracking-tighter mb-1 md:mb-3 relative z-10 leading-tight group-hover:text-pail-gold transition-colors break-words w-full px-1">
+                        <!-- Title -->
+                        <h4 class="text-[8px] md:text-xs font-black text-gray-900 dark:text-white uppercase tracking-tight md:tracking-tighter mb-1 md:mb-2 relative z-10 leading-tight group-hover:text-pail-gold transition-colors break-words w-full px-1 line-clamp-3 md:line-clamp-2">
                             {{ proc.title }}
                         </h4>
+
+                        <!-- Stats info - Mobile & Desktop -->
+                        <div class="text-center relative z-10 mb-1 hidden md:block" v-if="proc.count > 0">
+                            <span class="text-[10px] font-bold text-gray-400">
+                                {{ proc.count }} entri tercatat
+                            </span>
+                        </div>
                         
-                        <div class="mt-auto pt-2 md:pt-4 relative z-10 hidden md:block">
-                            <span class="text-[9px] font-black text-pail-gold uppercase tracking-[0.3em] border-b-2 border-pail-gold/20 group-hover:border-pail-gold transition-all">
+                        <!-- Action Button - Desktop only -->
+                        <div class="mt-auto pt-2 md:pt-3 relative z-10 hidden md:block">
+                            <span class="text-[9px] font-black text-pail-gold uppercase tracking-[0.2em] border-b-2 border-pail-gold/20 group-hover:border-pail-gold transition-all">
                                 Buka Modul &rarr;
                             </span>
                         </div>

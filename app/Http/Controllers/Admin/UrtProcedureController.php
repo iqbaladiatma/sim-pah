@@ -163,10 +163,40 @@ class UrtProcedureController extends Controller
 
         $filteredProcedures = collect($this->procedures)
             ->filter(fn($p) => !$group || $p['group'] === $group)
-            ->map(fn($p, $key) => array_merge($p, [
-                'id' => $key,
-                'url' => route('admin.procedures.show', $key)
-            ]));
+            ->map(function ($p, $key) {
+                // Calculate data count for this procedure
+                $count = 0;
+                try {
+                    $modelClass = $p['model'];
+                    $query = $modelClass::query();
+                    $model = new $modelClass;
+                    $tableName = $model->getTable();
+
+                    // Apply type filter if exists
+                    if (isset($p['type']) && Schema::hasColumn($tableName, 'type')) {
+                        $query->where('type', $p['type']);
+                    }
+
+                    // Apply category filter if exists
+                    if (isset($p['category']) && Schema::hasColumn($tableName, 'category')) {
+                        $query->where('category', $p['category']);
+                    }
+
+                    $count = $query->count();
+                } catch (\Exception $e) {
+                    $count = 0;
+                }
+
+                // Return only serializable data (exclude 'model' class reference)
+                return [
+                    'id' => $key,
+                    'title' => $p['title'],
+                    'icon' => $p['icon'] ?? 'LibraryIcon',
+                    'group' => $p['group'] ?? '',
+                    'url' => route('admin.procedures.show', $key),
+                    'count' => $count
+                ];
+            });
 
         return Inertia::render('Admin/Procedures/Index', [
             'procedures' => $filteredProcedures->values(),

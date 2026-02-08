@@ -52,7 +52,24 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 4. Prosedur ISO Data
+        // 4. System Settings
+        \App\Models\SystemSetting::updateOrCreate(
+            ['key' => 'emergency_contact'],
+            ['value' => '6281234567890']
+        );
+        \App\Models\SystemSetting::updateOrCreate(
+            ['key' => 'app_name'],
+            ['value' => 'SIM PAH Mataram']
+        );
+        \App\Models\SystemSetting::updateOrCreate(
+            ['key' => 'maintenance_mode'],
+            ['value' => 'false']
+        );
+
+        // 5. Prosedur ISO Data
         $this->call(ProcedureSeeder::class);
+
+        // 6. Sample Requests (Pengajuan)
+        $this->call(RequestSeeder::class);
     }
 }

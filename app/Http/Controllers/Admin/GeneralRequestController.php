@@ -11,19 +11,64 @@ use Inertia\Inertia;
 
 class GeneralRequestController extends Controller
 {
-    public function index()
+    public function index(Request $httpRequest)
     {
-        // For Admin: View All Requests
-        $requests = GeneralRequest::with(['user.institution', 'institution'])
-            ->latest()
-            ->paginate(10);
+        // Build query with search and filters
+        $query = GeneralRequest::with(['user.institution', 'institution']);
+
+        // Search filter
+        if ($search = $httpRequest->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('institution', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Status filter
+        if ($status = $httpRequest->query('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        // Type filter
+        if ($type = $httpRequest->query('type')) {
+            if ($type !== 'all') {
+                $query->where('type', $type);
+            }
+        }
+
+        // Custom ordering: pending first, then processed, approved, rejected, completed
+        $query->orderByRaw("
+            CASE status 
+                WHEN 'pending' THEN 1 
+                WHEN 'processed' THEN 2 
+                WHEN 'approved' THEN 3 
+                WHEN 'rejected' THEN 4 
+                WHEN 'completed' THEN 5 
+                ELSE 6 
+            END
+        ")->orderBy('created_at', 'desc');
+
+        $requests = $query->paginate(10)->withQueryString();
 
         return Inertia::render('Admin/Requests/Index', [
             'requests' => $requests,
+            'filters' => [
+                'search' => $httpRequest->query('search', ''),
+                'status' => $httpRequest->query('status', 'all'),
+                'type' => $httpRequest->query('type', 'all'),
+            ],
             'stats' => [
                 'pending' => GeneralRequest::where('status', 'pending')->count(),
+                'processed' => GeneralRequest::where('status', 'processed')->count(),
                 'approved' => GeneralRequest::where('status', 'approved')->count(),
                 'rejected' => GeneralRequest::where('status', 'rejected')->count(),
+                'completed' => GeneralRequest::where('status', 'completed')->count(),
                 'total_cost_pending' => (float) GeneralRequest::where('status', 'pending')->sum('estimated_cost'),
                 'total_cost_approved' => (float) GeneralRequest::where('status', 'approved')->sum('estimated_cost'),
             ]
@@ -87,7 +132,7 @@ class GeneralRequestController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'estimated_cost' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,approved,rejected',
+            'status' => 'required|in:pending,processed,approved,rejected,completed',
             'admin_note' => 'nullable|string',
             'photo_evidence' => 'nullable|image|max:2048',
         ]);

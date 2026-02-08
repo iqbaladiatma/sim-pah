@@ -6,8 +6,10 @@ import { formatRupiah, parseRupiah } from "@/Utils/format";
 import SearchableSelect from "@/Components/SearchableSelect.vue";
 import IconSelect from "@/Components/IconSelect.vue";
 import ClockIcon from "@/Components/Icons/ClockIcon.vue";
+import RefreshIcon from "@/Components/Icons/RefreshIcon.vue";
 import CheckCircleIcon from "@/Components/Icons/CheckCircleIcon.vue";
 import XIcon from "@/Components/Icons/XIcon.vue";
+import ShieldCheckIcon from "@/Components/Icons/ShieldCheckIcon.vue";
 
 const props = defineProps({
     request: Object,
@@ -43,10 +45,14 @@ const getStatusColor = (status) => {
     switch (status) {
         case "pending":
             return "bg-yellow-100 text-yellow-800";
+        case "processed":
+            return "bg-blue-100 text-blue-800";
         case "approved":
             return "bg-green-100 text-green-800";
         case "rejected":
             return "bg-red-100 text-red-800";
+        case "completed":
+            return "bg-purple-100 text-purple-800";
         default:
             return "bg-gray-100 text-gray-800";
     }
@@ -54,8 +60,10 @@ const getStatusColor = (status) => {
 
 const statusOptions = [
     { value: 'pending', label: 'Pendampingan', icon: ClockIcon, iconClass: 'text-yellow-500' },
+    { value: 'processed', label: 'Diproses', icon: RefreshIcon, iconClass: 'text-blue-500' },
     { value: 'approved', label: 'Disetujui', icon: CheckCircleIcon, iconClass: 'text-green-500' },
-    { value: 'rejected', label: 'Ditolak', icon: XIcon, iconClass: 'text-red-500' }
+    { value: 'rejected', label: 'Ditolak', icon: XIcon, iconClass: 'text-red-500' },
+    { value: 'completed', label: 'Selesai', icon: ShieldCheckIcon, iconClass: 'text-purple-500' }
 ];
 </script>
 
