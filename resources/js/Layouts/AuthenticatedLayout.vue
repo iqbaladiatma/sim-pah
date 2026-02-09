@@ -9,11 +9,15 @@ import SettingsIcon from "@/Components/Icons/SettingsIcon.vue";
 import LogOutIcon from "@/Components/Icons/LogOutIcon.vue";
 import CheckCircleIcon from "@/Components/Icons/CheckCircleIcon.vue";
 import XCircleIcon from "@/Components/Icons/XCircleIcon.vue";
+import Swal from 'sweetalert2';
 
 const isSidebarOpen = ref(false);
 const isSidebarCollapsed = ref(false);
 const isDarkMode = ref(false);
 const isIsoMenuOpen = ref(usePage().url.includes("procedures"));
+const deferredPrompt = ref(null);
+const isPwaMode = ref(false);
+const isBannerDismissed = ref(false);
 
 // Clock logic
 const currentTime = ref("");
@@ -25,6 +29,38 @@ const updateClock = () => {
     const m = String(now.getMinutes()).padStart(2, "0");
     const s = String(now.getSeconds()).padStart(2, "0");
     currentTime.value = `${h}:${m}:${s}`;
+};
+
+const installPWA = async () => {
+    if (deferredPrompt.value) {
+        deferredPrompt.value.prompt();
+        const { outcome } = await deferredPrompt.value.userChoice;
+        if (outcome === 'accepted') {
+            deferredPrompt.value = null;
+        }
+    } else {
+         Swal.fire({
+            title: 'Install Aplikasi Manual',
+            html: `
+                <div class="text-left text-sm space-y-3 font-medium text-gray-600">
+                    <p>Browser membatasi fitur "Install Otomatis" pada alamat <b>sim-pah.test</b>.</p>
+                    <p class="text-xs text-gray-400">Tips: Gunakan alamat <b>localhost</b> jika ingin tombol ini berfungsi otomatis.</p>
+                    
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 mt-2">
+                        <p class="font-bold text-gray-800 uppercase tracking-widest text-xs mb-2">Cara Install Manual:</p>
+                        <ul class="list-disc pl-5 space-y-1">
+                            <li><strong>PC/Laptop:</strong> Klik menu browser (pojok kanan atas) &rarr; "Simpan dan Bagikan" &rarr; "Install SIM URT".</li>
+                            <li><strong>Android/Chrome:</strong> Buka Menu (titik tiga) &rarr; "Tambahkan ke Layar Utama" (Add to Home Screen).</li>
+                            <li><strong>iOS/Safari:</strong> Klik tombol Share &rarr; "Tambah ke Layar Utama".</li>
+                        </ul>
+                    </div>
+                </div>
+            `,
+            icon: 'info',
+            confirmButtonText: 'Saya Mengerti',
+            confirmButtonColor: '#C9A658'
+        });
+    }
 };
 
 // Auto-close sidebar on mobile when navigating
@@ -59,6 +95,24 @@ onMounted(() => {
     } else {
         isDarkMode.value = false;
         document.documentElement.classList.remove("dark");
+    }
+
+    // PWA Install Prompt Capture
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt.value = e;
+        console.log('PWA Install Prompt Captured');
+    });
+    
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        isPwaMode.value = true;
+    }
+    
+    // Debugging
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then((registration) => {
+            console.log('Service Worker Ready:', registration);
+        });
     }
 });
 
@@ -849,6 +903,22 @@ const requestsUrl = computed(() =>
                                 >Analitik</span
                             >
                         </NavLink>
+
+                        <!-- PWA Install Button -->
+                        <div v-if="!isPwaMode" class="px-3 lg:px-5 mt-6 mb-2">
+                             <button
+                                @click="installPWA"
+                                class="w-full relative overflow-hidden group bg-gradient-to-br from-pail-gold to-yellow-600 text-white p-4 rounded-2xl shadow-lg shadow-pail-gold/30 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
+                            >
+                                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 rounded-2xl"></div>
+                                <svg class="w-5 h-5 relative z-10 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                <span v-if="!isSidebarCollapsed" class="font-black text-xs uppercase tracking-widest relative z-10">
+                                    Install App
+                                </span>
+                            </button>
+                        </div>
                     </template>
                 </nav>
 
@@ -976,6 +1046,18 @@ const requestsUrl = computed(() =>
                         </div>
                     </nav>
                 </div>
+
+                <!-- Install PWA Button (Desktop) -->
+                <button
+                    v-if="!isPwaMode"
+                    @click="installPWA"
+                    class="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pail-gold to-yellow-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all mr-4"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Install App</span>
+                </button>
 
                 <div class="flex items-center gap-6">
                     <Dropdown
@@ -1432,6 +1514,44 @@ const requestsUrl = computed(() =>
                 >
             </button>
         </nav>
+
+        <!-- PWA Install Banner (Mobile) -->
+        <Transition
+            enter-active-class="transition duration-500 ease-out"
+            enter-from-class="translate-y-full opacity-0"
+            enter-to-class="translate-y-0 opacity-100"
+            leave-active-class="transition duration-300 ease-in"
+            leave-from-class="translate-y-0 opacity-100"
+            leave-to-class="translate-y-full opacity-0"
+        >
+            <div
+                v-if="!isPwaMode && !isBannerDismissed"
+                class="lg:hidden fixed bottom-28 left-4 right-4 z-[80] bg-gray-900/95 backdrop-blur-xl border border-pail-gold/30 rounded-[2rem] p-4 shadow-2xl shadow-black/50 flex items-center justify-between gap-4"
+            >
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center p-1 shadow-lg">
+                        <img src="/logo.png" class="w-full h-full object-contain mix-blend-multiply" alt="App Icon"> 
+                         <!-- Fallback svg if logo not loaded -->
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-white uppercase tracking-wider leading-none mb-1">Install SIM URT</h3>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Akses Lebih Cepat & Offline</p>
+                    </div>
+                </div>
+                <button
+                    @click="installPWA"
+                    class="px-5 py-2.5 bg-pail-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-pail-gold/20 hover:scale-105 active:scale-95 transition-all"
+                >
+                    Install
+                </button>
+                <button 
+                    @click="isBannerDismissed = true" 
+                    class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg"
+                >
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        </Transition>
     </div>
 </template>
 

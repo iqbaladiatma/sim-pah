@@ -4,7 +4,7 @@ import { Link } from "@inertiajs/vue3";
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-6 relative overflow-hidden transition-colors duration-500">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden transition-colors duration-500">
         <!-- Dashboard-style Background Pattern -->
         <div class="fixed inset-0 pointer-events-none opacity-[0.03] dark:opacity-[0.05] z-0 overflow-hidden">
             <div class="absolute inset-0" style="background-image: radial-gradient(#000 0.5px, transparent 0.5px); background-size: 24px 24px;"></div>
@@ -16,16 +16,16 @@ import { Link } from "@inertiajs/vue3";
 
         <div class="w-full max-w-md relative z-10 flex flex-col items-center">
             <!-- Branding Header -->
-            <div class="mb-12 text-center">
+            <div class="mb-8 sm:mb-12 text-center">
                 <Link href="/" class="flex flex-col items-center gap-4">
-                    <div class="w-32 h-32 flex items-center justify-center">
-                        <ApplicationLogo class="h-24 w-24 fill-current text-pail-gold" />
+                    <div class="w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center transition-all duration-500">
+                        <ApplicationLogo class="h-16 w-16 sm:h-24 sm:w-24 fill-current text-pail-gold transition-all duration-500" />
                     </div>
                     <div class="flex flex-col items-center mt-2">
-                        <span class="text-4xl font-black tracking-tighter text-gray-900 dark:text-white leading-none">
+                        <span class="text-3xl sm:text-4xl font-black tracking-tighter text-gray-900 dark:text-white leading-none transition-all duration-300">
                             SIM <span class="text-pail-gold">PAH</span>
                         </span>
-                        <span class="text-[10px] font-black text-pail-gold uppercase tracking-[0.4em] mt-2 opacity-60">
+                        <span class="text-[8px] sm:text-[10px] font-black text-pail-gold uppercase tracking-[0.4em] mt-2 opacity-60 transition-all duration-300">
                             Edisi Mataram
                         </span>
                     </div>
@@ -33,7 +33,7 @@ import { Link } from "@inertiajs/vue3";
             </div>
 
             <!-- Login Card (Glassmorphism) -->
-            <div class="w-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-2xl px-10 py-12 rounded-[3rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.15)] border border-white dark:border-gray-700/50">
+            <div class="w-full bg-white/70 dark:bg-gray-800/70 backdrop-blur-2xl px-6 py-8 sm:px-10 sm:py-12 rounded-[2rem] sm:rounded-[3rem] shadow-[0_30px_100px_-20px_rgba(0,0,0,0.15)] border border-white dark:border-gray-700/50 transition-all duration-500">
                 <slot />
             </div>
 

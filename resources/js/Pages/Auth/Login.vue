@@ -48,33 +48,33 @@ const submit = () => {
         </div>
 
         <!-- Intelligence Hub Header -->
-        <div class="mb-8 sm:mb-12 relative text-center">
+        <div class="mb-6 sm:mb-12 relative text-center transition-all duration-500">
             <div class="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center gap-2 opacity-20">
-                <div class="w-10 sm:w-20 h-[1px] bg-pail-gold"></div>
+                <div class="w-6 sm:w-20 h-[1px] bg-pail-gold transition-all duration-500"></div>
                 <DiamondIcon className="w-3 h-3 text-pail-gold" />
-                <div class="w-10 sm:w-20 h-[1px] bg-pail-gold"></div>
+                <div class="w-6 sm:w-20 h-[1px] bg-pail-gold transition-all duration-500"></div>
             </div>
             
-            <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-tight">
+            <h2 class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase leading-tight transition-all duration-300">
                 <span class="text-pail-gold">Login</span>
             </h2>
             <div class="mt-4 flex items-center justify-center gap-3">
                 <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                <p class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">
+                <p class="text-[8px] sm:text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] transition-all duration-300">
                     Protokol Keamanan Aktif
                 </p>
             </div>
         </div>
 
-        <form @submit.prevent="submit" class="space-y-10">
+        <form @submit.prevent="submit" class="space-y-6 sm:space-y-10 transition-all duration-500">
             <!-- Institution Selection Hub -->
-            <div class="bg-gray-50/80 dark:bg-gray-900/40 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 relative group transition-all duration-700 hover:border-pail-gold/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
+            <div class="bg-gray-50/80 dark:bg-gray-900/40 p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 relative group transition-all duration-700 hover:border-pail-gold/30 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
                 <div class="absolute -right-8 -top-8 w-32 h-32 bg-pail-gold opacity-[0.03] rounded-full blur-3xl group-hover:opacity-10 transition-opacity"></div>
                 
                 <div class="relative z-10">
                     <div class="flex items-center justify-between mb-4 px-1">
-                        <InputLabel for="institution" value="Identitas Lembaga" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400" />
-                        <span class="text-[7px] sm:text-[9px] font-black text-pail-gold/40 uppercase tracking-widest">Wajib untuk Lembaga-Lembaga</span>
+                        <InputLabel for="institution" value="Identitas Lembaga" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400 transition-all duration-300" />
+                        <span class="text-[7px] sm:text-[9px] font-black text-pail-gold/40 uppercase tracking-widest transition-all duration-300">Wajib untuk Lembaga-Lembaga</span>
                     </div>
                     
                     <SearchableSelect 
@@ -88,7 +88,7 @@ const submit = () => {
                         <div class="w-8 h-8 rounded-xl bg-pail-gold/10 flex items-center justify-center shrink-0">
                             <SparklesIcon className="w-4 h-4 text-pail-gold" />
                         </div>
-                        <p class="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase tracking-tight leading-relaxed">
+                        <p class="text-[8px] sm:text-[9px] font-bold text-gray-400 uppercase tracking-tight leading-relaxed transition-all duration-300">
                             Personil yang terasosiasi dengan lembaga tertentu wajib mengidentifikasi <span class="text-pail-gold">Node Institusi</span> mereka. Akun administrator melewati protokol ini.
                         </p>
                     </div>
@@ -98,7 +98,7 @@ const submit = () => {
             <!-- Credentials Block -->
             <div class="space-y-6">
                 <div class="group relative">
-                    <InputLabel for="email" value="Email" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400 mb-3 px-2" />
+                    <InputLabel for="email" value="Email" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400 mb-3 px-2 transition-all duration-300" />
                     <div class="relative">
                         <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 transition-colors group-focus-within:text-pail-gold z-10">
                             <UserIcon className="w-5 h-5" />
@@ -119,7 +119,7 @@ const submit = () => {
 
                 <div class="group relative">
                     <div class="flex items-center justify-between mb-3 px-2">
-                        <InputLabel for="password" value="Password" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400" />
+                        <InputLabel for="password" value="Password" class="text-[8px] sm:text-[10px] uppercase tracking-[0.3em] font-black text-gray-400 transition-all duration-300" />
                         <Link
                             v-if="canResetPassword"
                             :href="route('password.request')"
@@ -158,7 +158,7 @@ const submit = () => {
             <div class="pt-6">
                 <button
                     type="submit"
-                    class="w-full h-16 sm:h-20 bg-gray-900 dark:bg-black hover:bg-black dark:hover:bg-gray-900 text-pail-gold font-black rounded-full shadow-2xl shadow-black/20 transform transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] border border-pail-gold/20 group/btn overflow-hidden relative"
+                    class="w-full h-14 sm:h-20 bg-gray-900 dark:bg-black hover:bg-black dark:hover:bg-gray-900 text-pail-gold font-black rounded-full shadow-2xl shadow-black/20 transform transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] border border-pail-gold/20 group/btn overflow-hidden relative"
                     :disabled="form.processing"
                 >
                     <div class="absolute inset-0 bg-pail-gold opacity-0 group-hover/btn:opacity-5 transition-opacity"></div>

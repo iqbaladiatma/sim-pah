@@ -113,15 +113,15 @@ const deleteRequest = () => {
                     <!-- Left Column: Details -->
                     <div class="lg:col-span-2 space-y-8">
                         <div
-                            class="bg-white dark:bg-gray-800 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-2xl overflow-hidden"
+                            class="bg-white dark:bg-gray-800 rounded-[2.5rem] md:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-2xl overflow-hidden"
                         >
-                            <div class="p-10 md:p-14">
+                            <div class="p-6 md:p-14">
                                 <!-- Status Badge -->
                                 <div
-                                    class="flex justify-between items-start mb-10"
+                                    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 sm:mb-10"
                                 >
                                     <span
-                                        class="px-6 py-2 text-[10px] font-black rounded-full border shadow-sm inline-flex items-center gap-2 uppercase tracking-[0.2em]"
+                                        class="px-5 py-2 text-[9px] font-black rounded-full border shadow-sm inline-flex items-center gap-2 uppercase tracking-[0.2em]"
                                         :class="getStatusColor(request.status)"
                                     >
                                         <span
@@ -130,7 +130,7 @@ const deleteRequest = () => {
                                         {{ getStatusLabel(request.status) }}
                                     </span>
                                     <span
-                                        class="text-[10px] font-black text-gray-300 uppercase tracking-widest"
+                                        class="text-[9px] font-black text-gray-300 uppercase tracking-widest pl-1"
                                     >
                                         {{
                                             new Date(
@@ -145,7 +145,7 @@ const deleteRequest = () => {
                                 </div>
 
                                 <h1
-                                    class="text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-6 leading-tight"
+                                    class="text-2xl md:text-3xl font-black text-gray-900 dark:text-white uppercase tracking-tight mb-6 leading-tight"
                                 >
                                     {{ request.title }}
                                 </h1>
