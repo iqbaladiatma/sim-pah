@@ -71,5 +71,11 @@ class DatabaseSeeder extends Seeder
 
         // 6. Sample Requests (Pengajuan)
         $this->call(RequestSeeder::class);
+
+         // 6. Sample Requests (Pengajuan)
+        $this->call(FixAllLembagaUsersSeeder::class);
+
+
+
     }
 }
