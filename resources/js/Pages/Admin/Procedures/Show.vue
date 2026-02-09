@@ -42,8 +42,8 @@ const tableColspan = computed(() => {
     if (t === 'pemeliharaan-gedung') return 18;
     if (t === 'pemeliharaan-ac') return 10;
     if (t === 'pemeliharaan-kamar-mandi') return 16;
-    if (['pemeliharaan-pompa', 'pemeliharaan-air-bersih'].includes(t)) return 41;
-    if (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(t)) return 29;
+    if (['pemeliharaan-pompa', 'pemeliharaan-air-bersih'].includes(t)) return 42;
+    if (['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(t)) return 30;
     if (t === 'pemeliharaan-kipas') return 9;
     if (t === 'pemeliharaan-septik') return 11;
     if (t === 'pemeliharaan-sarpras') return 10;
@@ -57,7 +57,7 @@ const tableColspan = computed(() => {
     if (t === 'detailed-monitoring') return 26;
     if (t === 'weekly-activity') return 10;
     if (t === 'vehicle-log') return 10;
-    if (t === 'pemeliharaan-listrik') return 18;
+    if (t === 'pemeliharaan-listrik' || t === 'electrical-maintenance') return 18;
     if (t === 'kelengkapan-alat') return 9;
     if (t === 'monitoring-kebersihan') return 17;
     if (t === 'monitoring-aset') return 7;
@@ -161,7 +161,7 @@ const fiscalYears = [
 ];
 
 // Unit Options for Satuan Dropdown
-const unitOptions = [
+const unitOptions = ref([
     'Buah',
     'Unit',
     'Pcs',
@@ -173,12 +173,8 @@ const unitOptions = [
     'Liter',
     'Dus',
     'Box',
-    'Karton',
-    'Custom'
-];
-
-const showCustomUnit = ref(false);
-const customUnitValue = ref('');
+    'Karton'
+]);
 
 // Petugas Options - Default list with option to add custom
 const petugasOptions = ref([
@@ -190,30 +186,6 @@ const petugasOptions = ref([
     'Security',
     'Koordinator Gedung',
 ]);
-const showCustomPetugas = ref(false);
-const customPetugasValue = ref('');
-
-const handlePetugasChange = (value) => {
-    if (value === '_custom_') {
-        showCustomPetugas.value = true;
-        customPetugasValue.value = '';
-    } else {
-        showCustomPetugas.value = false;
-    }
-};
-
-const applyCustomPetugas = () => {
-    if (customPetugasValue.value.trim()) {
-        const newPetugas = customPetugasValue.value.trim();
-        // Add to options if not exists
-        if (!petugasOptions.value.includes(newPetugas)) {
-            petugasOptions.value.push(newPetugas);
-        }
-        form.performed_by = newPetugas;
-        showCustomPetugas.value = false;
-        customPetugasValue.value = '';
-    }
-};
 
 const handlePeriodicItemChange = () => {
     let selected = null;
@@ -242,22 +214,54 @@ const handlePeriodicItemChange = () => {
     }
 };
 
-const handleUnitChange = () => {
-    if (form.unit === 'Custom') {
-        showCustomUnit.value = true;
-        customUnitValue.value = '';
-    } else {
-        showCustomUnit.value = false;
-        customUnitValue.value = '';
+// Simplified handlers for createable selects
+const handleUnitCreate = (val) => {
+    // Add to options locally so it appears selected immediately (optional, SearchableSelect handles display)
+    if (!unitOptions.includes(val)) {
+        unitOptions.push(val);
     }
+    form.unit = val;
 };
 
-const applyCustomUnit = () => {
-    if (customUnitValue.value.trim()) {
-        form.unit = customUnitValue.value.trim();
-        showCustomUnit.value = false;
-        customUnitValue.value = '';
+const handlePetugasCreate = (val) => {
+    if (!petugasOptions.value.includes(val)) {
+        petugasOptions.value.push(val);
     }
+    form.performed_by = val;
+};
+
+// Condition Options and Handlers
+const beforeConditionOptions = ref([
+    'Baik',
+    'Rusak Ringan',
+    'Rusak Berat',
+    'Perlu Pemeliharaan',
+    'Kotor',
+    'Bersih',
+    'Kurang Terawat'
+]);
+
+const afterConditionOptions = ref([
+    'Baik',
+    'Berfungsi Normal',
+    'Bersih',
+    'Selesai Diperbaiki',
+    'Dalam Pengawasan',
+    'Perlu Tindak Lanjut'
+]);
+
+const handleBeforeConditionCreate = (val) => {
+    if (!beforeConditionOptions.value.includes(val)) {
+        beforeConditionOptions.value.push(val);
+    }
+    form.before_condition = val;
+};
+
+const handleAfterConditionCreate = (val) => {
+    if (!afterConditionOptions.value.includes(val)) {
+        afterConditionOptions.value.push(val);
+    }
+    form.after_condition = val;
 };
 
 const showCreateModal = ref(false);
@@ -433,9 +437,6 @@ const openCreateModal = () => {
     editId.value = null;
     form.reset();
     
-    // Reset custom unit state
-    showCustomUnit.value = false;
-    customUnitValue.value = '';
     
     // ISO Checklist Helpers
     newItem.value = '';
@@ -473,6 +474,23 @@ const openEditModal = (item) => {
     if (item.institution_id) form.institution_id = item.institution_id;
     if (item.room_id) form.room_id = item.room_id;
     if (item.vehicle_id) form.vehicle_id = item.vehicle_id;
+    
+    // Ensure custom Unit and Petugas are in options
+    if (item.unit && !unitOptions.value.includes(item.unit)) {
+        unitOptions.value.push(item.unit);
+    }
+    if (item.performed_by && !petugasOptions.value.includes(item.performed_by)) {
+        petugasOptions.value.push(item.performed_by);
+    }
+    
+    // Ensure custom Condition values are in options
+    if (item.before_condition && !beforeConditionOptions.value.includes(item.before_condition)) {
+        beforeConditionOptions.value.push(item.before_condition);
+    }
+    if (item.after_condition && !afterConditionOptions.value.includes(item.after_condition)) {
+        afterConditionOptions.value.push(item.after_condition);
+    }
+    
     if (props.type === 'pemeliharaan-listrik') {
         form.monthly_data = item.monthly_data || {};
     }
@@ -1301,7 +1319,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                         </tr>
 
                         <!-- Standard Row for Other Types -->
-                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance', 'monitoring-aset', 'parkir-area', 'penggunaan-kendaraan', 'ceklist-iso', 'agenda-perbaikan'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                        <tr v-if="!['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance', 'monitoring-aset', 'parkir-area', 'penggunaan-kendaraan', 'ceklist-iso', 'agenda-perbaikan', 'pemeliharaan-listrik'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <!-- Dynamic Headers based on Type -->
                             <template v-if="type.includes('kendaraan')">
                                 <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Armada / Plat</th>
@@ -1329,6 +1347,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                             <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                         </tr>
 
+
                         <!-- specialized for Pemeliharaan AC -->
                         <tr v-if="type === 'pemeliharaan-ac'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
@@ -1340,6 +1359,19 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                             <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Listrik Jaringan</th>
                             <th class="px-2 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Listrik Tegangan</th>
                             <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Petugas</th>
+                            <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+                        </tr>
+
+                        <!-- specialized for Electrical Maintenance -->
+                        <tr v-if="type === 'electrical-maintenance' || type === 'pemeliharaan-listrik'" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">No</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">Item Pengecekan</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Standard</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Metode</th>
+                            <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Freq</th>
+                            <th v-for="m in ['Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun']" :key="m" class="px-1 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700">
+                                {{ m }}
+                            </th>
                             <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                         </tr>
 
@@ -2075,12 +2107,8 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                  </template>
 
                                 <!-- Specialized Content for ELECTRICAL MAINTENANCE -->
-                                <template v-else-if="type === 'electrical-maintenance'">
+                                <template v-else-if="type === 'electrical-maintenance' || type === 'pemeliharaan-listrik'">
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-400 text-center">{{ index + 1 }}</td>
-                                    <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase whitespace-nowrap">{{ item.title || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_standard || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_method || '-' }}</td>
-                                    <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_frequency || '-' }}</td>
                                     <td class="px-4 py-6 text-[10px] font-black text-gray-900 dark:text-white uppercase whitespace-nowrap">{{ item.title || '-' }}</td>
                                     <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_standard || '-' }}</td>
                                     <td class="px-4 py-6 text-[9px] font-black text-gray-600 dark:text-gray-400 text-center whitespace-nowrap">{{ item.check_method || '-' }}</td>
@@ -3531,14 +3559,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
 
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pemeriksa</label>
-                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
-                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
-                                                </select>
-                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
-                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.performed_by"
+                                                    :options="petugasOptions"
+                                                    placeholder="Pilih Petugas..."
+                                                    allow-create
+                                                    @create="handlePetugasCreate"
+                                                />
                                             </div>
 
                                             <div class="sm:col-span-2">
@@ -3811,16 +3838,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
-                                                </select>
-                                                <!-- Custom Unit Input -->
-                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
-                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
-                                                        OK
-                                                    </button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.unit"
+                                                    :options="unitOptions"
+                                                    placeholder="Pilih Satuan..."
+                                                    allow-create
+                                                    @create="handleUnitCreate"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
@@ -3848,16 +3872,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
-                                                </select>
-                                                <!-- Custom Unit Input -->
-                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
-                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
-                                                        OK
-                                                    </button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.unit"
+                                                    :options="unitOptions"
+                                                    placeholder="Pilih Satuan..."
+                                                    allow-create
+                                                    @create="handleUnitCreate"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Pengadaan / Penggantian</label>
@@ -3905,14 +3926,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                         </div>
                                                         <div class="sm:col-span-2">
                                                             <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Penilai (Staff URT)</label>
-                                                            <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-white dark:bg-gray-800 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                                <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
-                                                                <option value="_custom_">+ Tambah Petugas Lain...</option>
-                                                            </select>
-                                                            <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
-                                                                <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                                <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
-                                                            </div>
+                                                            <SearchableSelect
+                                                                v-model="form.performed_by"
+                                                                :options="petugasOptions"
+                                                                placeholder="Pilih Petugas..."
+                                                                allow-create
+                                                                @create="handlePetugasCreate"
+                                                            />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -3989,16 +4009,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
-                                                </select>
-                                                <!-- Custom Unit Input -->
-                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
-                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
-                                                        OK
-                                                    </button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.unit"
+                                                    :options="unitOptions"
+                                                    placeholder="Pilih Satuan..."
+                                                    allow-create
+                                                    @create="handleUnitCreate"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Harga Satuan</label>
@@ -4064,14 +4081,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas (Staff URT)</label>
-                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
-                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
-                                                </select>
-                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
-                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.performed_by"
+                                                    :options="petugasOptions"
+                                                    placeholder="Pilih Petugas..."
+                                                    allow-create
+                                                    @create="handlePetugasCreate"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Nama Meter / ID Pelanggan</label>
@@ -4114,14 +4130,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
-                                                    <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
-                                                        <option value="_custom_">+ Tambah Petugas Lain...</option>
-                                                    </select>
-                                                    <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
-                                                        <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
-                                                    </div>
+                                                    <SearchableSelect
+                                                        v-model="form.performed_by"
+                                                        :options="petugasOptions"
+                                                        placeholder="Pilih Petugas..."
+                                                        allow-create
+                                                        @create="handlePetugasCreate"
+                                                    />
                                                 </div>
                                             </div>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
@@ -4161,14 +4176,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:col-span-2">
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas</label>
-                                                    <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
-                                                        <option value="_custom_">+ Tambah Petugas Lain...</option>
-                                                    </select>
-                                                    <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
-                                                        <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                        <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
-                                                    </div>
+                                                    <SearchableSelect
+                                                        v-model="form.performed_by"
+                                                        :options="petugasOptions"
+                                                        placeholder="Pilih Petugas..."
+                                                        allow-create
+                                                        @create="handlePetugasCreate"
+                                                    />
                                                 </div>
                                                 <div>
                                                     <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Area Kerja</label>
@@ -4332,16 +4346,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Satuan</label>
-                                                <select v-model="form.unit" @change="handleUnitChange" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="unit in unitOptions" :key="unit" :value="unit">{{ unit }}</option>
-                                                </select>
-                                                <!-- Custom Unit Input -->
-                                                <div v-if="showCustomUnit" class="mt-2 flex gap-2">
-                                                    <input v-model="customUnitValue" type="text" placeholder="Masukkan satuan custom..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomUnit" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">
-                                                        OK
-                                                    </button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.unit"
+                                                    :options="unitOptions"
+                                                    placeholder="Pilih Satuan..."
+                                                    allow-create
+                                                    @create="handleUnitCreate"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Asal Barang</label>
@@ -4440,14 +4451,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
-                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
-                                                </select>
-                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
-                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.performed_by"
+                                                    :options="petugasOptions"
+                                                    placeholder="Pilih Petugas..."
+                                                    allow-create
+                                                    @create="handlePetugasCreate"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Keterangan</label>
@@ -4506,11 +4516,23 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Sebelum</label>
-                                                <input v-model="form.before_condition" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                <SearchableSelect
+                                                    v-model="form.before_condition"
+                                                    :options="beforeConditionOptions"
+                                                    placeholder="Pilih Kondisi..."
+                                                    allow-create
+                                                    @create="handleBeforeConditionCreate"
+                                                />
                                             </div>
                                             <div>
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Kondisi Sesudah</label>
-                                                <input v-model="form.after_condition" type="text" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
+                                                <SearchableSelect
+                                                    v-model="form.after_condition"
+                                                    :options="afterConditionOptions"
+                                                    placeholder="Pilih Kondisi..."
+                                                    allow-create
+                                                    @create="handleAfterConditionCreate"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Tindakan Pemeliharaan / Perbaikan</label>
@@ -4526,14 +4548,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block">Petugas Pelaksana</label>
-                                                <select v-model="form.performed_by" @change="handlePetugasChange(form.performed_by)" class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <option v-for="petugas in petugasOptions" :key="petugas" :value="petugas">{{ petugas }}</option>
-                                                    <option value="_custom_">+ Tambah Petugas Lain...</option>
-                                                </select>
-                                                <div v-if="showCustomPetugas" class="mt-2 flex gap-2">
-                                                    <input v-model="customPetugasValue" type="text" placeholder="Nama petugas..." class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold">
-                                                    <button @click="applyCustomPetugas" type="button" class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all">OK</button>
-                                                </div>
+                                                <SearchableSelect
+                                                    v-model="form.performed_by"
+                                                    :options="petugasOptions"
+                                                    placeholder="Pilih Petugas..."
+                                                    allow-create
+                                                    @create="handlePetugasCreate"
+                                                />
                                             </div>
                                         </template>
                                     </template>
