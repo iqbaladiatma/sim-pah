@@ -20,47 +20,47 @@ class FixAllLembagaUsersSeeder extends Seeder
         // Mapping dari email yang diharapkan (auth.md) ke CODE yang ada di database
         $userMapping = [
             // PENDIDIKAN
-            'sd_pa@simpah.test' => 'SD IT PUTRA',
-            'sd_pi@simpah.test' => 'SD IT PUTRI',
-            'smp_pa@simpah.test' => 'SMP PUTRA',
-            'smp_pi@simpah.test' => 'SMP IT PUTRI',
-            'sma_pa@simpah.test' => 'SMA IT PUTRI', // Note: Tidak ada SMA PUTRA di database
-            'ma_pa@simpah.test' => 'MA_PLUS',
+            'sd_pa@abhursarpras.com' => 'SD IT PUTRA',
+            'sd_pi@abhursarpras.com' => 'SD IT PUTRI',
+            'smp_pa@abhursarpras.com' => 'SMP PUTRA',
+            'smp_pi@abhursarpras.com' => 'SMP IT PUTRI',
+            'sma_pa@abhursarpras.com' => 'SMA IT PUTRI', // Note: Tidak ada SMA PUTRA di database
+            'ma_pa@abhursarpras.com' => 'MA_PLUS',
 
             // FULLDAY
-            'smp_fullday@simpah.test' => 'SMP FULLDAY',
-            'sma_fullday@simpah.test' => 'SMA FULLDAY',
-            'smp_sma_fullday@simpah.test' => 'SMP & SMA FULLDAY',
+            'smp_fullday@abhursarpras.com' => 'SMP FULLDAY',
+            'sma_fullday@abhursarpras.com' => 'SMA FULLDAY',
+            'smp_sma_fullday@abhursarpras.com' => 'SMP & SMA FULLDAY',
 
             // PONDOK & AKADEMIK
-            'diniyah@simpah.test' => 'DINIYAH',
-            'pgmi@simpah.test' => 'PGMI',
-            'tahfidz@simpah.test' => 'TAHFIDZ',
-            'bahasa@simpah.test' => 'BAHASA',
+            'diniyah@abhursarpras.com' => 'DINIYAH',
+            'pgmi@abhursarpras.com' => 'PGMI',
+            'tahfidz@abhursarpras.com' => 'TAHFIDZ',
+            'bahasa@abhursarpras.com' => 'BAHASA',
 
             // ASRAMA
-            'asrama_smp_pa@simpah.test' => 'ASPA_SMP',
-            'asrama_smp_pi@simpah.test' => 'ASPI_SMP',
-            'asrama_ma@simpah.test' => 'AS_MA',
-            'asrama_sma_pi@simpah.test' => 'ASPI_SMA',
+            'asrama_smp_pa@abhursarpras.com' => 'ASPA_SMP',
+            'asrama_smp_pi@abhursarpras.com' => 'ASPI_SMP',
+            'asrama_ma@abhursarpras.com' => 'AS_MA',
+            'asrama_sma_pi@abhursarpras.com' => 'ASPI_SMA',
 
             // ADMINISTRASI
-            'urt@simpah.test' => 'URT',
-            'sekretariat@simpah.test' => 'SEKRETARIAT',
-            'wadir_akd@simpah.test' => 'WADIR_AKD',
-            'wadir_um@simpah.test' => 'WADIR_UM',
-            'bk@simpah.test' => 'BK',
-            'keuangan@simpah.test' => 'KEU_IT',
+            'urt@abhursarpras.com' => 'URT',
+            'sekretariat@abhursarpras.com' => 'SEKRETARIAT',
+            'wadir_akd@abhursarpras.com' => 'WADIR_AKD',
+            'wadir_um@abhursarpras.com' => 'WADIR_UM',
+            'bk@abhursarpras.com' => 'BK',
+            'keuangan@abhursarpras.com' => 'KEU_IT',
 
             // INFRASTRUKTUR & OPERASIONAL
-            'sarpras@simpah.test' => 'Sarpras',
-            'kbt@simpah.test' => 'KBT',
-            'transport@simpah.test' => 'TRANSPORT',
-            'dapur@simpah.test' => 'DAPUR',
-            'keamanan@simpah.test' => 'SECURITY',
-            'uks@simpah.test' => 'UKS',
-            'uup@simpah.test' => 'UUP',
-            'perpustakaan@simpah.test' => 'PERPUS',
+            'sarpras@abhursarpras.com' => 'Sarpras',
+            'kbt@abhursarpras.com' => 'KBT',
+            'transport@abhursarpras.com' => 'TRANSPORT',
+            'dapur@abhursarpras.com' => 'DAPUR',
+            'keamanan@abhursarpras.com' => 'SECURITY',
+            'uks@abhursarpras.com' => 'UKS',
+            'uup@abhursarpras.com' => 'UUP',
+            'perpustakaan@abhursarpras.com' => 'PERPUS',
         ];
 
         $created = 0;
