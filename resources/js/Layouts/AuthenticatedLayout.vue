@@ -1228,8 +1228,8 @@ const requestsUrl = computed(() =>
                         class="flex items-center gap-2 sm:gap-4 bg-gray-50/50 dark:bg-gray-900/30 px-2 sm:px-5 py-2 rounded-xl border border-gray-100 dark:border-gray-700/50 shadow-inner"
                     >
                         <span
-                            class="text-[9px] font-black text-gray-400 uppercase tracking-widest hidden sm:inline"
-                            >Dev by</span
+                            class="text-[7px] sm:text-[9px] font-black text-gray-400 uppercase tracking-widest"
+                            >Develop By</span
                         >
                         <div class="flex items-center gap-2 sm:gap-3">
                             <a
@@ -1251,7 +1251,7 @@ const requestsUrl = computed(() =>
                                     </svg>
                                 </div>
                                 <span
-                                    class="text-[9px] font-bold text-gray-500 group-hover:text-pink-600 transition-colors tracking-tighter hidden sm:inline"
+                                    class="text-[7px] sm:text-[9px] font-bold text-gray-500 group-hover:text-pink-600 transition-colors tracking-tighter"
                                     >@iq_html</span
                                 >
                             </a>
@@ -1283,7 +1283,7 @@ const requestsUrl = computed(() =>
                                     </svg>
                                 </div>
                                 <span
-                                    class="text-[9px] font-bold text-gray-500 group-hover:text-green-600 transition-colors tracking-tighter hidden sm:inline"
+                                    class="text-[7px] sm:text-[9px] font-bold text-gray-500 group-hover:text-green-600 transition-colors tracking-tighter"
                                     >WhatsApp URT</span
                                 >
                             </a>

@@ -1,9 +1,20 @@
 <script setup>
-import { Head, Link } from "@inertiajs/vue3";
+import { Head, Link, usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 
 const props = defineProps({
     status: Number,
+    message: String,
+});
+
+const page = usePage();
+const user = computed(() => page.props.auth?.user);
+
+const dashboardUrl = computed(() => {
+    if (user.value && ["admin", "super admin"].includes(user.value.role)) {
+        return "/admin/dashboard";
+    }
+    return "/dashboard";
 });
 
 const title = computed(() => {
@@ -17,6 +28,10 @@ const title = computed(() => {
 });
 
 const description = computed(() => {
+    if (props.message && props.status === 403) {
+        return props.message;
+    }
+
     return {
         503: "Maaf, sistem sedang sibuk atau dalam pemeliharaan rutin. Silakan coba kembali sesaat lagi.",
         500: "Terjadi kesalahan pada server kami. Tim teknis telah dinotifikasi mengenai masalah ini.",
@@ -80,7 +95,7 @@ const icon = computed(() => {
 
                 <div class="pt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
                     <Link 
-                        href="/dashboard"
+                        :href="dashboardUrl"
                         class="px-8 py-4 bg-gray-900 dark:bg-pail-gold text-pail-gold dark:text-black rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all w-full sm:w-auto text-center"
                     >
                         Kembali ke Dashboard

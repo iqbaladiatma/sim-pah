@@ -73,7 +73,7 @@ class UrtProcedureController extends Controller
 
         // GROUP KENDARAAN & LAINNYA
         'parkir-area' => ['title' => 'Parkir Area PAH Mataram', 'model' => ParkingLog::class, 'icon' => 'MapPinIcon', 'group' => 'lainnya', 'sheet' => 'FORMULIR PARKIR AREA'], // Custom mapping
-        'penggunaan-kendaraan' => ['title' => 'LOGBOOK PENGAJUAN PENGGUNAAN KENDARAAN PAH MATARAM', 'model' => VehicleRequest::class, 'type' => 'vehicle-log', 'icon' => 'TruckIcon', 'group' => 'lainnya', 'sheet' => 'LOGBOOK PENGAJUAN PENGGUNAAN KE'],
+        'penggunaan-kendaraan' => ['title' => 'LOGBOOK PENGAJUAN PENGGUNAAN KENDARAAN PAH MATARAM', 'model' => VehicleRequest::class, 'icon' => 'TruckIcon', 'group' => 'lainnya', 'sheet' => 'LOGBOOK PENGAJUAN PENGGUNAAN KE'],
         'registrasi-kendaraan' => ['title' => 'Master Registrasi Kendaraan', 'model' => Vehicle::class, 'icon' => 'TruckIcon', 'group' => 'lainnya', 'sheet' => 'REGISTRASI KENDARAAN'],
         'ceklist-iso' => ['title' => 'Master Ceklist ISO', 'model' => IsoChecklist::class, 'icon' => 'ClipboardCheckIcon', 'group' => 'lainnya', 'sheet' => 'CEKLIST AUDIT INTERNAL ISO'],
     ];
@@ -182,6 +182,12 @@ class UrtProcedureController extends Controller
                         $query->where('category', $p['category']);
                     }
 
+                    // Apply period_year filter if exists (consistent with show method)
+                    if (Schema::hasColumn($tableName, 'period_year')) {
+                        $year = request('year', date('Y'));
+                        $query->where('period_year', $year);
+                    }
+
                     $count = $query->count();
                 } catch (\Exception $e) {
                     $count = 0;
@@ -223,10 +229,19 @@ class UrtProcedureController extends Controller
             $query->where('category', $procedure['category']);
         }
 
-        // Filter by Year (for specific types)
+        // Filter by Year (priority for period_year column)
         if (Schema::hasColumn($tableName, 'period_year')) {
             $year = request('year', date('Y'));
-            $query->where('period_year', $year);
+            $query->where(function ($q) use ($year) {
+                $q->where('period_year', $year);
+                // Also include NULL records if we're looking at the current year
+                if ($year == date('Y')) {
+                    $q->orWhereNull('period_year');
+                }
+            });
+        } elseif (Schema::hasColumn($tableName, 'year')) {
+            $year = request('year', date('Y'));
+            $query->where('year', $year);
         }
 
         // Filter by Location

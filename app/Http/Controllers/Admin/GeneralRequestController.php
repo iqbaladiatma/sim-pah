@@ -42,6 +42,11 @@ class GeneralRequestController extends Controller
             }
         }
 
+        // Institution filter
+        if ($institutionId = $httpRequest->query('institution')) {
+            $query->where('institution_id', $institutionId);
+        }
+
         // Custom ordering: pending first, then processed, approved, rejected, completed
         $query->orderByRaw("
             CASE status 
@@ -62,6 +67,7 @@ class GeneralRequestController extends Controller
                 'search' => $httpRequest->query('search', ''),
                 'status' => $httpRequest->query('status', 'all'),
                 'type' => $httpRequest->query('type', 'all'),
+                'institution' => $httpRequest->query('institution', ''),
             ],
             'stats' => [
                 'pending' => GeneralRequest::where('status', 'pending')->count(),

@@ -14,12 +14,13 @@ class ReportController extends Controller
     {
         $institution_stats = Institution::withCount(['items', 'requests'])->get()->map(function ($inst) {
             return [
-            'name' => $inst->name,
-            'code' => $inst->code,
-            'items_count' => $inst->items_count,
-            'requests_count' => $inst->requests_count,
-            'total_cost' => GeneralRequest::where('institution_id', $inst->id)->sum('estimated_cost'),
-            'pending_requests' => GeneralRequest::where('institution_id', $inst->id)->where('status', 'pending')->count(),
+                'id' => $inst->id,
+                'name' => $inst->name,
+                'code' => $inst->code,
+                'items_count' => $inst->items_count,
+                'requests_count' => $inst->requests_count,
+                'total_cost' => GeneralRequest::where('institution_id', $inst->id)->sum('estimated_cost'),
+                'pending_requests' => GeneralRequest::where('institution_id', $inst->id)->where('status', 'pending')->count(),
             ];
         });
 

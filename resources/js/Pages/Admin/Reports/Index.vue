@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head } from "@inertiajs/vue3";
+import { Head, Link } from "@inertiajs/vue3";
 import { formatRupiah } from "@/Utils/format";
 
 defineProps({
@@ -51,47 +51,56 @@ defineProps({
                 </div>
 
                 <!-- Grid of Institutions -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
                     <div v-for="inst in stats" :key="inst.code" 
-                        class="bg-white dark:bg-gray-800 p-10 rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-xl group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden">
+                        class="bg-white dark:bg-gray-800 p-4 sm:p-6 md:p-10 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[3rem] border border-gray-100 dark:border-gray-700 shadow-xl group hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden flex flex-col">
                         
                         <!-- Accent Background -->
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-gray-50 dark:bg-gray-900 rounded-bl-[4rem] group-hover:bg-pail-gold/10 transition-colors duration-500"></div>
+                        <div class="absolute top-0 right-0 w-16 h-16 sm:w-32 sm:h-32 bg-gray-50 dark:bg-gray-900 rounded-bl-[2rem] sm:rounded-bl-[4rem] group-hover:bg-pail-gold/10 transition-colors duration-500"></div>
 
-                        <header class="relative z-10 mb-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-5 py-2 rounded-2xl bg-gray-100 dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700 text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] group-hover:bg-pail-gold group-hover:text-white group-hover:border-pail-gold transition-all duration-500 shadow-sm">
-                                    {{ inst.code }}
-                                </span>
-                                <div v-if="inst.pending_requests > 0" class="flex items-center gap-2">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
-                                    <span class="text-[9px] font-black text-red-500 uppercase tracking-widest">{{ inst.pending_requests }} MENUNGGU</span>
+                        <header class="relative z-10 mb-4 sm:mb-8">
+                            <div class="flex items-center justify-between mb-4 sm:mb-6">
+                                <div class="flex items-center gap-2 sm:gap-4">
+                                    <div class="w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl bg-gray-900 dark:bg-pail-gold flex items-center justify-center text-pail-gold dark:text-gray-900 font-black text-xs sm:text-xl shadow-lg border border-white/10 shrink-0">
+                                        {{ inst.name.charAt(0) }}
+                                    </div>
+                                    <span class="px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl bg-gray-100 dark:bg-gray-900 border border-gray-200/50 dark:border-gray-700 text-[6px] sm:text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.1em] sm:tracking-[0.2em] group-hover:bg-pail-gold group-hover:text-white group-hover:border-pail-gold transition-all duration-500 truncate max-w-[30px] sm:max-w-none">
+                                        {{ inst.code }}
+                                    </span>
+                                </div>
+                                <div v-if="inst.pending_requests > 0" class="flex items-center gap-1 sm:gap-2">
+                                    <span class="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-red-500 animate-ping"></span>
+                                    <span class="text-[6px] sm:text-[9px] font-black text-red-500 uppercase tracking-widest">{{ inst.pending_requests }} <span class="hidden sm:inline">MENUNGGU</span></span>
                                 </div>
                             </div>
-                            <h3 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight line-clamp-2 min-h-[3.5rem]">{{ inst.name }}</h3>
+                            <h3 class="text-[10px] sm:text-base md:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight line-clamp-2 min-h-[1.5rem] sm:min-h-[3.5rem]">{{ inst.name }}</h3>
                         </header>
 
-                        <div class="relative z-10 grid grid-cols-2 gap-6 mb-10">
-                            <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                                <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Aset Inventaris</p>
-                                <p class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ inst.items_count }}</p>
+                        <div class="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6 mb-4 sm:mb-10">
+                            <div class="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-6 rounded-xl sm:rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                                <p class="text-[6px] sm:text-[9px] text-gray-400 font-black uppercase tracking-widest mb-0.5 sm:mb-1">Aset</p>
+                                <p class="text-sm sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ inst.items_count }}</p>
                             </div>
-                            <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
-                                <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-1">Total Pengajuan</p>
-                                <p class="text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ inst.requests_count }}</p>
+                            <div class="bg-gray-50 dark:bg-gray-900/50 p-3 sm:p-6 rounded-xl sm:rounded-[2rem] border border-gray-100 dark:border-gray-800 shadow-sm">
+                                <p class="text-[6px] sm:text-[9px] text-gray-400 font-black uppercase tracking-widest mb-0.5 sm:mb-1">Req</p>
+                                <p class="text-sm sm:text-3xl font-black text-gray-900 dark:text-white tracking-tighter">{{ inst.requests_count }}</p>
                             </div>
                         </div>
 
                         <!-- Footer Cost -->
-                        <div class="relative z-10 mt-auto pt-8 border-t border-gray-50 dark:border-gray-700/50">
-                            <div class="flex items-end justify-between">
-                                <div class="space-y-1">
-                                    <p class="text-[9px] text-gray-400 font-black uppercase tracking-widest">Total Serapan Biaya</p>
-                                    <p class="text-2xl font-black text-pail-gold font-mono tracking-tighter">{{ formatRupiah(inst.total_cost) }}</p>
+                        <div class="relative z-10 mt-auto pt-3 sm:pt-8 border-t border-gray-50 dark:border-gray-700/50">
+                            <div class="flex items-end justify-between gap-1">
+                                <div class="space-y-0.5 sm:space-y-1 min-w-0">
+                                    <p class="text-[6px] sm:text-[9px] text-gray-400 font-black uppercase tracking-widest truncate">Total Biaya</p>
+                                    <p class="text-[8px] sm:text-2xl font-black text-pail-gold font-mono tracking-tighter truncate">{{ formatRupiah(inst.total_cost) }}</p>
                                 </div>
-                                <div class="w-12 h-12 bg-gray-50 dark:bg-gray-900 rounded-2xl flex items-center justify-center border border-gray-100 dark:border-gray-700">
-                                    <PlusIcon className="w-5 h-5 text-gray-300" />
-                                </div>
+                                <Link :href="route('admin.requests.index', { institution: inst.id })" 
+                                    class="w-7 h-7 sm:w-14 sm:h-14 bg-gray-900 dark:bg-gray-700 rounded-lg sm:rounded-2xl flex items-center justify-center border border-gray-800 dark:border-gray-600 text-pail-gold hover:scale-110 active:scale-95 transition-all shadow-xl group/btn shrink-0"
+                                    title="Lihat Pengajuan">
+                                    <svg class="w-3.5 h-3.5 sm:w-6 sm:h-6 transition-transform group-hover/btn:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </Link>
                             </div>
                         </div>
                     </div>

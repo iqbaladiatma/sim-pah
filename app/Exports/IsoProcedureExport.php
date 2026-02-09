@@ -249,13 +249,14 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('C' . $currentRow, $item->check_standard);
                         $sheet->setCellValue('D' . $currentRow, $item->check_method);
                         $sheet->setCellValue('E' . $currentRow, $item->check_frequency);
-                        
+
                         // Months
                         // Jul -> offset 0 -> F (5)
                         foreach (['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun'] as $index => $month) {
                             $colIndex = 6 + $index; // F start
-                            $status = $item->{$month.'_status'};
-                            if ($status) $sheet->setCellValueByColumnAndRow($colIndex, $currentRow, $status);
+                            $status = $item->{$month . '_status'};
+                            if ($status)
+                                $sheet->setCellValueByColumnAndRow($colIndex, $currentRow, $status);
                         }
                     } elseif (str_contains($sheetName, 'KARTU INVENTARIS RUANGAN')) {
                         // A: No, B: Nama, C: Merk/Kode, D: No. Seri, E: Ukuran, F: Bahan, G: Tahun, H: No Kode, I: Jumlah, J: Baik, K: KB, L: RB, M: Ket
@@ -492,57 +493,57 @@ class IsoProcedureExport implements WithEvents
                                 $sheet->setCellValue('D6', $item->institution?->name);
                                 $sheet->setCellValue('D7', $item->room?->name);
                             }
-                            }
-                        } elseif (str_contains($sheetName, 'FORM KEGIATAN PEKANAN PETUGAS')) {
-                            $sheet->setCellValue('B' . $currentRow, $item->week_name);
-                            $sheet->setCellValue('C' . $currentRow, $item->performer?->name);
-                            $sheet->setCellValue('D' . $currentRow, $item->room?->name ?? $item->location);
-                            $sheet->setCellValue('E' . $currentRow, $item->title);
-                            $sheet->setCellValue('F' . $currentRow, $item->scheduled_at);
-                            $sheet->setCellValue('G' . $currentRow, $item->is_checked ? 'V' : '');
-                            $sheet->setCellValue('H' . $currentRow, $item->description);
-                            $sheet->setCellValue('I' . $currentRow, $item->responsible_person);
-                        } elseif (str_contains($sheetName, 'LOGBOOK PENGAJUAN PENGGUNAAN KENDARAAN')) {
-                            $sheet->setCellValue('B' . $currentRow, $item->request_date ? date('d/m/Y', strtotime($item->request_date)) : '');
-                            $sheet->setCellValue('C' . $currentRow, $item->vehicle?->name);
-                            $sheet->setCellValue('D' . $currentRow, $item->time_range);
-                            $sheet->setCellValue('E' . $currentRow, $item->institution_name ?? $item->user?->institution?->name);
-                            $sheet->setCellValue('F' . $currentRow, $item->destination);
-                            $sheet->setCellValue('G' . $currentRow, $item->start_mileage);
-                            $sheet->setCellValue('H' . $currentRow, $item->fuel_level_before);
-                            $sheet->setCellValue('I' . $currentRow, $item->condition_before);
-                            $sheet->setCellValue('J' . $currentRow, $item->responsible_person);
-                        } elseif (str_contains($sheetName, 'FORM PEMELIHARAAN JARINGAN LIST')) {
-                            $sheet->setCellValue('B' . $currentRow, $item->title);
-                            $sheet->setCellValue('C' . $currentRow, $item->standard_check);
-                            $sheet->setCellValue('D' . $currentRow, $item->method_check);
-                            $sheet->setCellValue('E' . $currentRow, $item->frequency);
-                            
-                            foreach (['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun'] as $index => $month) {
-                                $colIndex = 6 + $index; // F start
-                                $status = $item->{$month.'_status'};
-                                if ($status) $sheet->setCellValueByColumnAndRow($colIndex, $currentRow, $status);
-                            }
-                        } else {
-                            // FORMULIR LAPORAN ASET PAH MATARAM
-                            // A: No, B: Satker, C: Jumlah, D: Satuan, E: Baik, F: KB, G: Rusak, H: Tgl, I: Petugas, J: Nilai, K: Ket
-                            $sheet->setCellValue('B' . $currentRow, $item->institution?->name);
-                            $sheet->setCellValue('C' . $currentRow, $item->stock);
-                            $sheet->setCellValue('D' . $currentRow, $item->unit);
-
-                            // Condition mapping for Laporan Aset (E, F, G)
-                            if ($item->condition === 'B')
-                                $sheet->setCellValue('E' . $currentRow, 'V');
-                            if ($item->condition === 'KB')
-                                $sheet->setCellValue('F' . $currentRow, 'V');
-                            if ($item->condition === 'RB')
-                                $sheet->setCellValue('G' . $currentRow, 'V');
-
-                            $sheet->setCellValue('H' . $currentRow, $item->updated_at?->format('Y-m-d'));
-                            $sheet->setCellValue('I' . $currentRow, $item->responsible_person);
-                            $sheet->setCellValue('J' . $currentRow, $item->price);
-                            $sheet->setCellValue('K' . $currentRow, $item->note);
                         }
+                    } elseif (str_contains($sheetName, 'FORM KEGIATAN PEKANAN PETUGAS')) {
+                        $sheet->setCellValue('B' . $currentRow, $item->week_name);
+                        $sheet->setCellValue('C' . $currentRow, $item->performer?->name);
+                        $sheet->setCellValue('D' . $currentRow, $item->room?->name ?? $item->location);
+                        $sheet->setCellValue('E' . $currentRow, $item->title);
+                        $sheet->setCellValue('F' . $currentRow, $item->scheduled_at);
+                        $sheet->setCellValue('G' . $currentRow, $item->is_checked ? 'V' : '');
+                        $sheet->setCellValue('H' . $currentRow, $item->description);
+                        $sheet->setCellValue('I' . $currentRow, $item->responsible_person);
+                    } elseif (str_contains($sheetName, 'LOGBOOK PENGAJUAN PENGGUNAAN KENDARAAN')) {
+                        $sheet->setCellValue('B' . $currentRow, $item->request_date ? date('d/m/Y', strtotime($item->request_date)) : '');
+                        $sheet->setCellValue('C' . $currentRow, $item->vehicle?->name);
+                        $sheet->setCellValue('D' . $currentRow, $item->time_range);
+                        $sheet->setCellValue('E' . $currentRow, $item->institution_name ?? $item->user?->institution?->name);
+                        $sheet->setCellValue('F' . $currentRow, $item->destination);
+                        $sheet->setCellValue('G' . $currentRow, $item->start_mileage);
+                        $sheet->setCellValue('H' . $currentRow, $item->fuel_level_before);
+                        $sheet->setCellValue('I' . $currentRow, $item->condition_before);
+                        $sheet->setCellValue('J' . $currentRow, $item->responsible_person);
+                    } elseif (str_contains($sheetName, 'FORM PEMELIHARAAN JARINGAN LIST')) {
+                        $sheet->setCellValue('B' . $currentRow, $item->title);
+                        $sheet->setCellValue('C' . $currentRow, $item->standard_check);
+                        $sheet->setCellValue('D' . $currentRow, $item->method_check);
+                        $sheet->setCellValue('E' . $currentRow, $item->frequency);
+
+                        foreach (['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun'] as $index => $month) {
+                            $colIndex = 6 + $index; // F start
+                            $status = $item->{$month . '_status'};
+                            if ($status)
+                                $sheet->setCellValueByColumnAndRow($colIndex, $currentRow, $status);
+                        }
+                    } else {
+                        // FORMULIR LAPORAN ASET PAH MATARAM
+                        // A: No, B: Satker, C: Jumlah, D: Satuan, E: Baik, F: KB, G: Rusak, H: Tgl, I: Petugas, J: Nilai, K: Ket
+                        $sheet->setCellValue('B' . $currentRow, $item->institution?->name);
+                        $sheet->setCellValue('C' . $currentRow, $item->stock);
+                        $sheet->setCellValue('D' . $currentRow, $item->unit);
+
+                        // Condition mapping for Laporan Aset (E, F, G)
+                        if ($item->condition === 'B')
+                            $sheet->setCellValue('E' . $currentRow, 'V');
+                        if ($item->condition === 'KB')
+                            $sheet->setCellValue('F' . $currentRow, 'V');
+                        if ($item->condition === 'RB')
+                            $sheet->setCellValue('G' . $currentRow, 'V');
+
+                        $sheet->setCellValue('H' . $currentRow, $item->updated_at?->format('Y-m-d'));
+                        $sheet->setCellValue('I' . $currentRow, $item->responsible_person);
+                        $sheet->setCellValue('J' . $currentRow, $item->price);
+                        $sheet->setCellValue('K' . $currentRow, $item->note);
                     }
                 }
             }
