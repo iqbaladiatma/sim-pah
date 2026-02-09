@@ -66,8 +66,8 @@ onMounted(() => {
 // If editing, populate form (logic to be added if needed, currently assumes CREATE)
 
 const titleOptions = [
-    'RAB TAHUN 2026',
-    'RAB TAHUN 2027',
+    'PAB TAHUN 2026',
+    'PAB TAHUN 2027',
     'ANALISIS KEBUTUHAN FASILITAS TAMBAHAN',
     'ANGGARAN BIAYA OPERASIONAL'
 ];
@@ -165,7 +165,7 @@ const displayCurrency = (val) => {
         <div class="flex items-center justify-between mb-8 border-b dark:border-gray-700/50 pb-6">
             <div>
                 <h2 class="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight">
-                    {{ isEdit ? 'Update Data Analisis / RAB' : 'Isi Data Analisis / RAB' }}
+                    {{ isEdit ? 'Update Data Analisis / PAB' : 'Isi Data Analisis / PAB' }}
                 </h2>
                 <p class="text-[10px] font-black text-pail-gold uppercase tracking-widest mt-1">Management Entry Console</p>
             </div>

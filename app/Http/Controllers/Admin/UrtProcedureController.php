@@ -64,7 +64,7 @@ class UrtProcedureController extends Controller
         'penerimaan-barang' => ['title' => 'FORMULIR PENERIMAAN BARANG', 'model' => MaintenanceLog::class, 'type' => 'receiving', 'icon' => 'DownloadIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PENERIMAAN BARANG'],
         'penyerahan-barang' => ['title' => 'FORMULIR PENYERAHAN BARANG', 'model' => MaintenanceLog::class, 'type' => 'handover', 'icon' => 'UploadIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PENYERAHAN BARANG'],
         'jadwal-token' => ['title' => 'FORMULIR JADWAL PENGISIAN TOKEN LISTRIK', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Token', 'icon' => 'KeyIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR JADWAL PENGISIAN TOKEN'],
-        'rab-tahunan' => ['title' => 'RAB TAHUNAN', 'model' => BudgetPlan::class, 'type' => 'rab-tahunan', 'icon' => 'ClipboardListIcon', 'group' => 'logistik', 'sheet' => 'RAB TAHUNAN'],
+        'pab-tahunan' => ['title' => 'PAB TAHUNAN', 'model' => BudgetPlan::class, 'type' => 'pab-tahunan', 'icon' => 'ClipboardListIcon', 'group' => 'logistik', 'sheet' => 'PAB TAHUNAN'],
         'visi-2030' => ['title' => 'VISI 2030', 'model' => BudgetPlan::class, 'type' => 'visi-2030', 'icon' => 'SparklesIcon', 'group' => 'logistik', 'sheet' => 'VISI 2030'],
 
         // GROUP KEBERSIHAN

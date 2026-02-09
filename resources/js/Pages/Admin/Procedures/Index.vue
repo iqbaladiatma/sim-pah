@@ -107,10 +107,146 @@ const filteredProcedures = computed(() => {
         (proc.category && proc.category.toLowerCase().includes(query))
     );
 });
+import ImportMappingModal from '@/Components/ImportMappingModal.vue';
+import Modal from '@/Components/Modal.vue';
+import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
+
+// State for Import
+const showImportSelectionModal = ref(false);
+const showImportModal = ref(false);
+const selectedImportType = ref(null);
+const importHeaders = ref([]);
+const importFields = ref([]);
+const importSheets = ref([]);
+const isAnalyzing = ref(false);
+const searchQueryImport = ref('');
+
+const filteredImportProcedures = computed(() => {
+    if (!searchQueryImport.value) return props.procedures;
+    const q = searchQueryImport.value.toLowerCase();
+    return props.procedures.filter(p => p.title.toLowerCase().includes(q));
+});
+
+const openImportSelection = () => {
+    showImportSelectionModal.value = true;
+};
+
+const selectProcedureForImport = (proc) => {
+    selectedImportType.value = proc.type || proc.id; // Use type or id as key
+    showImportSelectionModal.value = false;
+    showImportModal.value = true;
+    // Reset previous import state
+    importHeaders.value = [];
+    importFields.value = [];
+    importSheets.value = [];
+};
+
+const onAnalyze = ({ file, sheet }) => {
+    if (!selectedImportType.value) return;
+    
+    isAnalyzing.value = true;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", selectedImportType.value);
+    if (sheet) formData.append("sheet", sheet);
+
+    axios.post(route("admin.procedures.check_import_headers"), formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    })
+    .then((response) => {
+        importHeaders.value = response.data.headers;
+        importFields.value = response.data.fields;
+        importSheets.value = response.data.sheets || [];
+    })
+    .catch((error) => {
+        console.error(error);
+        alert("Gagal membaca file: " + (error.response?.data?.error || error.message));
+    })
+    .finally(() => {
+        isAnalyzing.value = false;
+    });
+};
+
+const handleImportSubmit = ({ file, mapping, sheet }) => {
+    const importForm = useForm({
+        file: file,
+        mapping: mapping,
+        sheet: sheet,
+    });
+
+    importForm.post(route("admin.procedures.import", selectedImportType.value), {
+        onSuccess: () => {
+            showImportModal.value = false;
+            selectedImportType.value = null;
+        },
+        onError: (errors) => {
+            console.error(errors);
+        },
+    });
+};
 </script>
 
 <template>
     <Head :title="getGroupTitle(currentGroup)" />
+    
+    <Modal :show="showImportSelectionModal" @close="showImportSelectionModal = false">
+        <div class="p-6">
+            <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tighter mb-4">
+                Pilih Modul untuk Import Data
+            </h3>
+            
+            <div class="mb-4">
+                <input 
+                    v-model="searchQueryImport"
+                    type="text" 
+                    placeholder="Cari modul..." 
+                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-pail-gold"
+                    autofocus
+                />
+            </div>
+            
+            <div class="max-h-[60vh] overflow-y-auto space-y-2 pr-2">
+                <button 
+                    v-for="proc in filteredImportProcedures" 
+                    :key="proc.id"
+                    @click="selectProcedureForImport(proc)"
+                    class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-pail-gold/10 hover:text-pail-gold transition-colors text-left group border border-transparent hover:border-pail-gold/20"
+                >
+                    <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-pail-gold shadow-sm">
+                        <component :is="icons[proc.icon] || icons.LibraryIcon" class="w-4 h-4" />
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold uppercase tracking-wide text-gray-800 dark:text-gray-200 group-hover:text-pail-gold">{{ proc.title }}</div>
+                    </div>
+                </button>
+                
+                <div v-if="filteredImportProcedures.length === 0" class="text-center py-8 text-gray-400 text-sm">
+                    Tidak ada modul ditemukan.
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button 
+                    @click="showImportSelectionModal = false"
+                    class="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 uppercase tracking-wider"
+                >
+                    Batal
+                </button>
+            </div>
+        </div>
+    </Modal>
+
+    <ImportMappingModal
+        :show="showImportModal"
+        :processing="isAnalyzing"
+        :file-headers="importHeaders"
+        :sheets="importSheets"
+        :required-fields="importFields"
+        @close="showImportModal = false"
+        @analyze="onAnalyze"
+        @submit="handleImportSubmit"
+    />
 
     <AuthenticatedLayout>
         <template #header>
@@ -125,6 +261,13 @@ const filteredProcedures = computed(() => {
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <button 
+                        @click="openImportSelection"
+                        class="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
+                    >
+                        <UploadIcon class="w-4 h-4" />
+                        Import Data
+                    </button>
                     <Link 
                         :href="route('admin.procedures.dashboard')" 
                         class="flex items-center justify-center gap-2 px-5 py-2.5 bg-pail-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-600 transition-all shadow-lg hover:shadow-pail-gold/20"
