@@ -4,18 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
 
 class Request extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['title', 'status', 'type'])
+            ->logOnly(['title', 'status', 'type', 'deletion_reason'])
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Request has been {$eventName}");
     }
@@ -30,6 +30,7 @@ class Request extends Model
         'estimated_cost',
         'status',
         'admin_note',
+        'deletion_reason',
     ];
 
     public function user()

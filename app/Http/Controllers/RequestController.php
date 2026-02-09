@@ -103,6 +103,20 @@ class RequestController extends Controller
         ]);
     }
 
+    public function show(\App\Models\Request $request)
+    {
+        $user = auth()->user();
+
+        // Multi-tenancy check
+        if ($request->institution_id !== $user->institution_id) {
+            abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk melihat pengajuan ini.');
+        }
+
+        return Inertia::render('Requests/Show', [
+            'request' => $request->load(['user', 'institution'])
+        ]);
+    }
+
     public function update(Request $httpRequest, \App\Models\Request $request)
     {
         $user = auth()->user();
@@ -139,7 +153,7 @@ class RequestController extends Controller
         return redirect()->route('requests.index')->with('success', 'Pengajuan berhasil diperbarui.');
     }
 
-    public function destroy(\App\Models\Request $request)
+    public function destroy(Request $httpRequest, \App\Models\Request $request)
     {
         $user = auth()->user();
 
@@ -152,6 +166,10 @@ class RequestController extends Controller
         if ($request->status !== 'pending') {
             return redirect()->back()->with('error', 'Hanya pengajuan dengan status (Tinjauan) yang dapat dihapus.');
         }
+
+        $request->update([
+            'deletion_reason' => $httpRequest->deletion_reason ?? 'Dihapus oleh pengguna tanpa alasan.'
+        ]);
 
         $request->delete();
 
