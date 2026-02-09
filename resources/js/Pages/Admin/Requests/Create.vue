@@ -12,7 +12,7 @@ const props = defineProps({
 
 const form = useForm({
     institution_id: "",
-    type: "",
+    type: "utilitas",
     title: "",
     description: "",
     estimated_cost: 0,
@@ -61,8 +61,7 @@ const submit = () => {
 const requestTypes = [
     { id: 'utilitas', label: 'Utilitas', desc: 'Listrik, Air, Internet', icon: 'bolt', color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-900/20' },
     { id: 'barang_habis_pakai', label: 'Barang Habis Pakai', desc: 'ATK, Kebersihan, Dapur', icon: 'box', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-    { id: 'pemeliharaan', label: 'Pemeliharaan', desc: 'Perbaikan Aset, Servis', icon: 'tool', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20' },
-    { id: 'darurat', label: 'Darurat', desc: 'Insiden, Bencana', icon: 'alert', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
+    { id: 'darurat', label: 'Darurat / Emergency', desc: 'Insiden, Bencana, Urgen', icon: 'alert', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20' },
 ];
 
 const selectType = (typeId) => {

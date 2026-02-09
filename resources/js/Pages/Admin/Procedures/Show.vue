@@ -70,7 +70,7 @@ const tableColspan = computed(() => {
         return 18;
     if (t === "kelengkapan-alat") return 9;
     if (t === "monitoring-kebersihan") return 17;
-    if (t === "monitoring-aset") return 7;
+    if (t === "monitoring-aset") return 11;
     if (t === "pemilihan-evaluasi") return 6;
     if (t === "pelelangan-aset") return 9;
     if (t === "peminjaman-barang") return 11;
@@ -1800,6 +1800,12 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             rowspan="2"
                                             class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest"
                                         >
+                                            Satuan Kerja
+                                        </th>
+                                        <th
+                                            rowspan="2"
+                                            class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest"
+                                        >
                                             JENIS BARANG / MERK
                                         </th>
                                         <th
@@ -1813,6 +1819,18 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap"
                                         >
                                             KONDISI
+                                        </th>
+                                        <th
+                                            rowspan="2"
+                                            class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center"
+                                        >
+                                            Tgl Periksa
+                                        </th>
+                                        <th
+                                            rowspan="2"
+                                            class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center"
+                                        >
+                                            Petugas
                                         </th>
                                     </template>
 
@@ -1829,7 +1847,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             rowspan="2"
                                             class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap"
                                         >
-                                            Petugas Pemeriksa
+                                            Petugas Pelaksana
                                         </th>
                                         <th
                                             rowspan="2"
@@ -6928,7 +6946,6 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </td>
                                         </template>
 
-                                        <!-- Specialized Content for MONITORING ASET -->
                                         <template
                                             v-else-if="
                                                 type === 'monitoring-aset'
@@ -6938,6 +6955,11 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 class="px-4 py-6 text-[10px] font-black text-gray-400 text-center"
                                             >
                                                 {{ index + 1 }}
+                                            </td>
+                                            <td
+                                                class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight"
+                                            >
+                                                {{ item.institution?.name || "-" }}
                                             </td>
                                             <td
                                                 class="px-4 py-6 text-[11px] font-black text-gray-900 dark:text-white uppercase leading-tight"
@@ -6996,6 +7018,21 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                         ? "✓"
                                                         : "-"
                                                 }}
+                                            </td>
+                                            <td
+                                                class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center"
+                                            >
+                                                {{ formatDate(item.completed_at) }}
+                                            </td>
+                                            <td
+                                                class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center uppercase"
+                                            >
+                                                {{ item.performed_by || "-" }}
+                                            </td>
+                                            <td
+                                                class="px-4 py-6 text-[10px] font-black text-gray-600 dark:text-gray-400"
+                                            >
+                                                {{ item.condition_notes || "-" }}
                                             </td>
                                         </template>
 
@@ -7534,6 +7571,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 class="px-4 py-4 text-[10px] font-black text-gray-600 dark:text-gray-400 text-center border-l dark:border-gray-700"
                                             >
                                                 {{
+                                                    item.performed_by ||
                                                     item.responsible_person ||
                                                     item.person_in_charge ||
                                                     "-"
@@ -9410,15 +9448,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 <div v-else>
                                                     <label
                                                         class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block"
-                                                        >Petugas
-                                                        Pemeriksa</label
+                                                        >Petugas Pelaksana</label
                                                     >
-                                                    <input
-                                                        v-model="
-                                                            form.responsible_person
-                                                        "
-                                                        type="text"
-                                                        class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
+                                                    <SearchableSelect
+                                                        v-model="form.performed_by"
+                                                        :options="petugasOptions"
+                                                        placeholder="Pilih Petugas..."
+                                                        allow-create
+                                                        @create="handlePetugasCreate"
                                                     />
                                                 </div>
                                                 <div
@@ -11515,48 +11552,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block"
                                                     >Petugas</label
                                                 >
-                                                <select
+                                                <SearchableSelect
                                                     v-model="form.performed_by"
-                                                    @change="
-                                                        handlePetugasChange(
-                                                            form.performed_by,
-                                                        )
-                                                    "
-                                                    class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
-                                                >
-                                                    <option
-                                                        v-for="petugas in petugasOptions"
-                                                        :key="petugas"
-                                                        :value="petugas"
-                                                    >
-                                                        {{ petugas }}
-                                                    </option>
-                                                    <option value="_custom_">
-                                                        + Tambah Petugas Lain...
-                                                    </option>
-                                                </select>
-                                                <div
-                                                    v-if="showCustomPetugas"
-                                                    class="mt-2 flex gap-2"
-                                                >
-                                                    <input
-                                                        v-model="
-                                                            customPetugasValue
-                                                        "
-                                                        type="text"
-                                                        placeholder="Nama petugas..."
-                                                        class="flex-1 bg-white dark:bg-gray-800 border border-pail-gold/30 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-pail-gold"
-                                                    />
-                                                    <button
-                                                        @click="
-                                                            applyCustomPetugas
-                                                        "
-                                                        type="button"
-                                                        class="px-4 py-2 bg-pail-gold text-white rounded-xl text-xs font-black uppercase hover:bg-pail-gold/90 transition-all"
-                                                    >
-                                                        OK
-                                                    </button>
-                                                </div>
+                                                    :options="petugasOptions"
+                                                    placeholder="Pilih Petugas..."
+                                                    allow-create
+                                                    @create="handlePetugasCreate"
+                                                />
                                             </div>
                                             <div class="sm:col-span-2">
                                                 <label

@@ -7,9 +7,9 @@ use Inertia\Inertia;
 
 class RequestController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $httpRequest)
     {
-        $user = $request->user();
+        $user = $httpRequest->user();
         $query = \App\Models\Request::with(['user.institution', 'institution']);
 
         // Filter for Lembaga role
@@ -17,10 +17,29 @@ class RequestController extends Controller
             $query->where('institution_id', $user->institution_id);
         }
 
-        $requests = $query->latest()->paginate(10);
+        // Search Filter
+        if ($search = $httpRequest->query('search')) {
+            $query->where(function (\Illuminate\Database\Eloquent\Builder $q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        // Status Filter
+        if ($status = $httpRequest->query('status')) {
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        $requests = $query->latest()->paginate(10)->withQueryString();
 
         return Inertia::render('Requests/Index', [
-            'requests' => $requests
+            'requests' => $requests,
+            'filters' => [
+                'search' => $httpRequest->query('search', ''),
+                'status' => $httpRequest->query('status', 'all'),
+            ]
         ]);
     }
 
@@ -39,7 +58,7 @@ class RequestController extends Controller
         }
 
         $validated = $request->validate([
-            'type' => 'required|string|max:50',
+            'type' => 'required|in:utilitas,barang_habis_pakai,darurat',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'estimated_cost' => 'required|numeric|min:0',
@@ -74,8 +93,7 @@ class RequestController extends Controller
             abort(403, 'Akses ditolak. Anda hanya bisa mengedit pengajuan Anda sendiri.');
         }
 
-        // Check status (Optional: can they edit if approved? requested said "edit pengajuan bukan keputusan")
-        // Usually it's better to only allow editing pending ones.
+        // Only allow editing pending ones.
         if ($request->status !== 'pending') {
             return redirect()->back()->with('error', 'Pengajuan yang sudah diproses tidak bisa diedit.');
         }
@@ -98,7 +116,7 @@ class RequestController extends Controller
         }
 
         $validated = $httpRequest->validate([
-            'type' => 'required|string|max:50',
+            'type' => 'required|in:utilitas,barang_habis_pakai,darurat',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'estimated_cost' => 'required|numeric|min:0',
@@ -119,5 +137,24 @@ class RequestController extends Controller
         $request->update($data);
 
         return redirect()->route('requests.index')->with('success', 'Pengajuan berhasil diperbarui.');
+    }
+
+    public function destroy(\App\Models\Request $request)
+    {
+        $user = auth()->user();
+
+        // Check ownership
+        if ($request->user_id !== $user->id) {
+            abort(403);
+        }
+
+        // Only allow deleting pending ones
+        if ($request->status !== 'pending') {
+            return redirect()->back()->with('error', 'Hanya pengajuan dengan status (Tinjauan) yang dapat dihapus.');
+        }
+
+        $request->delete();
+
+        return redirect()->route('requests.index')->with('success', 'Pengajuan berhasil dihapus.');
     }
 }

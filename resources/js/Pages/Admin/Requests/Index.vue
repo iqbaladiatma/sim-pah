@@ -33,7 +33,7 @@ const showTypeDropdown = ref(false);
 // Status options with colors
 const statusOptions = [
     { value: 'all', label: 'Semua Status', color: 'bg-gray-400' },
-    { value: 'pending', label: 'Pendampingan', color: 'bg-yellow-500' },
+    { value: 'pending', label: 'Tinjauan', color: 'bg-yellow-500' },
     { value: 'processed', label: 'Diproses', color: 'bg-blue-500' },
     { value: 'approved', label: 'Disetujui', color: 'bg-green-500' },
     { value: 'rejected', label: 'Ditolak', color: 'bg-red-500' },
@@ -115,7 +115,7 @@ const getDay = (date) => {
 
 const getStatusLabel = (status) => {
     switch (status) {
-        case "pending": return "Pendampingan";
+        case "pending": return "Tinjauan";
         case "processed": return "Diproses";
         case "approved": return "Disetujui";
         case "rejected": return "Ditolak";

@@ -321,9 +321,25 @@ const filteredRooms = computed(() => {
                                 <TextInput v-model="form.stock" type="number" class="w-full mt-1" required />
                                 <div v-if="form.errors.stock" class="text-red-500 text-xs mt-1">{{ form.errors.stock }}</div>
                             </div>
-                             <div>
+                            <div>
                                 <InputLabel value="Satuan" />
-                                <TextInput v-model="form.unit" class="w-full mt-1" required placeholder="Pcs, Unit, Set" />
+                                <select v-model="form.unit" class="w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" required>
+                                    <option value="Pcs">Pcs</option>
+                                    <option value="Unit">Unit</option>
+                                    <option value="Set">Set</option>
+                                    <option value="Box">Box</option>
+                                    <option value="Pack">Pack</option>
+                                    <option value="Lusin">Lusin</option>
+                                    <option value="Kodi">Kodi</option>
+                                    <option value="Rim">Rim</option>
+                                    <option value="Kg">Kg</option>
+                                    <option value="Liter">Liter</option>
+                                    <option value="Meter">Meter</option>
+                                    <option value="Roll">Roll</option>
+                                    <option value="Botol">Botol</option>
+                                    <option value="Jerigen">Jerigen</option>
+                                    <option value="Karton">Karton</option>
+                                </select>
                                 <div v-if="form.errors.unit" class="text-red-500 text-xs mt-1">{{ form.errors.unit }}</div>
                             </div>
                             <div>
