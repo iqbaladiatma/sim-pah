@@ -1,18 +1,44 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import Pagination from "@/Components/Pagination.vue";
 import FolderIcon from "@/Components/Icons/FolderIcon.vue";
 import PlusIcon from "@/Components/Icons/PlusIcon.vue";
+import SearchIcon from "@/Components/Icons/SearchIcon.vue";
 import RocketIcon from "@/Components/Icons/RocketIcon.vue";
 import DownloadIcon from "@/Components/Icons/DownloadIcon.vue";
+import PackageIcon from "@/Components/Icons/PackageIcon.vue";
 import ConfirmModal from "@/Components/ConfirmModal.vue";
 import { formatRupiah } from "@/Utils/format";
 
 const props = defineProps({
     items: Object,
+    mode: {
+        type: String,
+        default: 'list'
+    },
+    institutions: Object,
+    institution: Object,
     stats: Object,
+    filters: Object,
+});
+
+const search = ref(props.filters?.search || "");
+
+let timeout = null;
+watch(search, (val) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        router.get(route(route().current()), { 
+            search: val,
+            institution_id: props.institution?.id 
+        }, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true
+        });
+    }, 500);
 });
 
 // Delete Confirmation Modal State
@@ -82,6 +108,20 @@ const handleImport = () => {
                     >
                         <FolderIcon className="w-4 h-4" /> Import
                     </button>
+
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input
+                            v-model="search"
+                            type="text"
+                            placeholder="Cari barang..."
+                            class="pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-pail-gold focus:border-pail-gold w-full sm:w-64 shadow-lg shadow-pail-gold/5 transition-all"
+                        />
+                        <div class="absolute left-3 top-2.5 text-gray-400">
+                             <SearchIcon className="w-4 h-4" />
+                        </div>
+                    </div>
+
                     <Link
                         :href="route('admin.items.create')"
                         class="px-6 py-3 bg-pail-gold text-white rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-pail-gold/20 font-black text-[10px] sm:text-xs uppercase tracking-widest flex items-center justify-center gap-2"
@@ -131,8 +171,51 @@ const handleImport = () => {
                     </div>
                 </div>
 
+                <!-- BREADCRUMB / TITLE FOR LIST MODE -->
+                <div v-if="mode === 'list'" class="flex items-center gap-2 mb-6">
+                    <Link :href="route('admin.items.index')" class="text-gray-400 hover:text-pail-gold transition-colors">
+                        <FolderIcon className="w-5 h-5" />
+                    </Link>
+                    <span class="text-gray-300">/</span>
+                    <span class="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tighter">{{ institution?.name }}</span>
+                    <span class="px-2 py-0.5 bg-pail-gold/10 text-pail-gold rounded text-xs font-black">{{ institution?.code }}</span>
+                </div>
+
+                <!-- FOLDER VIEW MODE -->
+                <div v-if="mode === 'folders'" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <Link 
+                        v-for="inst in institutions" 
+                        :key="inst.id" 
+                        :href="route('admin.items.index', { institution_id: inst.id })"
+                        class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group relative overflow-hidden flex flex-col items-center text-center cursor-pointer"
+                    >
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <FolderIcon className="w-24 h-24 text-pail-gold" />
+                        </div>
+                        
+                        <div class="w-16 h-16 bg-pail-gold/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-pail-gold group-hover:text-white transition-colors duration-300">
+                             <span class="text-xl font-black text-pail-gold group-hover:text-white">{{ inst.code.substring(0, 2) }}</span>
+                        </div>
+
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight mb-1 line-clamp-1 w-full">{{ inst.name }}</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">{{ inst.code }}</p>
+
+                        <div class="mt-auto px-4 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs font-black text-gray-600 dark:text-gray-400 group-hover:bg-pail-gold/10 group-hover:text-pail-gold transition-colors">
+                            {{ inst.items_count }} Items
+                        </div>
+                    </Link>
+                    
+                    <!-- Empty State for Folders -->
+                     <div v-if="institutions && institutions.length === 0" class="col-span-full py-20 text-center">
+                        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FolderIcon className="w-10 h-10 text-gray-300" />
+                        </div>
+                        <p class="text-gray-400 font-bold">Tidak ada lembaga ditemukan.</p>
+                    </div>
+                </div>
+
                 <!-- Desktop Table Master -->
-                <div class="hidden lg:block bg-white dark:bg-gray-800 shadow-2xl rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden backdrop-blur-sm">
+                <div v-if="mode === 'list'" class="hidden lg:block bg-white dark:bg-gray-800 shadow-2xl rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden backdrop-blur-sm">
                     <div class="p-6">
                         <table class="min-w-full border-separate border-spacing-y-3">
                             <thead>
@@ -212,7 +295,7 @@ const handleImport = () => {
                 </div>
 
                 <!-- Mobile Premium Card Engine -->
-                <div class="lg:hidden space-y-6">
+                <div v-if="mode === 'list'" class="lg:hidden space-y-6">
                     <div v-for="item in items.data" :key="item.id" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden group">
                         <div class="p-6">
                             <div class="flex items-center justify-between mb-4">
@@ -266,7 +349,9 @@ const handleImport = () => {
                 </div>
 
                 <!-- Pagination Engine -->
-                <Pagination :links="items.links" />
+                <div v-if="mode === 'list'">
+                    <Pagination :links="items.links" />
+                </div>
             </div>
         </div>
 

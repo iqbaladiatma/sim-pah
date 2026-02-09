@@ -10,17 +10,63 @@ use Illuminate\Support\Facades\DB;
 
 class ItemRequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('Admin/ItemRequests/Index', [
-            'requests' => ItemUpdateRequest::with(['user.institution', 'item'])->latest()->paginate(10),
-            'stats' => [
-                'pending' => ItemUpdateRequest::where('status', 'pending')->count(),
-                'approved' => ItemUpdateRequest::where('status', 'approved')->count(),
-                'rejected' => ItemUpdateRequest::where('status', 'rejected')->count(),
-                'total' => ItemUpdateRequest::count(),
-            ]
-        ]);
+        $stats = [
+            'pending' => ItemUpdateRequest::where('status', 'pending')->count(),
+            'approved' => ItemUpdateRequest::where('status', 'approved')->count(),
+            'rejected' => ItemUpdateRequest::where('status', 'rejected')->count(),
+            'total' => ItemUpdateRequest::count(),
+        ];
+
+        if ($request->has('institution_id') && $request->institution_id) {
+            $institution = \App\Models\Institution::findOrFail($request->institution_id);
+
+            $query = ItemUpdateRequest::with(['user.institution', 'item'])
+                ->whereHas('user', function ($q) use ($institution) {
+                    $q->where('institution_id', $institution->id);
+                });
+
+            if ($request->search) {
+                $query->where(function ($q) use ($request) {
+                    $q->whereHas('item', function ($sq) use ($request) {
+                        $sq->where('name', 'like', '%' . $request->search . '%');
+                    })->orWhereHas('user', function ($sq) use ($request) {
+                        $sq->where('name', 'like', '%' . $request->search . '%');
+                    });
+                });
+            }
+
+            return Inertia::render('Admin/ItemRequests/Index', [
+                'mode' => 'list',
+                'institution' => $institution,
+                'requests' => $query->latest()->paginate(10)->withQueryString(),
+                'filters' => $request->only(['search', 'institution_id']),
+                'stats' => $stats
+            ]);
+        } else {
+            // Folder view: Get institutions with pending request counts
+            $institutions = \App\Models\Institution::withCount([
+                'itemUpdateRequests' => function ($q) {
+                    $q->where('status', 'pending');
+                }
+            ])->get();
+
+            // Filter institutions by search if provided
+            if ($request->search) {
+                $institutions = $institutions->filter(function ($inst) use ($request) {
+                    return stripos($inst->name, $request->search) !== false ||
+                        stripos($inst->code, $request->search) !== false;
+                })->values();
+            }
+
+            return Inertia::render('Admin/ItemRequests/Index', [
+                'mode' => 'folders',
+                'institutions' => $institutions,
+                'filters' => $request->only(['search']),
+                'stats' => $stats
+            ]);
+        }
     }
 
     public function approve(ItemUpdateRequest $request)
@@ -35,8 +81,7 @@ class ItemRequestController extends Controller
 
             if ($request->type === 'delete') {
                 $request->item()->delete();
-            }
-            else {
+            } else {
                 // Update item stock
                 $item = $request->item;
                 $newStock = $request->new_data['stock'] ?? $item->stock;

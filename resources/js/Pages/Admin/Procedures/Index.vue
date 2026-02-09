@@ -9,7 +9,7 @@ import ClipboardCheckIcon from '@/Components/Icons/CheckCircleIcon.vue';
 import ToolsIcon from '@/Components/Icons/SettingsIcon.vue';
 import ExclamationIcon from '@/Components/Icons/InfoIcon.vue';
 import OfficeBuildingIcon from '@/Components/Icons/FolderIcon.vue';
-import SwitchHorizontalIcon from '@/Components/Icons/SparklesIcon.vue';
+import SwitchHorizontalIcon from '@/Components/Icons/SwitchHorizontalIcon.vue'; // Corrected
 import CashIcon from '@/Components/Icons/DiamondIcon.vue';
 import TrashIcon from '@/Components/Icons/TrashIcon.vue';
 import ShoppingCartIcon from '@/Components/Icons/PackageIcon.vue';
@@ -20,6 +20,11 @@ import TruckIcon from '@/Components/Icons/PackageIcon.vue';
 import ChipIcon from '@/Components/Icons/ZapIcon.vue';
 import IdentificationIcon from '@/Components/Icons/UserIcon.vue';
 import MapPinIcon from '@/Components/Icons/LocationIcon.vue';
+import RefreshIcon from '@/Components/Icons/RefreshIcon.vue'; // Corrected
+import ShieldCheckIcon from '@/Components/Icons/ShieldCheckIcon.vue'; // Corrected
+import DownloadIcon from '@/Components/Icons/DownloadIcon.vue'; // Added
+import UploadIcon from '@/Components/Icons/UploadIcon.vue'; // Added
+import ClipboardListIcon from '@/Components/Icons/ClipboardListIcon.vue'; // Added
 
 // Safe mapping for missing icons
 import DocumentIcon from '@/Components/Icons/DocumentIcon.vue';
@@ -57,18 +62,21 @@ const icons = {
     ClockIcon, 
     DesktopComputerIcon: ToolsIcon, 
     TagIcon: CashIcon, 
-    ShieldCheckIcon: ClipboardCheckIcon,
+    ShieldCheckIcon, // Corrected
     BoxIcon: LibraryIcon, 
     ArchiveIcon: InboxIcon,
     WindIcon: SparklesIcon,
     ColorSwatchIcon: SparklesIcon,
     FilterIcon: SparklesIcon,
     BeakerIcon: SparklesIcon,
-    RefreshIcon: SparklesIcon,
+    RefreshIcon, // Corrected
     ScaleIcon: SparklesIcon,
     KeyIcon: ToolsIcon,
     DocumentReportIcon: DocumentIcon,
     PresentationChartLineIcon: ToolsIcon,
+    DownloadIcon, // Added
+    UploadIcon, // Added
+    ClipboardListIcon, // Added
 };
 
 const props = defineProps({

@@ -22,6 +22,9 @@ use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\HeadingRowImport;
 use App\Exports\IsoProcedureExport;
+use App\Models\BudgetPlan;
+use App\Models\BudgetPlanItem;
+use App\Models\BudgetPlanAttachment;
 
 class UrtProcedureController extends Controller
 {
@@ -61,6 +64,8 @@ class UrtProcedureController extends Controller
         'penerimaan-barang' => ['title' => 'FORMULIR PENERIMAAN BARANG', 'model' => MaintenanceLog::class, 'type' => 'receiving', 'icon' => 'DownloadIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PENERIMAAN BARANG'],
         'penyerahan-barang' => ['title' => 'FORMULIR PENYERAHAN BARANG', 'model' => MaintenanceLog::class, 'type' => 'handover', 'icon' => 'UploadIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR PENYERAHAN BARANG'],
         'jadwal-token' => ['title' => 'FORMULIR JADWAL PENGISIAN TOKEN LISTRIK', 'model' => MaintenanceLog::class, 'type' => 'maintenance', 'category' => 'Token', 'icon' => 'KeyIcon', 'group' => 'logistik', 'sheet' => 'FORMULIR JADWAL PENGISIAN TOKEN'],
+        'rab-tahunan' => ['title' => 'RAB TAHUNAN', 'model' => BudgetPlan::class, 'type' => 'rab-tahunan', 'icon' => 'ClipboardListIcon', 'group' => 'logistik', 'sheet' => 'RAB TAHUNAN'],
+        'visi-2030' => ['title' => 'VISI 2030', 'model' => BudgetPlan::class, 'type' => 'visi-2030', 'icon' => 'SparklesIcon', 'group' => 'logistik', 'sheet' => 'VISI 2030'],
 
         // GROUP KEBERSIHAN
         'timeline-kebersihan' => ['title' => 'Timeline Pemeliharaan Kebersihan', 'model' => MaintenanceLog::class, 'type' => 'cleaning', 'icon' => 'ClockIcon', 'group' => 'kebersihan', 'sheet' => 'TIMELINE PEMELIHARAAN KEBERSIHA'],
@@ -260,6 +265,11 @@ class UrtProcedureController extends Controller
             }
         }
 
+        // Explicitly load items for BudgetPlan
+        if ($modelClass === BudgetPlan::class) {
+            $loadRelations[] = 'items';
+        }
+
         $query->with($loadRelations);
 
         // Sort by ID asc for checklist items to keep order
@@ -296,6 +306,10 @@ class UrtProcedureController extends Controller
         if (!isset($this->procedures[$type]))
             abort(404);
         $procedure = $this->procedures[$type];
+
+        if ($procedure['model'] === BudgetPlan::class) {
+            return $this->storeBudgetPlan($request, $type);
+        }
 
         $data = $request->all();
         $model = new $procedure['model'];
@@ -371,6 +385,11 @@ class UrtProcedureController extends Controller
         if (!isset($this->procedures[$type]))
             abort(404);
         $procedure = $this->procedures[$type];
+
+        if ($procedure['model'] === BudgetPlan::class) {
+            return $this->updateBudgetPlan($request, $type, $id);
+        }
+
         $model = $procedure['model']::findOrFail($id);
 
         $data = $request->all();
@@ -592,5 +611,130 @@ class UrtProcedureController extends Controller
             },
             "template-{$type}.xlsx"
         );
+    }
+
+    private function storeBudgetPlan(Request $request, $type)
+    {
+        $procedure = $this->procedures[$type];
+
+        $request->validate([
+            'title' => 'required|string',
+            'fiscal_year' => 'required|string',
+            'items' => 'required|array',
+            'items.*.description' => 'required|string',
+            'items.*.volume' => 'required|numeric',
+            'items.*.unit' => 'required|string',
+            'items.*.unit_price' => 'required|numeric',
+        ]);
+
+        $data = $request->all();
+        $data['type'] = $procedure['type'] ?? $type;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $request) {
+            $institutionId = $data['institution_id'] ?? auth()->user()->institution_id;
+            if (!$institutionId) {
+                throw new \Exception('Lembaga wajib dipilih.');
+            }
+
+            $plan = BudgetPlan::create([
+                'institution_id' => $institutionId,
+                'user_id' => auth()->id(),
+                'title' => $data['title'],
+                'fiscal_year' => $data['fiscal_year'],
+                'description' => $data['description'] ?? null,
+                'total_budget' => collect($data['items'])->sum(function ($i) {
+                    return $i['total_price'] ?? 0;
+                }),
+                'status' => 'pending',
+                'type' => $data['type'],
+            ]);
+
+            foreach ($data['items'] as $index => $itemData) {
+                // Remove attachments from itemData before creating
+                $cleanItemData = collect($itemData)->except(['attachments'])->toArray();
+                $item = $plan->items()->create($cleanItemData);
+
+                // Handle Attachments
+                if ($request->hasFile("items.{$index}.attachments")) {
+                    foreach ($request->file("items.{$index}.attachments") as $file) {
+                        $path = $file->store('budget-plans', 'public');
+                        $item->attachments()->create([
+                            'file_path' => $path,
+                            'file_type' => 'photo',
+                            'original_name' => $file->getClientOriginalName(),
+                        ]);
+                    }
+                }
+            }
+        });
+
+        return back()->with('success', 'Data berhasil disimpan.');
+    }
+
+    private function updateBudgetPlan(Request $request, $type, $id)
+    {
+        $plan = BudgetPlan::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string',
+            'fiscal_year' => 'required|string',
+            'items' => 'required|array',
+            'items.*.description' => 'required|string',
+            'items.*.volume' => 'required|numeric',
+            'items.*.unit' => 'required|string',
+            'items.*.unit_price' => 'required|numeric',
+        ]);
+
+        $data = $request->all();
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($plan, $data, $request) {
+            // Update Parent
+            $plan->update([
+                'title' => $data['title'],
+                'fiscal_year' => $data['fiscal_year'],
+                'description' => $data['description'] ?? null,
+                'total_budget' => collect($data['items'])->sum(function ($i) {
+                    return ($i['volume'] ?? 0) * ($i['unit_price'] ?? 0);
+                }),
+            ]);
+
+            // Handle Items
+            $existingIds = $plan->items()->pluck('id')->toArray();
+            $submittedIds = array_filter(array_column($data['items'], 'id'));
+
+            // Delete removed items
+            $toDelete = array_diff($existingIds, $submittedIds);
+            if (!empty($toDelete)) {
+                BudgetPlanItem::destroy($toDelete);
+            }
+
+            foreach ($data['items'] as $index => $itemData) {
+                // Ensure total_price is set
+                $itemData['total_price'] = ($itemData['volume'] * $itemData['unit_price']);
+
+                if (isset($itemData['id']) && in_array($itemData['id'], $existingIds)) {
+                    // Update
+                    $item = BudgetPlanItem::find($itemData['id']);
+                    $item->update($itemData);
+                } else {
+                    // Create
+                    $item = $plan->items()->create($itemData);
+                }
+
+                // Handle Attachments (Add only)
+                if ($request->hasFile("items.{$index}.attachments")) {
+                    foreach ($request->file("items.{$index}.attachments") as $file) {
+                        $path = $file->store('budget-plans', 'public');
+                        $item->attachments()->create([
+                            'file_path' => $path,
+                            'file_type' => 'photo',
+                            'original_name' => $file->getClientOriginalName(),
+                        ]);
+                    }
+                }
+            }
+        });
+
+        return back()->with('success', 'Data berhasil diperbarui.');
     }
 }

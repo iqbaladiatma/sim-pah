@@ -159,12 +159,24 @@ const distributionSlices = computed(() => {
                         Pantau kelengkapan dokumentasi ISO 9001:2015 dengan mudah
                     </p>
                 </div>
-                <Link :href="route('admin.procedures.index')" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 dark:bg-pail-gold text-white dark:text-gray-900 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black dark:hover:bg-yellow-500 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    Kelola Prosedur
-                </Link>
+                <div class="hidden sm:flex items-center gap-2">
+                    <a 
+                        :href="route('admin.procedures.export_all')" 
+                        target="_blank"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-900 dark:bg-gray-700 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-black transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Export Seluruh (Excel)
+                    </a>
+                    <Link :href="route('admin.procedures.index')" class="inline-flex items-center gap-2 px-5 py-2.5 bg-pail-gold text-white dark:text-gray-900 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-yellow-600 dark:hover:bg-yellow-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        Kelola Prosedur
+                    </Link>
+                </div>
             </div>
         </template>
 

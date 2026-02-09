@@ -7,8 +7,16 @@ import PlusIcon from "@/Components/Icons/PlusIcon.vue";
 import InboxIcon from "@/Components/Icons/InboxIcon.vue";
 import ZapIcon from "@/Components/Icons/ZapIcon.vue";
 
+import FolderIcon from "@/Components/Icons/FolderIcon.vue";
+
 const props = defineProps({
     requests: Object,
+    mode: {
+        type: String,
+        default: 'list'
+    },
+    institutions: Object, // For folder view
+    institution: Object, // For list view
     stats: Object,
     filters: Object,
 });

@@ -11,10 +11,20 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $query = User::with('institution');
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::with('institution')->latest()->paginate(100),
+            'users' => $query->latest()->paginate(100)->withQueryString(),
+            'filters' => $request->only(['search']),
             'stats' => [
                 'total' => User::count(),
                 'admins' => User::whereIn('role', ['admin', 'super admin'])->count(),

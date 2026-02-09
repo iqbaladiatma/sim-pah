@@ -178,7 +178,11 @@ const submit = () => {
                                     <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-1 flex items-center gap-2">
                                         <UserIcon className="w-3 h-3" /> Nama Penanggung Jawab
                                     </label>
-                                    <input v-model="form.responsible_person" type="text" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-black px-6" placeholder="Petugas URT / Lembaga" />
+                                    <select v-model="form.responsible_person" class="w-full h-14 border-gray-100 rounded-2xl bg-gray-50/50 dark:bg-gray-900 dark:border-gray-700 text-sm focus:ring-pail-gold focus:border-pail-gold font-black px-6 uppercase tracking-widest">
+                                        <option value="">- Pilih -</option>
+                                        <option value="Admin">Admin</option>
+                                        <option value="Admin URT">Admin URT</option>
+                                    </select>
                                     <div v-if="form.errors.responsible_person" class="text-red-500 text-[10px] font-black uppercase mt-2 ml-1">{{ form.errors.responsible_person }}</div>
                                 </div>
 

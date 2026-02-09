@@ -39,6 +39,9 @@ class IsoProcedureExport implements WithEvents
     // A more direct approach using PhpSpreadsheet for maximum control over the template
     public static function download($type, $procedureData)
     {
+        ini_set('memory_limit', '1024M');
+        set_time_limit(300);
+
         $templatePath = public_path('FORMISOPROSEDUR.xlsx');
         $spreadsheet = IOFactory::load($templatePath);
 
@@ -47,8 +50,16 @@ class IsoProcedureExport implements WithEvents
             $sheet = $spreadsheet->getSheetByName($sheetName);
 
             // Fill data based on model type
-            $model = $procedureData['model'];
-            $query = $model::query();
+            $modelClass = $procedureData['model'];
+            $query = $modelClass::query();
+
+            // Eager load common relations to avoid N+1
+            $availableRelations = ['institution', 'room', 'vehicle', 'performer', 'user'];
+            foreach ($availableRelations as $relation) {
+                if (method_exists($modelClass, $relation)) {
+                    $query->with($relation);
+                }
+            }
 
             if (isset($procedureData['type'])) {
                 $query->where('type', $procedureData['type']);
@@ -57,7 +68,12 @@ class IsoProcedureExport implements WithEvents
                 $query->where('category', $procedureData['category']);
             }
 
-            $data = $query->latest()->get();
+            try {
+                $data = $query->latest()->limit(500)->get();
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("ISO Export Query Error: " . $e->getMessage());
+                $data = collect();
+            }
 
             // LOGIC TO MAP DATA TO TEMPLATE
             // This varies by sheet. For now, let's start with a generic row filling starting at a common row (e.g., row 10)
@@ -67,9 +83,8 @@ class IsoProcedureExport implements WithEvents
                 $currentRow = $startRow + $index;
                 $sheet->setCellValue('A' . $currentRow, $index + 1);
 
-                if ($model === MaintenanceLog::class) {
+                if ($modelClass === MaintenanceLog::class) {
                     if (str_contains($sheetName, 'PEMELIHARAAN GEDUNG')) {
-                        // ... (keep existing gedun logic)
                         $sheet->setCellValue('B' . $currentRow, $item->title);
                         $sheet->setCellValue('C' . $currentRow, $item->check_standard);
                         $sheet->setCellValue('D' . $currentRow, $item->check_method);
@@ -82,9 +97,9 @@ class IsoProcedureExport implements WithEvents
                         }
 
                         if ($index === 0) {
-                            $sheet->setCellValue('H3', $item->subcategory); // Gedung
-                            $sheet->setCellValue('H4', $item->location);    // Lokasi
-                            $sheet->setCellValue('H5', $item->year);        // Tahun
+                            $sheet->setCellValue('H3', $item->subcategory);
+                            $sheet->setCellValue('H4', $item->location);
+                            $sheet->setCellValue('H5', $item->year);
                         }
                     } elseif (str_contains($sheetName, 'PEMELIHARAAN POMPA') || str_contains($sheetName, 'PEMELIHARAAN AIR BERSI') || str_contains($sheetName, 'PEMELIHARAAN AIR MINUM') || str_contains($sheetName, 'PEMELIHARAAN GENSET')) {
                         $sheet->setCellValue('B' . $currentRow, $item->title);
@@ -93,18 +108,15 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('E' . $currentRow, $item->check_frequency);
 
                         $months = ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun'];
-
-                        // Decision on areas based on type
                         if (str_contains($sheetName, 'PEMELIHARAAN AIR MINUM') || str_contains($sheetName, 'PEMELIHARAAN GENSET')) {
-                            $areas = ['putra', 'putri']; // Mapping to Pkn1/Pkn2 for Genset
+                            $areas = ['putra', 'putri'];
                         } elseif (str_contains($sheetName, 'PEMELIHARAAN POMPA')) {
                             $areas = ['putra', 'putri', 'lawata'];
                         } else {
-                            $areas = ['lawata', 'putra', 'putri']; // For Air Bersih
+                            $areas = ['lawata', 'putra', 'putri'];
                         }
 
-                        $colIdx = 5; // Starting Cell F is index 5 (0-based)
-
+                        $colIdx = 5;
                         foreach ($months as $m) {
                             foreach ($areas as $a) {
                                 $colLetter = Coordinate::stringFromColumnIndex($colIdx + 1);
@@ -115,8 +127,8 @@ class IsoProcedureExport implements WithEvents
 
                         if ($index === 0) {
                             if (str_contains($sheetName, 'PEMELIHARAAN GENSET')) {
-                                $sheet->setCellValue('B4', $item->subcategory); // Kegiatan
-                                $sheet->setCellValue('B5', $item->serial_number); // No Mesin
+                                $sheet->setCellValue('B4', $item->subcategory);
+                                $sheet->setCellValue('B5', $item->serial_number);
                                 $sheet->setCellValue('B6', $item->location);
                                 $sheet->setCellValue('H7', $item->year);
                             } else {
@@ -175,19 +187,6 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('H' . $currentRow, $item->action_taken);
                         $sheet->setCellValue('I' . $currentRow, $item->after_condition);
                         $sheet->setCellValue('J' . $currentRow, $item->performer?->name ?? 'Staff URT');
-                    } elseif (str_contains($sheetName, 'LAPORAN PEMELIHARAAN SARPRAS')) {
-                        $sheet->setCellValue('B' . $currentRow, $item->title);
-                        $sheet->setCellValue('C' . $currentRow, $item->check_standard); // Jenis Pekerjaan
-                        $sheet->setCellValue('D' . $currentRow, $item->room?->name ?? $item->location);
-                        $sheet->setCellValue('E' . $currentRow, $item->before_condition);
-                        $sheet->setCellValue('F' . $currentRow, $item->action_taken);
-                        $sheet->setCellValue('G' . $currentRow, $item->after_condition);
-                        $sheet->setCellValue('H' . $currentRow, $item->performer?->name ?? 'Staff URT');
-                        $sheet->setCellValue('I' . $currentRow, $item->description);
-
-                        if ($index === 0) {
-                            $sheet->setCellValue('B3', $item->subcategory); // Pemeliharaan : ...
-                        }
                     } elseif (str_contains($sheetName, 'JADWAL AGENDA PERBAIKAN SARPRAS')) {
                         $sheet->setCellValue('B' . $currentRow, $item->title);
                         $sheet->setCellValue('C' . $currentRow, strtoupper($item->status ?? 'PENDING'));
@@ -229,9 +228,8 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('H' . $currentRow, $item->performer?->name ?? 'Staff URT');
                         $sheet->setCellValue('I' . $currentRow, $item->description);
                     }
-                } elseif ($model === Item::class) {
+                } elseif ($modelClass === Item::class) {
                     if (str_contains($sheetName, 'BUKU INDUK')) {
-                        // NO | SATKER | RUANGAN | JENIS | MERK | MERK | TGL | NO URUT | KODE | NO PONDOK | QTY | SATUAN | SUMBER | TGL SERAH | KONDISI | HARGA | PENYUSUTAN | PJ | KET
                         $sheet->setCellValue('B' . $currentRow, $item->institution?->name);
                         $sheet->setCellValue('C' . $currentRow, $item->room?->name);
                         $sheet->setCellValue('D' . $currentRow, $item->name);
@@ -251,7 +249,6 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('R' . $currentRow, $item->responsible_person);
                         $sheet->setCellValue('S' . $currentRow, $item->note);
                     } elseif (str_contains($sheetName, 'KARTU INVENTARIS RUANGAN')) {
-                        // A: No, B: Nama, C: Merk/Kode, D: No. Seri, E: Ukuran, F: Bahan, G: Tahun, H: No Kode, I: Jumlah, J: Baik, K: KB, L: RB, M: Ket
                         $sheet->setCellValue('B' . $currentRow, $item->name);
                         $sheet->setCellValue('C' . $currentRow, $item->brand);
                         $sheet->setCellValue('D' . $currentRow, $item->serial_number);
@@ -261,7 +258,6 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('H' . $currentRow, $item->code);
                         $sheet->setCellValue('I' . $currentRow, $item->stock);
 
-                        // Condition mapping (J, K, L)
                         if ($item->condition === 'B')
                             $sheet->setCellValue('J' . $currentRow, 'V');
                         if ($item->condition === 'KB')
@@ -279,13 +275,10 @@ class IsoProcedureExport implements WithEvents
                             $sheet->setCellValue('D7', $item->room?->name);
                         }
                     } else {
-                        // FORMULIR LAPORAN ASET PAH MATARAM
-                        // No | SATUAN KERJA | JUMLAH ASET | SATUAN | Kondisi | Tgl Cek | Petugas | NILAI | KET
                         $sheet->setCellValue('B' . $currentRow, $item->institution?->name);
                         $sheet->setCellValue('C' . $currentRow, $item->stock);
                         $sheet->setCellValue('D' . $currentRow, $item->unit);
 
-                        // Condition mapping for Laporan Aset (E, F, G)
                         if ($item->condition === 'B')
                             $sheet->setCellValue('E' . $currentRow, 'V');
                         if ($item->condition === 'KB')
@@ -359,18 +352,44 @@ class IsoProcedureExport implements WithEvents
             }
         }
 
-        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-        $fileName = "ISO-{$type}-" . date('YmdHis') . ".xlsx";
-        $tempFile = tempnam(sys_get_temp_dir(), 'excel');
-        $writer->save($tempFile);
+        if (ob_get_length())
+            ob_end_clean();
 
-        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+        try {
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $writer->setPreCalculateFormulas(false);
+            $fileName = "ISO-REKAP-" . strtoupper($type) . "-" . date('YmdHis') . ".xlsx";
+            $tempFile = tempnam(sys_get_temp_dir(), 'excel');
+            $writer->save($tempFile);
+
+            return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("ISO Export Save Error: " . $e->getMessage());
+            return back()->with('error', 'Gagal membuat file export: ' . $e->getMessage());
+        }
     }
 
     public static function downloadAll()
     {
+        // Aggressive memory and time management
+        @ini_set('memory_limit', '-1');
+        @set_time_limit(0);
+
+        if (function_exists('gc_enable')) {
+            gc_enable();
+        }
+
         $templatePath = public_path('FORMISOPROSEDUR.xlsx');
-        $spreadsheet = IOFactory::load($templatePath);
+        if (!file_exists($templatePath)) {
+            throw new \Exception("Template file not found at: " . $templatePath);
+        }
+
+        try {
+            $spreadsheet = IOFactory::load($templatePath);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("ISO Export Load Error: " . $e->getMessage());
+            throw $e;
+        }
 
         // Use the UrtProcedureController's procedures mapping
         $controller = new \App\Http\Controllers\Admin\UrtProcedureController();
@@ -379,13 +398,29 @@ class IsoProcedureExport implements WithEvents
         $property->setAccessible(true);
         $procedures = $property->getValue($controller);
 
+        $processedSheets = [];
+
         foreach ($procedures as $type => $procedureData) {
             $sheetName = $procedureData['sheet'] ?? null;
-            if ($sheetName && $spreadsheet->sheetNameExists($sheetName)) {
+            if ($sheetName && !in_array($sheetName, $processedSheets) && $spreadsheet->sheetNameExists($sheetName)) {
+                $processedSheets[] = $sheetName;
                 $sheet = $spreadsheet->getSheetByName($sheetName);
 
-                $model = $procedureData['model'];
-                $query = $model::query();
+                $modelClass = $procedureData['model'];
+                if (!class_exists($modelClass)) {
+                    \Illuminate\Support\Facades\Log::warning("ISO Export: Model class {$modelClass} not found. Skipping.");
+                    continue;
+                }
+
+                $query = $modelClass::query();
+
+                // Eager load common relations
+                $availableRelations = ['institution', 'room', 'vehicle', 'performer', 'user'];
+                foreach ($availableRelations as $relation) {
+                    if (method_exists($modelClass, $relation)) {
+                        $query->with($relation);
+                    }
+                }
 
                 if (isset($procedureData['type']))
                     $query->where('type', $procedureData['type']);
@@ -399,7 +434,7 @@ class IsoProcedureExport implements WithEvents
                     $currentRow = $startRow + $index;
                     $sheet->setCellValue('A' . $currentRow, $index + 1);
 
-                    if ($model === MaintenanceLog::class) {
+                    if ($modelClass === MaintenanceLog::class) {
                         if (str_contains($sheetName, 'PEMELIHARAAN GEDUNG')) {
                             $sheet->setCellValue('B' . $currentRow, $item->title);
                             $sheet->setCellValue('C' . $currentRow, $item->check_standard);
@@ -508,6 +543,7 @@ class IsoProcedureExport implements WithEvents
                         } elseif (str_contains($sheetName, 'LAPORAN PEMELIHARAAN SARPRAS')) {
                             $sheet->setCellValue('B' . $currentRow, $item->title);
                             $sheet->setCellValue('C' . $currentRow, $item->check_standard);
+                            $sheet->setCellValue('C' . $currentRow, $item->check_standard);
                             $sheet->setCellValue('D' . $currentRow, $item->room?->name ?? $item->location);
                             $sheet->setCellValue('E' . $currentRow, $item->before_condition);
                             $sheet->setCellValue('F' . $currentRow, $item->action_taken);
@@ -518,6 +554,56 @@ class IsoProcedureExport implements WithEvents
                             if ($index === 0) {
                                 $sheet->setCellValue('B3', $item->subcategory);
                             }
+                        } elseif (str_contains($sheetName, 'FORM KEGIATAN PEKANAN PETUGAS')) {
+                            $sheet->setCellValue('B' . $currentRow, $item->week_name);
+                            $sheet->setCellValue('C' . $currentRow, $item->performer?->name);
+                            $sheet->setCellValue('D' . $currentRow, $item->room?->name ?? $item->location);
+                            $sheet->setCellValue('E' . $currentRow, $item->title);
+                            $sheet->setCellValue('F' . $currentRow, $item->scheduled_at);
+                            $sheet->setCellValue('G' . $currentRow, $item->is_checked ? 'V' : '');
+                            $sheet->setCellValue('H' . $currentRow, $item->description);
+                            $sheet->setCellValue('I' . $currentRow, $item->responsible_person);
+                        } elseif (str_contains($sheetName, 'PEMELIHARAAN POMPA') || str_contains($sheetName, 'PEMELIHARAAN AIR BERSI') || str_contains($sheetName, 'PEMELIHARAAN AIR MINUM') || str_contains($sheetName, 'PEMELIHARAAN GENSET')) {
+                            $sheet->setCellValue('B' . $currentRow, $item->title);
+                            $sheet->setCellValue('C' . $currentRow, $item->check_standard);
+                            $sheet->setCellValue('D' . $currentRow, $item->check_method);
+                            $sheet->setCellValue('E' . $currentRow, $item->check_frequency);
+
+                            $months = ['jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun'];
+                            if (str_contains($sheetName, 'PEMELIHARAAN AIR MINUM') || str_contains($sheetName, 'PEMELIHARAAN GENSET')) {
+                                $areas = ['putra', 'putri'];
+                            } elseif (str_contains($sheetName, 'PEMELIHARAAN POMPA')) {
+                                $areas = ['putra', 'putri', 'lawata'];
+                            } else {
+                                $areas = ['lawata', 'putra', 'putri'];
+                            }
+
+                            $colIdx = 5;
+                            foreach ($months as $m) {
+                                foreach ($areas as $a) {
+                                    $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx + 1);
+                                    $sheet->setCellValue($colLetter . $currentRow, $item->{$m . '_' . $a});
+                                    $colIdx++;
+                                }
+                            }
+                        } elseif (str_contains($sheetName, 'PEMELIHARAAN KIPAS ANG')) {
+                            $sheet->setCellValue('B' . $currentRow, $item->completed_at);
+                            $sheet->setCellValue('C' . $currentRow, $item->room?->name ?? $item->location);
+                            $sheet->setCellValue('D' . $currentRow, $item->fan_type);
+                            $sheet->setCellValue('E' . $currentRow, $item->subcategory);
+                            $sheet->setCellValue('F' . $currentRow, $item->before_condition === 'B' ? 'BAGUS' : 'RUSAK');
+                            $sheet->setCellValue('G' . $currentRow, $item->action_taken);
+                            $sheet->setCellValue('H' . $currentRow, $item->performer?->name ?? 'Staff URT');
+                        } elseif (str_contains($sheetName, 'PEMELIHARAAN SEPTIK TA')) {
+                            $sheet->setCellValue('B' . $currentRow, $item->completed_at);
+                            $sheet->setCellValue('C' . $currentRow, $item->room?->name ?? $item->location);
+                            $sheet->setCellValue('D' . $currentRow, $item->st_baik);
+                            $sheet->setCellValue('E' . $currentRow, $item->st_penuh);
+                            $sheet->setCellValue('F' . $currentRow, $item->st_bocor);
+                            $sheet->setCellValue('G' . $currentRow, $item->st_bau);
+                            $sheet->setCellValue('H' . $currentRow, $item->action_taken);
+                            $sheet->setCellValue('I' . $currentRow, $item->after_condition);
+                            $sheet->setCellValue('J' . $currentRow, $item->performer?->name ?? 'Staff URT');
                         } elseif (str_contains($sheetName, 'JADWAL AGENDA PERBAIKAN SARPRAS')) {
                             $sheet->setCellValue('B' . $currentRow, $item->title);
                             $sheet->setCellValue('C' . $currentRow, strtoupper($item->status ?? 'PENDING'));
@@ -557,7 +643,7 @@ class IsoProcedureExport implements WithEvents
                             $sheet->setCellValue('H' . $currentRow, $item->performer?->name ?? 'Staff URT');
                             $sheet->setCellValue('I' . $currentRow, $item->description);
                         }
-                    } elseif ($model === Item::class) {
+                    } elseif ($modelClass === Item::class) {
                         if (str_contains($sheetName, 'BUKU INDUK')) {
                             $sheet->setCellValue('B' . $currentRow, $item->institution?->name);
                             $sheet->setCellValue('C' . $currentRow, $item->room?->name);
@@ -592,7 +678,6 @@ class IsoProcedureExport implements WithEvents
                             if ($item->condition === 'RB') $sheet->setCellValue('L' . $currentRow, 'V');
 
                             $sheet->setCellValue('M' . $currentRow, $item->note);
-
                             if ($index === 0) {
                                 $sheet->setCellValue('D3', 'NUSA TENGGARA BARAT');
                                 $sheet->setCellValue('D4', 'KOTA MATARAM');

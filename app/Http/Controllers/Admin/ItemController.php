@@ -13,21 +13,47 @@ class ItemController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Item::with(['institution', 'room']);
+        if ($request->has('institution_id') && $request->institution_id) {
+            $institution = \App\Models\Institution::findOrFail($request->institution_id);
+            $query = Item::with(['institution', 'room'])
+                ->where('institution_id', $institution->id);
 
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            if ($request->has('search')) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            }
+
+            return Inertia::render('Admin/Items/Index', [
+                'mode' => 'list',
+                'institution' => $institution,
+                'items' => $query->latest()->paginate(10)->withQueryString(),
+                'filters' => $request->only(['search', 'institution_id']),
+                'stats' => [
+                    'total_items' => Item::where('institution_id', $institution->id)->count(),
+                    'total_stock' => Item::where('institution_id', $institution->id)->sum('stock'),
+                    'low_stock' => Item::where('institution_id', $institution->id)->whereColumn('stock', '<=', 'min_stock')->count(),
+                    'total_value' => 0
+                ]
+            ]);
+        } else {
+            $query = \App\Models\Institution::withCount('items');
+
+            if ($request->has('search')) {
+                $query->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('code', 'like', '%' . $request->search . '%');
+            }
+
+            return Inertia::render('Admin/Items/Index', [
+                'mode' => 'folders',
+                'institutions' => $query->get(),
+                'filters' => $request->only(['search']),
+                'stats' => [
+                    'total_items' => Item::count(),
+                    'total_stock' => Item::sum('stock'),
+                    'low_stock' => Item::whereColumn('stock', '<=', 'min_stock')->count(),
+                    'total_value' => 0
+                ]
+            ]);
         }
-
-        return Inertia::render('Admin/Items/Index', [
-            'items' => $query->latest()->paginate(10),
-            'stats' => [
-                'total_items' => Item::count(),
-                'total_stock' => Item::sum('stock'),
-                'low_stock' => Item::whereColumn('stock', '<=', 'min_stock')->count(),
-                'total_value' => 0 // 'price' column does not exist in items table.
-            ]
-        ]);
     }
 
     public function create()

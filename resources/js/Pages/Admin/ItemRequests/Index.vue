@@ -1,12 +1,37 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm } from "@inertiajs/vue3";
-import { ref } from "vue";
+import { Head, useForm, router, Link } from "@inertiajs/vue3";
+import { ref, watch } from "vue";
 import ConfirmModal from "@/Components/ConfirmModal.vue";
+import FolderIcon from "@/Components/Icons/FolderIcon.vue";
 
-defineProps({
+const props = defineProps({
     requests: Object,
+    mode: {
+        type: String,
+        default: 'list'
+    },
+    institutions: Object, // For folder view
+    institution: Object, // For list view
     stats: Object,
+    filters: Object,
+});
+
+const search = ref(props.filters?.search || "");
+
+let timeout = null;
+watch(search, (val) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        router.get(route(route().current()), { 
+            search: val,
+            institution_id: props.institution?.id 
+        }, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true
+        });
+    }, 500);
 });
 
 const form = useForm({});
@@ -63,12 +88,34 @@ const closeRejectModal = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-4 sm:px-0">
                 <div>
                     <h2 class="text-xl font-black leading-tight text-gray-800 dark:text-gray-200 uppercase tracking-tighter">
                         Audit & Validasi Stok
                     </h2>
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mt-1">Gudang Pusat v2.0</p>
+                </div>
+                <!-- Search Input -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full md:w-auto">
+                    <Link
+                        v-if="mode === 'list'"
+                        :href="route('admin.item_requests.index')"
+                        class="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-all font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                    >
+                        <FolderIcon className="w-4 h-4" /> Kembali
+                    </Link>
+
+                    <div class="relative w-full md:w-auto">
+                        <input
+                            v-model="search"
+                            type="text"
+                            :placeholder="mode === 'list' ? 'Cari request...' : 'Cari lembaga...'"
+                            class="pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-pail-gold focus:border-pail-gold w-full sm:w-64 shadow-lg shadow-pail-gold/5 transition-all"
+                        />
+                        <div class="absolute left-3 top-2.5 text-gray-400">
+                                <SearchIcon className="w-4 h-4" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </template>
@@ -113,7 +160,51 @@ const closeRejectModal = () => {
                 </div>
 
                 <!-- Main Content Canvas -->
-                <div class="bg-white dark:bg-gray-800 rounded-[3rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden">
+                
+                <!-- BREADCRUMB / TITLE FOR LIST MODE -->
+                <div v-if="mode === 'list'" class="flex items-center gap-2 mb-6">
+                    <Link :href="route('admin.item_requests.index')" class="text-gray-400 hover:text-pail-gold transition-colors">
+                        <FolderIcon className="w-5 h-5" />
+                    </Link>
+                    <span class="text-gray-300">/</span>
+                    <span class="text-xl font-black text-gray-800 dark:text-white uppercase tracking-tighter">{{ institution?.name }}</span>
+                    <span class="px-2 py-0.5 bg-pail-gold/10 text-pail-gold rounded text-xs font-black">{{ institution?.code }}</span>
+                </div>
+
+                <!-- FOLDER VIEW MODE -->
+                <div v-if="mode === 'folders'" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                    <Link 
+                        v-for="inst in institutions" 
+                        :key="inst.id" 
+                        :href="route('admin.item_requests.index', { institution_id: inst.id })"
+                        class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:scale-[1.02] transition-all duration-300 group relative overflow-hidden flex flex-col items-center text-center cursor-pointer"
+                    >
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <FolderIcon className="w-24 h-24 text-pail-gold" />
+                        </div>
+                        
+                        <div class="w-16 h-16 bg-pail-gold/10 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-pail-gold group-hover:text-white transition-colors duration-300">
+                             <span class="text-xl font-black text-pail-gold group-hover:text-white">{{ inst.code.substring(0, 2) }}</span>
+                        </div>
+
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight mb-1 line-clamp-1 w-full">{{ inst.name }}</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">{{ inst.code }}</p>
+
+                        <div class="mt-auto px-4 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs font-black text-gray-600 dark:text-gray-400 group-hover:bg-pail-gold/10 group-hover:text-pail-gold transition-colors">
+                            {{ inst.item_update_requests_count }} Pending Requests
+                        </div>
+                    </Link>
+                    
+                    <!-- Empty State for Folders -->
+                     <div v-if="institutions && institutions.length === 0" class="col-span-full py-20 text-center">
+                        <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FolderIcon className="w-10 h-10 text-gray-300" />
+                        </div>
+                        <p class="text-gray-400 font-bold">Tidak ada lembaga ditemukan.</p>
+                    </div>
+                </div>
+
+                <div v-if="mode === 'list'" class="bg-white dark:bg-gray-800 rounded-[3rem] shadow-2xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div class="p-10 border-b border-gray-50 dark:border-gray-700/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div>
                             <h3 class="text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">Daftar Audit Menunggu</h3>
@@ -181,6 +272,7 @@ const closeRejectModal = () => {
                         <p class="text-sm text-gray-400 font-medium">Tidak ada antrian validasi stok. Pekerjaan bagus!</p>
                     </div>
                 </div>
+                
             </div>
         </div>
 

@@ -12,19 +12,49 @@ use App\Imports\RoomImport;
 
 class RoomController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $totalRooms = Room::count();
         $latestRoom = Room::latest()->first();
 
-        return Inertia::render('Admin/Rooms/Index', [
-            'rooms' => Room::with('institution')->latest()->paginate(50),
-            'institutions' => Institution::all(),
-            'stats' => [
-                'total' => $totalRooms,
-                'latest' => $latestRoom ? $latestRoom->name : '-',
-            ],
-        ]);
+        if ($request->has('institution_id') && $request->institution_id) {
+            $institution = Institution::findOrFail($request->institution_id);
+            $query = Room::with('institution')->where('institution_id', $institution->id);
+
+            if ($request->search) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            return Inertia::render('Admin/Rooms/Index', [
+                'mode' => 'list',
+                'institution' => $institution,
+                'rooms' => $query->latest()->paginate(50)->withQueryString(),
+                'filters' => $request->only(['search', 'institution_id']),
+                'stats' => [
+                    'total' => Room::where('institution_id', $institution->id)->count(),
+                    'latest' => Room::where('institution_id', $institution->id)->latest()->first()->name ?? '-',
+                ],
+            ]);
+        } else {
+            $query = Institution::withCount('rooms');
+
+            if ($request->search) {
+                $query->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('code', 'like', '%' . $request->search . '%');
+            }
+
+            return Inertia::render('Admin/Rooms/Index', [
+                'mode' => 'folders',
+                'institutions' => $query->get(),
+                'filters' => $request->only(['search']),
+                'stats' => [
+                    'total' => $totalRooms,
+                    'latest' => $latestRoom ? $latestRoom->name : '-',
+                ],
+            ]);
+        }
     }
 
     public function showImport()

@@ -7,11 +7,20 @@ use Illuminate\Http\Request;
 
 class InstitutionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $institutions = \App\Models\Institution::latest()->paginate(10);
+        $query = \App\Models\Institution::query();
+
+        if ($request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                ->orWhere('code', 'like', '%' . $request->search . '%');
+        }
+
+        $institutions = $query->latest()->paginate(10)->withQueryString();
+
         return inertia('Admin/Institutions/Index', [
             'institutions' => $institutions,
+            'filters' => $request->only(['search']),
             'stats' => [
                 'total' => \App\Models\Institution::count(),
                 'new_this_month' => \App\Models\Institution::whereMonth('created_at', now()->month)->count(),

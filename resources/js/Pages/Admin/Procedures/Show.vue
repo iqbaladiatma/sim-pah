@@ -12,6 +12,7 @@ import PencilIcon from '@/Components/Icons/EditIcon.vue';
 import PhotographIcon from '@/Components/Icons/SparklesIcon.vue';
 import XIcon from '@/Components/Icons/XIcon.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import BudgetPlanForm from './Partials/BudgetPlanForm.vue';
 import ConfirmModal from "@/Components/ConfirmModal.vue";
 import Modal from "@/Components/Modal.vue";
 import ImportMappingModal from "@/Components/ImportMappingModal.vue";
@@ -69,6 +70,7 @@ const tableColspan = computed(() => {
     if (t === 'penggunaan-kendaraan') return 8;
     if (t === 'parkir-area') return 8;
     if (t === 'ceklist-iso') return 7;
+    if (['rab-tahunan', 'visi-2030'].includes(t)) return 6;
     if (t.includes('kendaraan')) return 5;
     return 7; // default
 });
@@ -690,11 +692,19 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
         <div class="py-6 sm:py-10">
             <div class="max-w-7xl mx-auto">
                 <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                    <!-- Desktop Table View -->
-                    <div class="hidden md:block overflow-x-auto border-b border-gray-100 dark:border-gray-700">
-                <table class="w-full text-left border-collapse min-w-max">
+                    <!-- Standard Table View with Horizontal Scroll -->
+                    <div class="overflow-x-auto border-b border-gray-100 dark:border-gray-700">
+                <table class="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                         <!-- Row 1 for Specialized & Double Headers -->
+                        <tr v-if="['rab-tahunan', 'visi-2030'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left sticky left-0 bg-white dark:bg-gray-800 z-20 shadow-[10px_0_15px_-10px_rgba(0,0,0,0.1)] border-r dark:border-gray-700">Aksi</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Judul Dokumen</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Tahun</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Lembaga</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-left">Total Anggaran</th>
+                            <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+                        </tr>
                         <tr v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-ac', 'pemeliharaan-kamar-mandi', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'agenda-perbaikan', 'monitoring-aset', 'pemeliharaan-listrik'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                             <template v-if="['pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)">
                                 <th rowspan="2" v-if="!['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type)" class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center">No.</th>
@@ -1515,6 +1525,16 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                              <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap">Status</th>
                              <th class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
                          </tr>
+                        <!-- Standard Row for Other Types -->
+                        <tr v-if="!['rab-tahunan', 'visi-2030', 'pendataan-aset', 'kir-ruangan', 'pemeliharaan-gedung', 'pemeliharaan-kamar-mandi', 'pemeliharaan-ac', 'pemeliharaan-kipas', 'pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-septik', 'pemeliharaan-sarpras', 'rekapan-pengajuan', 'laporan-proyek', 'peminjaman-barang', 'pelelangan-aset', 'berita-acara-pemeriksaan', 'pengadaan-sarpras', 'analisis-kebutuhan', 'pengajuan-rab', 'penerimaan-barang', 'penyerahan-barang', 'jadwal-token', 'pemeliharaan-kebersihan', 'jadwal-kebersihan', 'kelengkapan-alat', 'monitoring-kebersihan', 'detailed-monitoring', 'weekly-activity', 'vehicle-log', 'electrical-maintenance', 'monitoring-aset', 'parkir-area', 'penggunaan-kendaraan', 'ceklist-iso', 'agenda-perbaikan'].includes(type)" class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
+                            <!-- Dynamic Headers based on Type -->
+                            <template v-if="type.includes('kendaraan')">
+                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Armada / Plat</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest">Detail & Merk</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Status</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Manajemen</th>
+                            </template>
+
 
                         <template v-else-if="type === 'buku-induk' || type === 'berita-acara-pemeriksaan'">
                                 <th class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap">No.</th>
@@ -1551,8 +1571,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                             
                             <th v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan'" class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Nilai / Sumber</th>
                             <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
-                            <th v-if="type !== 'buku-induk' && type !== 'pendataan-aset' && type !== 'kir-ruangan'" class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Nilai / Sumber</th>
-                            <th class="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Manajemen</th>
+
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
@@ -1635,6 +1654,28 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                         :class="item.is_active ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'">
                                         {{ item.is_active ? 'Aktif' : 'Non-Aktif' }}
                                     </span>
+                                </td>
+                            </template>
+
+                            <!-- Specialized Content for Analisis / RAB -->
+                            <template v-else-if="['rab-tahunan', 'visi-2030'].includes(type)">
+                                <td class="px-6 py-4 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.title }}</td>
+                                <td class="px-6 py-4 text-[10px] font-black text-gray-400 font-mono">{{ item.fiscal_year }}</td>
+                                <td class="px-6 py-4 text-[10px] font-black text-gray-900 dark:text-white uppercase">{{ item.institution?.name || '-' }}</td>
+                                <td class="px-6 py-4 text-[10px] font-black text-pail-gold font-mono">Rp {{ Number(item.total_budget || 0).toLocaleString('id-ID') }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border"
+                                        :class="item.status === 'approved' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-yellow-50 text-yellow-600 border-yellow-100'">
+                                        {{ item.status }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button @click="openEditModal(item)" class="text-gray-400 hover:text-pail-gold transition-colors mr-2">
+                                        <PencilIcon class="w-4 h-4" />
+                                    </button>
+                                    <button @click="confirmDelete(item.id)" class="text-gray-400 hover:text-red-500 transition-colors">
+                                        <TrashIcon class="w-4 h-4" />
+                                    </button>
                                 </td>
                             </template>
 
@@ -2388,7 +2429,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                             
                             <!-- Universal Action Column (Sticky Right) -->
                             <td class="px-8 py-6 text-right sticky right-0 bg-white dark:bg-gray-800 shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.5)] z-10 border-l border-gray-50 dark:border-gray-700">
-                                <div class="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div class="flex justify-end gap-3 transition-opacity">
                                     <button @click="openEditModal(item)" class="w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-pail-gold hover:bg-pail-gold/10 transition-all">
                                         <PencilIcon class="w-4 h-4" />
                                     </button>
@@ -2413,8 +2454,8 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
 
                 </div>
 
-                <!-- Mobile Card View -->
-                <div class="md:hidden divide-y divide-gray-50 dark:divide-gray-700/50">
+                <!-- Removed Card View as per request for horizontal scroll only -->
+                <div v-if="false" class="md:hidden divide-y divide-gray-50 dark:divide-gray-700/50">
                     <div v-for="(item, index) in data.data" :key="item.id" class="p-5 space-y-4">
                         <!-- Card Header -->
                         <div class="flex items-start justify-between">
@@ -2539,8 +2580,10 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
     <!-- Create Modal -->
         <Teleport to="body">
             <div v-if="showCreateModal" class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-md">
-                <div class="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/10 max-h-[90vh] overflow-y-auto pb-28 sm:pb-0">
-                    <div class="p-6 md:p-12">
+                <div class="bg-white dark:bg-gray-800 w-full rounded-t-[2rem] sm:rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/10 max-h-[90vh] overflow-y-auto pb-28 sm:pb-0"
+                    :class="['rab-tahunan', 'visi-2030'].includes(type) ? 'max-w-5xl' : 'max-w-2xl'">
+                    <BudgetPlanForm v-if="['rab-tahunan', 'visi-2030'].includes(type)" :type="type" :initialData="isEdit ? form : null" @close="showCreateModal=false" @success="showCreateModal=false" />
+                    <div v-else class="p-6 md:p-12">
                         <div class="flex items-start justify-between mb-8 md:mb-10">
                             <div>
                                 <h3 class="text-xl md:text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tighter leading-tight">{{ isEdit ? 'Update Prosedur' : 'Entri Prosedur Baru' }}</h3>
