@@ -104,7 +104,13 @@ onMounted(() => {
         console.log('PWA Install Prompt Captured');
     });
     
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    // Enhanced PWA Mode Detection
+    const checkPwaMode = () => {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true;
+    };
+
+    if (checkPwaMode()) {
         isPwaMode.value = true;
     }
     
@@ -118,6 +124,23 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (timer) clearInterval(timer);
+});
+
+// Helper to detect iOS
+const isIos = () => {
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    return /iphone|ipad|ipod/.test(userAgent);
+};
+
+// Smart visibility for Install Button
+const showInstallButton = computed(() => {
+    // 1. If running as PWA (Standalone), never show
+    if (isPwaMode.value) return false;
+
+    // 2. Otherwise, ALWAYS show it in the web browser.
+    //    If the automatic prompt isn't valid (deferredPrompt is null),
+    //    clicking it will trigger the Manual Install Instructions (SweetAlert).
+    return true;
 });
 
 const dashboardUrl = computed(() => {
@@ -905,7 +928,7 @@ const requestsUrl = computed(() =>
                         </NavLink>
 
                         <!-- PWA Install Button -->
-                        <div v-if="!isPwaMode" class="px-3 lg:px-5 mt-6 mb-2">
+                        <div v-if="showInstallButton" class="px-3 lg:px-5 mt-6 mb-2">
                              <button
                                 @click="installPWA"
                                 class="w-full relative overflow-hidden group bg-gradient-to-br from-pail-gold to-yellow-600 text-white p-4 rounded-2xl shadow-lg shadow-pail-gold/30 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
@@ -1049,7 +1072,7 @@ const requestsUrl = computed(() =>
 
                 <!-- Install PWA Button (Desktop) -->
                 <button
-                    v-if="!isPwaMode"
+                    v-if="showInstallButton"
                     @click="installPWA"
                     class="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pail-gold to-yellow-600 text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all mr-4"
                 >
@@ -1525,7 +1548,7 @@ const requestsUrl = computed(() =>
             leave-to-class="translate-y-full opacity-0"
         >
             <div
-                v-if="!isPwaMode && !isBannerDismissed"
+                v-if="showInstallButton && !isBannerDismissed"
                 class="lg:hidden fixed bottom-28 left-4 right-4 z-[80] bg-gray-900/95 backdrop-blur-xl border border-pail-gold/30 rounded-[2rem] p-4 shadow-2xl shadow-black/50 flex items-center justify-between gap-4"
             >
                 <div class="flex items-center gap-4">

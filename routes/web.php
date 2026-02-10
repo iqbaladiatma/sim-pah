@@ -5,6 +5,66 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
+
+// Route to completely reset database (migrate:fresh --seed)
+// WARNING: THIS WILL WIPE ALL DATA
+Route::get('/reset-db-hard', function () {
+    $output = "<h1>DATABASE RESET PROTOCOL</h1>";
+    $output .= "<div style='background:#ffebee; border:2px solid red; padding:20px; color:#c62828;'>";
+    $output .= "<strong>CAUTION:</strong> This action wipes the entire database and re-seeds it.<br>";
+
+    try {
+        // Run migration fresh with seed
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+            '--seed' => true,
+            '--force' => true // Required for production
+        ]);
+
+        $output .= "<h2>SUCCESS</h2>";
+        $output .= "<pre style='background:#f5f5f5; padding:15px; border-radius:5px; color:#333;'>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+        $output .= "<p>Database has been completely reset and seeded.</p>";
+
+    } catch (\Throwable $e) {
+        $output .= "<h2>FAILED</h2>";
+        $output .= "<p>Error: " . $e->getMessage() . "</p>";
+        $output .= "<pre>" . $e->getTraceAsString() . "</pre>";
+    }
+
+    $output .= "</div>";
+    $output .= "<br><a href='/admin/dashboard' style='padding:10px 20px; background:#333; color:white; text-decoration:none; border-radius:5px;'>Go to Dashboard</a>";
+
+    return $output;
+});
+
+// Original non-destructive fix route (for reference or safe updates)
+Route::get('/fix-db-structure', function () {
+    $output = "<h1>Database Fixer</h1>";
+
+    try {
+        // Check if column exists
+        $hasColumn = \Illuminate\Support\Facades\Schema::hasColumn('requests', 'deleted_at');
+        $output .= "<p>Status Check: Column 'deleted_at' in 'requests' table: " . ($hasColumn ? '<span style="color:green">EXISTS</span>' : '<span style="color:red">MISSING</span>') . "</p>";
+
+        if (!$hasColumn) {
+            $output .= "<p>Attempting to run migrations...</p>";
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output .= "<pre style='background:#eee;padding:10px;'>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+
+            // Re-check
+            $hasColumnAfter = \Illuminate\Support\Facades\Schema::hasColumn('requests', 'deleted_at');
+            $output .= "<p>Post-Migration Check: " . ($hasColumnAfter ? '<span style="color:green">SUCCESS - Column Created</span>' : '<span style="color:red">FAILED - Column Still Missing</span>') . "</p>";
+        } else {
+            $output .= "<p>No migration needed for 'deleted_at'.</p>";
+        }
+
+        return $output;
+
+    } catch (\Throwable $e) {
+        return "<h1>Fatal Error</h1><p>" . $e->getMessage() . "</p><pre>" . $e->getTraceAsString() . "</pre>";
+    }
+});
+
 Route::get('/', function () {
     return redirect()->route('login');
 });

@@ -14,12 +14,25 @@ import XIcon from "@/Components/Icons/XIcon.vue";
 import FolderIcon from "@/Components/Icons/FolderIcon.vue";
 import LocationIcon from "@/Components/Icons/LocationIcon.vue";
 import UserIcon from "@/Components/Icons/UserIcon.vue";
+import DocumentIcon from "@/Components/Icons/DocumentIcon.vue";
 import SearchableSelect from "@/Components/SearchableSelect.vue";
 import BudgetPlanForm from "./Partials/BudgetPlanForm.vue";
 import ConfirmModal from "@/Components/ConfirmModal.vue";
 import Modal from "@/Components/Modal.vue";
 import ImportMappingModal from "@/Components/ImportMappingModal.vue";
 import axios from "axios";
+
+// DEBUG & EXPORT STATE
+const debugMode = ref(false); // Default disabled for production
+const debugLogs = ref([]);
+const showExportProgressModal = ref(false);
+const exportProgress = ref(0);
+
+const addLog = (msg) => {
+    if (!debugMode.value) return;
+    const time = new Date().toLocaleTimeString();
+    debugLogs.value.unshift(`[${time}] ${msg}`);
+};
 
 const props = defineProps({
     type: String,
@@ -45,7 +58,7 @@ const tableColspan = computed(() => {
     if (t === "buku-induk") return 20;
     if (t === "berita-acara-pemeriksaan") return 20;
     if (t === "kir-ruangan") return 14;
-    if (t === "pendataan-aset") return 12;
+    if (t === "pendataan-aset") return 13;
     if (t === "pemeliharaan-gedung") return 18;
     if (t === "pemeliharaan-ac") return 10;
     if (t === "pemeliharaan-kamar-mandi") return 16;
@@ -113,6 +126,34 @@ const formatDate = (dateString, withDay = false) => {
     } catch (e) {
         return dateString;
     }
+};
+
+/**
+ * Money / Currency Formatter
+ */
+const formatRupiah = (val) => {
+    if (val === null || val === undefined || val === "") return "";
+    const number =
+        typeof val === "string" ? parseFloat(val.replace(/[^0-9.-]/g, "")) : val;
+    if (isNaN(number)) return "";
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(number);
+};
+
+const handleRupiahInput = (event, field) => {
+    // Get raw digits
+    const rawValue = event.target.value.replace(/[^0-9]/g, "");
+    const numericValue = rawValue ? parseInt(rawValue) : 0;
+
+    // Update the Inertia form state (as raw number)
+    form[field] = numericValue;
+
+    // Force update the input display value immediately to formatted version
+    event.target.value = formatRupiah(numericValue);
 };
 
 const airBersihItems = [
@@ -868,8 +909,57 @@ const confirmDelete = () => {
     }
 };
 
-const exportExcel = () => {
-    window.location.href = route("admin.procedures.export", props.type);
+const exportExcel = async () => {
+    addLog("Memulai proses export...");
+    showExportProgressModal.value = true;
+    exportProgress.value = 0;
+
+    try {
+        addLog(`Requesting export for type: ${props.type}`);
+        const response = await axios.get(route("admin.procedures.export", props.type), {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    exportProgress.value = percentCompleted;
+                    addLog(`Download progress: ${percentCompleted}%`);
+                } else {
+                    addLog(`Download bytes: ${progressEvent.loaded}`);
+                }
+            }
+        });
+
+        addLog("Data diterima, memproses file...");
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Try to get filename from headers
+        const contentDisposition = response.headers['content-disposition'];
+        let fileName = `${props.procedure.title}_${new Date().toISOString().slice(0,10)}.xlsx`;
+        if (contentDisposition) {
+            const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+            if (fileNameMatch && fileNameMatch.length === 2)
+                fileName = fileNameMatch[1];
+        }
+        
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        
+        addLog("File berhasil didownload.");
+        setTimeout(() => {
+            showExportProgressModal.value = false;
+        }, 800);
+
+    } catch (error) {
+        console.error(error);
+        addLog("EXPORT ERROR: " + (error.response?.data?.message || error.message));
+        alert("Gagal melakukan export. Cek debug log.");
+        showExportProgressModal.value = false;
+    }
 };
 
 const showImportModal = ref(false);
@@ -879,6 +969,7 @@ const importSheets = ref([]);
 const isAnalyzing = ref(false);
 
 const openImportModal = () => {
+    addLog("Membuka modal import...");
     // Reset state for fresh start
     importHeaders.value = [];
     importFields.value = [];
@@ -887,6 +978,7 @@ const openImportModal = () => {
 };
 
 const onAnalyze = ({ file, sheet }) => {
+    addLog(`Menganalisa file: ${file.name} (Sheet: ${sheet || 'Default'})`);
     isAnalyzing.value = true;
 
     const formData = new FormData();
@@ -899,16 +991,17 @@ const onAnalyze = ({ file, sheet }) => {
             headers: { "Content-Type": "multipart/form-data" },
         })
         .then((response) => {
+            addLog("Analisa berhasil. Headers diterima.");
             importHeaders.value = response.data.headers;
             importFields.value = response.data.fields;
             importSheets.value = response.data.sheets || [];
+            addLog(`Deteksi ${importHeaders.value.length} kolom dan ${importSheets.value.length} sheet.`);
         })
         .catch((error) => {
             console.error(error);
-            alert(
-                "Gagal membaca file: " +
-                    (error.response?.data?.error || error.message),
-            );
+            const errMsg = error.response?.data?.error || error.message;
+            addLog("ANALYSIS ERROR: " + errMsg);
+            alert("Gagal membaca file: " + errMsg);
         })
         .finally(() => {
             isAnalyzing.value = false;
@@ -916,6 +1009,7 @@ const onAnalyze = ({ file, sheet }) => {
 };
 
 const handleImportSubmit = ({ file, mapping, sheet }) => {
+    addLog("Mengirim data import...");
     const importForm = useForm({
         file: file,
         mapping: mapping,
@@ -924,10 +1018,12 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
 
     importForm.post(route("admin.procedures.import", props.type), {
         onSuccess: () => {
+            addLog("Import berhasil diselesaikan.");
             showImportModal.value = false;
             // Success notification is handled by flash messages usually
         },
         onError: (errors) => {
+            addLog("IMPORT ERROR: " + JSON.stringify(errors));
             console.error(errors);
         },
     });
@@ -954,10 +1050,52 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
         :file-headers="importHeaders"
         :sheets="importSheets"
         :required-fields="importFields"
+        :template-url="route('admin.procedures.template', props.type)"
         @close="showImportModal = false"
         @analyze="onAnalyze"
         @submit="handleImportSubmit"
     />
+
+    <!-- EXPORT PROGRESS MODAL -->
+    <Modal :show="showExportProgressModal" :closeable="false" maxWidth="sm">
+        <div class="p-6 text-center">
+            <h3 class="text-lg font-black text-gray-900 dark:text-white uppercase mb-4">
+                Exporting Data...
+            </h3>
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-4 dark:bg-gray-700 overflow-hidden">
+                <div 
+                    class="bg-pail-gold h-4 rounded-full transition-all duration-300 ease-out"
+                    :style="{ width: exportProgress + '%' }"
+                ></div>
+            </div>
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                {{ exportProgress }}% Completed
+            </p>
+            <p class="text-[10px] text-gray-400 mt-2">
+                Mohon tunggu, sedang memproses file excel...
+            </p>
+        </div>
+    </Modal>
+
+    <!-- DEBUG PANEL (TEMPORARY) -->
+    <div v-if="debugMode" class="fixed bottom-0 left-0 right-0 bg-gray-900 text-green-400 p-4 z-[999] border-t border-gray-700 shadow-2xl font-mono text-xs max-h-64 overflow-y-auto opacity-95">
+        <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-1 sticky top-0 bg-gray-900">
+            <span class="font-bold flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                SYSTEM DEBUG LOGGER
+            </span>
+            <div class="flex gap-3">
+                <button @click="debugMode = false" class="text-xs hover:text-white hover:underline">[HIDE]</button>
+                <button @click="debugLogs = []" class="text-xs hover:text-white hover:underline">[CLEAR]</button>
+            </div>
+        </div>
+        <div class="flex flex-col-reverse">
+            <div v-for="(log, i) in debugLogs" :key="i" class="mb-0.5 break-words whitespace-pre-wrap border-b border-gray-800/50 pb-0.5">
+                {{ log }}
+            </div>
+        </div>
+        <div v-if="debugLogs.length === 0" class="text-gray-600 italic py-2 text-center">Waiting for system events...</div>
+    </div>
 
     <AuthenticatedLayout>
         <template #header>
@@ -1089,6 +1227,14 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                         <UploadIcon class="w-3.5 h-3.5" />
                         <span>Import</span>
                     </button>
+                    <a
+                        :href="route('admin.procedures.template', type)"
+                        download
+                        class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-[9px] font-black text-pail-gold uppercase tracking-widest hover:bg-pail-gold/5 transition-all flex items-center gap-2 shadow-sm"
+                    >
+                        <DocumentIcon class="w-3.5 h-3.5 text-pail-gold" />
+                        <span>Template</span>
+                    </a>
                     <button
                         @click="showCreateModal = true"
                         class="px-4 py-2 bg-gray-900 dark:bg-pail-gold text-pail-gold dark:text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all flex items-center gap-2 shadow-lg shadow-gray-200 dark:shadow-none hidden md:flex"
@@ -1265,25 +1411,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                     </th>
                                 </tr>
                                 <tr
-                                    v-if="
-                                        [
-                                            'pendataan-aset',
-                                            'kir-ruangan',
-                                            'pemeliharaan-gedung',
-                                            'pemeliharaan-ac',
-                                            'pemeliharaan-kamar-mandi',
-                                            'pemeliharaan-pompa',
-                                            'pemeliharaan-air-bersih',
-                                            'pemeliharaan-air-minum',
-                                            'pemeliharaan-genset',
-                                            'pemeliharaan-kipas',
-                                            'pemeliharaan-septik',
-                                            'pemeliharaan-sarpras',
-                                            'agenda-perbaikan',
-                                            'monitoring-aset',
-                                            'pemeliharaan-listrik',
-                                        ].includes(type)
-                                    "
+                                    v-if="['monitoring-aset', 'pendataan-aset', 'kir-ruangan'].includes(type)"
                                     class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700"
                                 >
                                     <template
@@ -1490,8 +1618,20 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                         >
                                             Jumlah
                                         </th>
+                                        <th
+                                            colspan="3"
+                                            class="px-4 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700"
+                                        >
+                                            Kondisi Saat Ini
+                                        </th>
                                     </template>
                                     <template v-if="type === 'pendataan-aset'">
+                                        <th
+                                            rowspan="2"
+                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap"
+                                        >
+                                            Jenis Barang / Nama Aset
+                                        </th>
                                         <th
                                             rowspan="2"
                                             class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap"
@@ -1509,6 +1649,30 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap"
                                         >
                                             Satuan
+                                        </th>
+                                        <th
+                                            colspan="3"
+                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center border-l dark:border-gray-700 whitespace-nowrap"
+                                        >
+                                            Kondisi Saat Ini
+                                        </th>
+                                        <th
+                                            rowspan="2"
+                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center"
+                                        >
+                                            Tanggal Pengecekan
+                                        </th>
+                                        <th
+                                            rowspan="2"
+                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap text-center"
+                                        >
+                                            Petugas Pemeriksa
+                                        </th>
+                                        <th
+                                            rowspan="2"
+                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap"
+                                        >
+                                            Nilai Aset
                                         </th>
                                     </template>
 
@@ -1744,8 +1908,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                     <th
                                         v-if="
                                             [
-                                                'pendataan-aset',
-                                                'kir-ruangan',
+                                                'monitoring-aset',
                                             ].includes(type)
                                         "
                                         colspan="3"
@@ -1836,26 +1999,6 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
 
 
 
-                                    <template v-if="type === 'pendataan-aset'">
-                                        <th
-                                            rowspan="2"
-                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap"
-                                        >
-                                            Tanggal Pengecekan
-                                        </th>
-                                        <th
-                                            rowspan="2"
-                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap"
-                                        >
-                                            Petugas Pelaksana
-                                        </th>
-                                        <th
-                                            rowspan="2"
-                                            class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap"
-                                        >
-                                            Nilai Aset
-                                        </th>
-                                    </template>
 
                                     <th
                                         v-if="
@@ -1912,25 +2055,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                 </tr>
                                 <!-- Row 2 for Specialized Double Headers / Bathroom -->
                                 <tr
-                                    v-if="
-                                        [
-                                            'pendataan-aset',
-                                            'kir-ruangan',
-                                            'pemeliharaan-gedung',
-                                            'pemeliharaan-ac',
-                                            'pemeliharaan-kamar-mandi',
-                                            'pemeliharaan-pompa',
-                                            'pemeliharaan-air-bersih',
-                                            'pemeliharaan-air-minum',
-                                            'pemeliharaan-genset',
-                                            'pemeliharaan-kipas',
-                                            'pemeliharaan-septik',
-                                            'pemeliharaan-sarpras',
-                                            'agenda-perbaikan',
-                                            'monitoring-aset',
-                                            'electrical-maintenance',
-                                        ].includes(type)
-                                    "
+                                    v-if="['monitoring-aset', 'pendataan-aset', 'kir-ruangan'].includes(type)"
                                     class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700"
                                 >
                                     <template v-if="type === 'monitoring-aset'">
@@ -2302,15 +2427,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                 </tr>
                                 <!-- Row 3 for Specialized Triple Header -->
                                 <tr
-                                    v-if="
-                                        [
-                                            'pemeliharaan-ac',
-                                            'pemeliharaan-pompa',
-                                            'pemeliharaan-air-bersih',
-                                            'pemeliharaan-air-minum',
-                                            'pemeliharaan-genset',
-                                        ].includes(type)
-                                    "
+                                    v-if="false"
                                     class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700"
                                 >
                                     <template v-if="type === 'pemeliharaan-ac'">
@@ -4204,73 +4321,78 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                         class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700"
                                     >
                                         <th
-                                            rowspan="2"
+                                            rowspan="3"
                                             class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap"
                                         >
                                             No
                                         </th>
                                         <th
-                                            rowspan="2"
+                                            rowspan="3"
                                             class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest whitespace-nowrap"
                                         >
                                             Item Pengecekan
                                         </th>
                                         <th
-                                            rowspan="2"
+                                            rowspan="3"
                                             class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center"
                                         >
                                             Std
                                         </th>
                                         <th
-                                            rowspan="2"
+                                            rowspan="3"
                                             class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center"
                                         >
                                             Mtd/Freq
                                         </th>
                                         <th
-                                            colspan="12"
-                                            class="px-4 py-3 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700"
+                                            :colspan="['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type) ? 24 : 36"
+                                            class="px-4 py-3 text-[9px] font-black text-pail-gold uppercase tracking-widest text-center border-l border-gray-100 dark:border-gray-700 bg-gray-100/10 dark:bg-gray-800/10"
                                         >
-                                            Rekap Monitoring (PA = Putra, PI =
-                                            Putri, LT = Lawata / P1 = Pekan 1,
-                                            P2 = Pekan 2)
+                                            Rekap Monitoring (PA = Putra, PI = Putri, LT = Lawata / P1 = Pekan 1, P2 = Pekan 2)
                                         </th>
                                         <th
-                                            rowspan="2"
+                                            rowspan="3"
                                             class="px-4 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-center whitespace-nowrap"
                                         >
                                             Keterangan
                                         </th>
                                         <th
-                                            rowspan="2"
-                                            class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap sticky right-0 bg-gray-50 dark:bg-gray-900 z-20 shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.5)]"
+                                            rowspan="3"
+                                            class="px-8 py-6 text-[9px] font-black text-gray-100 uppercase tracking-widest text-right whitespace-nowrap sticky right-0 bg-pail-gold dark:bg-pail-gold z-20 shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.5)] border-l dark:border-gray-700/50"
                                         >
                                             Manajemen
                                         </th>
                                     </tr>
                                     <tr
-                                        class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[7px] text-gray-400 font-black uppercase tracking-wider"
+                                        class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700 text-[8px] text-gray-500 font-black uppercase tracking-wider"
                                     >
                                         <th
-                                            v-for="m in [
-                                                'Jul',
-                                                'Agu',
-                                                'Sep',
-                                                'Okt',
-                                                'Nov',
-                                                'Des',
-                                                'Jan',
-                                                'Feb',
-                                                'Mar',
-                                                'Apr',
-                                                'Mei',
-                                                'Jun',
-                                            ]"
+                                            v-for="m in ['Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun']"
                                             :key="m"
-                                            class="px-1 py-2 text-center border-l dark:border-gray-700"
+                                            :colspan="['pemeliharaan-air-minum', 'pemeliharaan-genset'].includes(type) ? 2 : 3"
+                                            class="px-1 py-2 text-center border-l dark:border-gray-700 bg-gray-100/5 dark:bg-gray-800/5"
                                         >
                                             {{ m }}
                                         </th>
+                                    </tr>
+                                    <tr
+                                        class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 text-[7px] text-gray-400 font-black uppercase tracking-tighter"
+                                    >
+                                        <template v-for="i in 12" :key="i">
+                                            <th
+                                                v-for="area in type === 'pemeliharaan-genset'
+                                                    ? ['P1', 'P2']
+                                                    : type === 'pemeliharaan-air-minum'
+                                                      ? ['Pa', 'Pi']
+                                                      : type === 'pemeliharaan-pompa'
+                                                        ? ['Pa', 'Pi', 'Lt']
+                                                        : ['Lt', 'Pa', 'Pi']"
+                                                :key="area"
+                                                class="px-1 py-1 text-center border-l dark:border-gray-700"
+                                            >
+                                                {{ area }}
+                                            </th>
+                                        </template>
                                     </tr>
                                 </template>
 
@@ -4455,72 +4577,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                     </th>
                                 </tr>
 
-                                <!-- specialized for Pendataan Aset -->
-                                <tr
-                                    v-if="type === 'pendataan-aset'"
-                                    class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700"
-                                >
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center whitespace-nowrap"
-                                    >
-                                        No
-                                    </th>
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap"
-                                    >
-                                        Lembaga
-                                    </th>
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center whitespace-nowrap"
-                                    >
-                                        Jml
-                                    </th>
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap"
-                                    >
-                                        Satuan
-                                    </th>
-                                    <th
-                                        class="px-4 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center border-l dark:border-gray-700"
-                                    >
-                                        Baik
-                                    </th>
-                                    <th
-                                        class="px-4 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center border-l dark:border-gray-700"
-                                    >
-                                        Kurang
-                                    </th>
-                                    <th
-                                        class="px-4 py-4 text-[9px] font-black text-gray-400 tracking-widest text-center border-l dark:border-gray-700"
-                                    >
-                                        Rusak
-                                    </th>
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap"
-                                    >
-                                        Tgl Update
-                                    </th>
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap"
-                                    >
-                                        P.Jawab
-                                    </th>
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest text-right whitespace-nowrap"
-                                    >
-                                        Harga
-                                    </th>
-                                    <th
-                                        class="px-6 py-4 text-[9px] font-black text-gray-400 tracking-widest whitespace-nowrap"
-                                    >
-                                        Ket
-                                    </th>
-                                    <th
-                                        class="px-8 py-6 text-[9px] font-black text-gray-400 uppercase tracking-widest text-right whitespace-nowrap sticky right-0 bg-gray-50 dark:bg-gray-900 z-20 shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.05)] dark:shadow-[-15px_0_20px_-10px_rgba(0,0,0,0.5)]"
-                                    >
-                                        Manajemen
-                                    </th>
-                                </tr>
+
 
                                 <!-- specialized for Pengadaan Sarpras (Missing Header) -->
                                 <tr
@@ -7518,6 +7575,11 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             <td
                                                 class="px-6 py-4 text-[10px] font-black text-gray-900 dark:text-white uppercase"
                                             >
+                                                {{ item.name || "-" }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-[10px] font-black text-gray-900 dark:text-white uppercase"
+                                            >
                                                 {{
                                                     item.institution?.name ||
                                                     "-"
@@ -7578,16 +7640,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 }}
                                             </td>
                                             <td
-                                                class="px-4 py-4 text-[10px] font-black text-gray-900 dark:text-white text-right border-l dark:border-gray-700"
+                                                class="px-4 py-4 text-[10px] font-black text-gray-900 dark:text-white text-right border-l dark:border-gray-700 whitespace-nowrap"
                                             >
-                                                Rp
-                                                {{
-                                                    item.price
-                                                        ? Number(
-                                                              item.price,
-                                                          ).toLocaleString()
-                                                        : "-"
-                                                }}
+                                                {{ formatRupiah(item.price) }}
                                             </td>
                                             <td
                                                 class="px-4 py-4 text-[9px] text-gray-400 italic text-center border-l dark:border-gray-700 whitespace-normal min-w-[150px]"
@@ -9243,6 +9298,22 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                             </div>
                                         </div>
 
+                                        <!-- INSTITUTION SELECTION -->
+                                        <div
+                                            v-if="type === 'pendataan-aset' || type === 'kir-ruangan'"
+                                            class="sm:col-span-2"
+                                        >
+                                            <label
+                                                class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block"
+                                                >Satuan Kerja (Lembaga)</label
+                                            >
+                                            <SearchableSelect
+                                                v-model="form.institution_id"
+                                                :options="institutions"
+                                                placeholder="Pilih Satuan Kerja..."
+                                            />
+                                        </div>
+
                                         <div
                                             :class="
                                                 type === 'pendataan-aset' ||
@@ -9448,7 +9519,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 <div v-else>
                                                     <label
                                                         class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2 block"
-                                                        >Petugas Pelaksana</label
+                                                        >Petugas Pemeriksa</label
                                                     >
                                                     <SearchableSelect
                                                         v-model="form.performed_by"
@@ -9469,8 +9540,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                         >Nilai Aset</label
                                                     >
                                                     <input
-                                                        v-model="form.price"
-                                                        type="number"
+                                                        :value="formatRupiah(form.price)"
+                                                        @input="(e) => handleRupiahInput(e, 'price')"
+                                                        type="text"
                                                         class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                     />
                                                 </div>
@@ -9657,8 +9729,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Harga Perolehan</label
                                                 >
                                                 <input
-                                                    v-model="form.price"
-                                                    type="number"
+                                                    :value="formatRupiah(form.price)"
+                                                    @input="(e) => handleRupiahInput(e, 'price')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -9689,13 +9762,13 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                 class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                             >
                                                 <option value="B">
-                                                    BAIK (B)
+                                                    BAIK
                                                 </option>
                                                 <option value="KB">
-                                                    KURANG BAIK (KB)
+                                                    KURANG BAIK
                                                 </option>
                                                 <option value="RB">
-                                                    RUSAK BERAT (RB)
+                                                    RUSAK
                                                 </option>
                                             </select>
                                         </div>
@@ -11510,9 +11583,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Harga Satuan (Rp)</label
                                                 >
                                                 <input
-                                                    v-model="form.unit_price"
-                                                    type="number"
-                                                    step="any"
+                                                    :value="formatRupiah(form.unit_price)"
+                                                    @input="(e) => handleRupiahInput(e, 'unit_price')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -11522,8 +11595,8 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Jumlah Total (Auto)</label
                                                 >
                                                 <input
-                                                    v-model="form.total_price"
-                                                    type="number"
+                                                    :value="formatRupiah(form.total_price)"
+                                                    type="text"
                                                     disabled
                                                     class="w-full bg-gray-100 dark:bg-gray-700/50 border-0 rounded-2xl px-6 py-4 text-sm text-pail-gold font-black"
                                                 />
@@ -12017,9 +12090,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Anggaran (Rp)</label
                                                 >
                                                 <input
-                                                    v-model="form.budget_amount"
-                                                    type="number"
-                                                    step="any"
+                                                    :value="formatRupiah(form.budget_amount)"
+                                                    @input="(e) => handleRupiahInput(e, 'budget_amount')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -12029,9 +12102,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Realisasi (Rp)</label
                                                 >
                                                 <input
-                                                    v-model="form.actual_amount"
-                                                    type="number"
-                                                    step="any"
+                                                    :value="formatRupiah(form.actual_amount)"
+                                                    @input="(e) => handleRupiahInput(e, 'actual_amount')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -12270,8 +12343,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Nilai Perkiraan (Rp)</label
                                                 >
                                                 <input
-                                                    v-model="form.value"
-                                                    type="number"
+                                                    :value="formatRupiah(form.value)"
+                                                    @input="(e) => handleRupiahInput(e, 'value')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -12886,8 +12960,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Harga Satuan</label
                                                 >
                                                 <input
-                                                    v-model="form.unit_price"
-                                                    type="number"
+                                                    :value="formatRupiah(form.unit_price)"
+                                                    @input="(e) => handleRupiahInput(e, 'unit_price')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -12903,12 +12978,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     <p
                                                         class="text-xl font-black text-white"
                                                     >
-                                                        Rp
-                                                        {{
-                                                            Number(
-                                                                form.total_price,
-                                                            ).toLocaleString()
-                                                        }}
+                                                        {{ formatRupiah(form.total_price) }}
                                                     </p>
                                                 </div>
                                             </div>
@@ -12954,8 +13024,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     Kegiatan</label
                                                 >
                                                 <input
-                                                    v-model="form.cost"
-                                                    type="number"
+                                                    :value="formatRupiah(form.cost)"
+                                                    @input="(e) => handleRupiahInput(e, 'cost')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -13094,8 +13165,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Nominal Token (Rp)</label
                                                 >
                                                 <input
-                                                    v-model="form.total_price"
-                                                    type="number"
+                                                    :value="formatRupiah(form.total_price)"
+                                                    @input="(e) => handleRupiahInput(e, 'total_price')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>
@@ -14222,8 +14294,9 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
                                                     >Biaya / Nilai</label
                                                 >
                                                 <input
-                                                    v-model="form.cost"
-                                                    type="number"
+                                                    :value="formatRupiah(form.cost)"
+                                                    @input="(e) => handleRupiahInput(e, 'cost')"
+                                                    type="text"
                                                     class="w-full bg-gray-50 dark:bg-gray-900 border-0 rounded-2xl px-6 py-4 text-sm focus:ring-2 focus:ring-pail-gold"
                                                 />
                                             </div>

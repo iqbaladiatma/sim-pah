@@ -243,6 +243,7 @@ const handleImportSubmit = ({ file, mapping, sheet }) => {
         :file-headers="importHeaders"
         :sheets="importSheets"
         :required-fields="importFields"
+        :template-url="selectedImportType ? route('admin.procedures.template', selectedImportType) : null"
         @close="showImportModal = false"
         @analyze="onAnalyze"
         @submit="handleImportSubmit"

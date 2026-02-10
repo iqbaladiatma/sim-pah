@@ -450,32 +450,71 @@ class UrtProcedureController extends Controller
             // Read the headers (first row of each sheet)
             $headings = (new HeadingRowImport)->toArray($request->file('file'));
 
-            // Extract sheet names -> keys of the headings array are often sheet names or indices
-            // If it's a single sheet, it might be [0 => [...]] or ['Sheet1' => [...]]
-            // We normalize this.
+            \Illuminate\Support\Facades\Log::info('RAW_HEADINGS', ['data' => $headings]);
+
             $sheets = [];
-            foreach (array_keys($headings) as $key) {
-                // If key is string, it's likely a sheet name. If int, we might need to assume 'Sheet'.
-                // HeadingRowImport usually returns sheet names as keys if multiple.
-                $sheets[] = (string) $key;
+            $headersBySheet = [];
+
+            // 1. Normalize Structure
+            // Expected: [ SheetKey => [ 0 => [ 'Col1', 'Col2' ] ] ]
+            foreach ($headings as $key => $content) {
+                // Determine Sheet Name
+                $sheetName = is_string($key) ? $key : "Sheet " . ($key + 1);
+
+                // Determine Headers
+                // If content is [ ['Col1', 'Col2'] ] -> take index 0
+                if (is_array($content) && !empty($content) && is_array($content[0])) {
+                    $headers = $content[0];
+                }
+                // Rare case: content is directly ['Col1', 'Col2'] (CSV sometimes behaves oddly depending on settings)
+                elseif (is_array($content) && !empty($content) && is_string($content[0])) {
+                    $headers = $content;
+                } else {
+                    $headers = [];
+                }
+
+                if (!empty($headers)) {
+                    $sheets[] = $sheetName;
+                    $headersBySheet[$sheetName] = $headers;
+
+                    // Map numeric key to sheet name for fallback access
+                    if (is_numeric($key)) {
+                        $headersBySheet[(string) $key] = $headers;
+                    }
+                }
             }
 
-            // Determine selected sheet
+            // 2. Fallback if no sheets detected
+            if (empty($sheets)) {
+                $sheets[] = "Sheet 1";
+                $headersBySheet["Sheet 1"] = [];
+            }
+
+            // 3. Determine selected sheet
             $selectedSheet = $request->input('sheet');
-            if (!$selectedSheet || !isset($headings[$selectedSheet])) {
-                $selectedSheet = $sheets[0] ?? null;
+
+            // If user passed "Sheet 1" but keys are "0", or vice versa
+            // Try to match
+            $finalHeaders = [];
+
+            if ($selectedSheet && isset($headersBySheet[$selectedSheet])) {
+                $finalHeaders = $headersBySheet[$selectedSheet];
+            } else {
+                // Default to first sheet
+                $selectedSheet = $sheets[0];
+                $finalHeaders = $headersBySheet[$selectedSheet] ?? [];
             }
 
-            $fileHeaders = [];
-            if ($selectedSheet && isset($headings[$selectedSheet])) {
-                // The import usually returns [ [row1], [row2] ] for each sheet? 
-                // HeadingRowImport returns [ [ 'col1', 'col2' ] ] (wrapped in array)
-                // Let's verify structure: $headings['Sheet1'][0] should be the array of column names
-                $fileHeaders = $headings[$selectedSheet][0] ?? [];
-            }
+            // 4. Filter and Clean Headers
+            $finalHeaders = array_values(array_filter($finalHeaders, function ($h) {
+                return !empty($h) && is_string($h);
+            }));
 
-            // Normalize headers: flatten if necessary or filter nulls
-            $fileHeaders = array_filter($fileHeaders);
+            \Illuminate\Support\Facades\Log::info('PROCESSED_HEADERS', [
+                'sheets' => $sheets,
+                'selected' => $selectedSheet,
+                'headers' => $finalHeaders
+            ]);
 
             // Get required DB fields configuration
             $config = $this->getImportFields($request->type);
@@ -483,7 +522,7 @@ class UrtProcedureController extends Controller
             return response()->json([
                 'sheets' => $sheets,
                 'selected_sheet' => $selectedSheet,
-                'headers' => array_values($fileHeaders),
+                'headers' => $finalHeaders,
                 'fields' => $config
             ]);
         } catch (\Exception $e) {
@@ -507,11 +546,18 @@ class UrtProcedureController extends Controller
         $sheet = $request->input('sheet');
         $file = $request->file('file');
 
-        $importer = null;
         if ($procedure['model'] === MaintenanceLog::class) {
             $importer = new \App\Imports\MaintenanceLogImport($procedure['type'] ?? null, $mapping);
         } elseif ($procedure['model'] === Item::class) {
-            $importer = new \App\Imports\ItemImport($mapping);
+            $importer = new \App\Imports\ItemImport($mapping, auth()->user()->institution_id);
+        } elseif ($procedure['model'] === IsoChecklist::class) {
+            $importer = new \App\Imports\IsoChecklistImport($mapping);
+        } elseif ($procedure['model'] === VehicleRequest::class) {
+            $importer = new \App\Imports\VehicleRequestImport($mapping);
+        } elseif ($procedure['model'] === BorrowingRecord::class) {
+            $importer = new \App\Imports\BorrowingRecordImport($mapping);
+        } elseif ($procedure['model'] === AssetLifecycleLog::class) {
+            $importer = new \App\Imports\AssetLifecycleLogImport($mapping);
         } else {
             $importer = new \App\Imports\GenericImport($procedure['model'], $mapping);
         }
@@ -527,7 +573,6 @@ class UrtProcedureController extends Controller
 
     private function getImportFields($type)
     {
-        // Default common fields
         if (!isset($this->procedures[$type]))
             return [];
         $procedure = $this->procedures[$type];
@@ -535,35 +580,100 @@ class UrtProcedureController extends Controller
 
         $fields = [];
 
+        // 1. MAINTENANCE LOG (Most Complex)
         if ($model === MaintenanceLog::class) {
+            // Common Fields
             $fields = [
-                ['key' => 'judul', 'label' => 'Judul / Uraian', 'required' => true],
-                ['key' => 'deskripsi', 'label' => 'Deskripsi / Keterangan', 'required' => false],
-                ['key' => 'lokasi', 'label' => 'Lokasi / Ruangan', 'required' => false],
-                ['key' => 'biaya', 'label' => 'Biaya (Rp)', 'required' => false],
+                ['key' => 'title', 'label' => 'Judul / Uraian / Nama Item', 'required' => true],
+                ['key' => 'description', 'label' => 'Deskripsi / Keterangan', 'required' => false],
+                ['key' => 'location', 'label' => 'Lokasi / Ruangan', 'required' => false],
+                ['key' => 'cost', 'label' => 'Biaya (Rp)', 'required' => false],
                 ['key' => 'status', 'label' => 'Status', 'required' => false],
-                ['key' => 'jadwal', 'label' => 'Tanggal Jadwal', 'required' => false],
-                ['key' => 'petugas', 'label' => 'Petugas', 'required' => false],
+                ['key' => 'scheduled_at', 'label' => 'Tanggal Jadwal', 'required' => false],
+                ['key' => 'completed_at', 'label' => 'Tanggal Selesai', 'required' => false],
+                ['key' => 'performed_by', 'label' => 'Petugas / PIC', 'required' => false],
             ];
-            // Add specialized fields based on type
+
+            // Subtype Specifics
             if ($type === 'pemeliharaan-ac') {
-                $fields[] = ['key' => 'ac_pk', 'label' => 'PK (AC)', 'required' => false];
+                $fields = array_merge($fields, [
+                    ['key' => 'ac_indoor_pc', 'label' => 'Indoor PC', 'required' => false],
+                    ['key' => 'ac_indoor_sw', 'label' => 'Indoor SW', 'required' => false],
+                    ['key' => 'ac_outdoor_freon', 'label' => 'Outdoor Freon', 'required' => false],
+                    ['key' => 'ac_outdoor_amp', 'label' => 'Outdoor Ampere', 'required' => false],
+                    ['key' => 'ac_kelistrikan_jaringan', 'label' => 'Listrik Jaringan', 'required' => false],
+                    ['key' => 'ac_kelistrikan_tegangan', 'label' => 'Listrik Tegangan', 'required' => false],
+                ]);
+            } elseif ($type === 'pemeliharaan-kamar-mandi') {
+                $fields = array_merge($fields, [
+                    ['key' => 'kran_air', 'label' => 'Kran Air', 'required' => false],
+                    ['key' => 'lampu', 'label' => 'Lampu', 'required' => false],
+                    ['key' => 'fiting_lampu', 'label' => 'Fiting Lampu', 'required' => false],
+                    ['key' => 'saklar_lampu', 'label' => 'Saklar Lampu', 'required' => false],
+                    ['key' => 'ember', 'label' => 'Ember', 'required' => false],
+                    ['key' => 'gayung', 'label' => 'Gayung', 'required' => false],
+                    ['key' => 'closet', 'label' => 'Closet', 'required' => false],
+                    ['key' => 'pintu', 'label' => 'Pintu', 'required' => false],
+                    ['key' => 'grendel_pintu', 'label' => 'Grendel Pintu', 'required' => false],
+                ]);
+            } elseif (in_array($type, ['pemeliharaan-pompa', 'pemeliharaan-air-bersih', 'pemeliharaan-air-minum', 'pemeliharaan-genset', 'pemeliharaan-kipas', 'pemeliharaan-listrik'])) {
+                $fields = array_merge($fields, [
+                    ['key' => 'check_standard', 'label' => 'Standar Pengecekan', 'required' => false],
+                    ['key' => 'check_method', 'label' => 'Metode Pengecekan', 'required' => false],
+                    ['key' => 'check_frequency', 'label' => 'Frekuensi', 'required' => false],
+                ]);
+            } elseif ($type === 'pemeliharaan-septik') {
+                $fields = array_merge($fields, [
+                    ['key' => 'st_baik', 'label' => 'Kondisi Baik', 'required' => false],
+                    ['key' => 'st_penuh', 'label' => 'Kondisi Penuh', 'required' => false],
+                    ['key' => 'st_bocor', 'label' => 'Kondisi Bocor', 'required' => false],
+                    ['key' => 'st_bau', 'label' => 'Kondisi Bau', 'required' => false],
+                ]);
+            } elseif (in_array($type, ['analisis-kebutuhan', 'pengajuan-rab', 'detailed-monitoring'])) {
+                $fields = array_merge($fields, [
+                    ['key' => 'volume', 'label' => 'Volume / Jumlah', 'required' => false],
+                    ['key' => 'unit', 'label' => 'Satuan', 'required' => false],
+                    ['key' => 'unit_price', 'label' => 'Harga Satuan', 'required' => false],
+                    ['key' => 'total_price', 'label' => 'Total Harga', 'required' => false],
+                    ['key' => 'budget_amount', 'label' => 'Anggaran (Budget)', 'required' => false],
+                    ['key' => 'actual_amount', 'label' => 'Realisasi (Actual)', 'required' => false],
+                ]);
+            } elseif (in_array($type, ['pengadaan-sarpras', 'penerimaan-barang', 'pemilihan-evaluasi'])) {
+                $fields = array_merge($fields, [
+                    ['key' => 'procurement_type', 'label' => 'Tipe Pengadaan', 'required' => false],
+                    ['key' => 'supplier_address', 'label' => 'Alamat Supplier', 'required' => false],
+                    ['key' => 'supplier_contact', 'label' => 'Kontak Supplier', 'required' => false],
+                    ['key' => 'supplier_product', 'label' => 'Produk Supplier', 'required' => false],
+                    ['key' => 'sc_price', 'label' => 'Skor Harga', 'required' => false],
+                    ['key' => 'sc_quality', 'label' => 'Skor Kualitas', 'required' => false],
+                    ['key' => 'sc_delivery', 'label' => 'Skor Pengiriman', 'required' => false],
+                    ['key' => 'sc_service', 'label' => 'Skor Pelayanan', 'required' => false],
+                    ['key' => 'sc_legal', 'label' => 'Skor Legalitas', 'required' => false],
+                    ['key' => 'sc_total', 'label' => 'Total Skor', 'required' => false],
+                ]);
             }
+
+            // 2. ITEM / INVENTORY
         } elseif ($model === Item::class) {
             $fields = [
                 ['key' => 'code', 'label' => 'Kode Barang', 'required' => false],
                 ['key' => 'brand', 'label' => 'Merk', 'required' => false],
-                ['key' => 'name', 'label' => 'Nama Barang', 'required' => true],
-                ['key' => 'stock', 'label' => 'Jumlah Stock', 'required' => true],
-                ['key' => 'unit', 'label' => 'Satuan', 'required' => true],
-                ['key' => 'condition', 'label' => 'Kondisi (B/KB/RB)', 'required' => false],
+                ['key' => 'name', 'label' => 'Nama Barang / Jenis Aset', 'required' => true],
+                ['key' => 'stock', 'label' => 'JUMLAH ASET', 'required' => true],
+                ['key' => 'unit', 'label' => 'SATUAN', 'required' => true],
+                ['key' => 'condition', 'label' => 'Kondisi Saat Ini (B/KB/RB)', 'required' => false],
                 ['key' => 'location', 'label' => 'Lokasi / Ruangan', 'required' => false],
-                ['key' => 'institution_code', 'label' => 'Kode Lembaga', 'required' => false],
-                ['key' => 'purchase_date', 'label' => 'Tanggal Pembelian', 'required' => false],
-                ['key' => 'price', 'label' => 'Harga Perolehan', 'required' => false],
+                ['key' => 'institution_code', 'label' => 'SATUAN KERJA (Kode Lembaga)', 'required' => false],
+                ['key' => 'purchase_date', 'label' => 'Tanggal Pembelian / Pengecekan', 'required' => false],
+                ['key' => 'price', 'label' => 'Nilai Aset / Harga Perolehan', 'required' => false],
                 ['key' => 'source', 'label' => 'Sumber Dana', 'required' => false],
                 ['key' => 'specification', 'label' => 'Spesifikasi', 'required' => false],
+                ['key' => 'serial_number', 'label' => 'Nomor Seri', 'required' => false],
+                ['key' => 'size', 'label' => 'Ukuran', 'required' => false],
+                ['key' => 'material', 'label' => 'Bahan', 'required' => false],
             ];
+
+            // 3. VEHICLE REQUEST
         } elseif ($model === VehicleRequest::class) {
             $fields = [
                 ['key' => 'vehicle_plate', 'label' => 'Plat Nomor', 'required' => true],
@@ -571,7 +681,11 @@ class UrtProcedureController extends Controller
                 ['key' => 'end_time', 'label' => 'Waktu Selesai', 'required' => true],
                 ['key' => 'destination', 'label' => 'Tujuan', 'required' => true],
                 ['key' => 'purpose', 'label' => 'Keperluan', 'required' => true],
+                ['key' => 'start_mileage', 'label' => 'KM Awal', 'required' => false],
+                ['key' => 'end_mileage', 'label' => 'KM Akhir', 'required' => false],
             ];
+
+            // 4. BORROWING RECORD
         } elseif ($model === BorrowingRecord::class) {
             $fields = [
                 ['key' => 'item_code', 'label' => 'Kode Barang', 'required' => true],
@@ -579,6 +693,36 @@ class UrtProcedureController extends Controller
                 ['key' => 'return_date', 'label' => 'Tanggal Kembali', 'required' => false],
                 ['key' => 'borrower_name', 'label' => 'Peminjam', 'required' => true],
                 ['key' => 'status', 'label' => 'Status', 'required' => false],
+                ['key' => 'quantity', 'label' => 'Jumlah', 'required' => false],
+            ];
+
+            // 5. ISO CHECKLIST
+        } elseif ($model === IsoChecklist::class) {
+            $fields = [
+                ['key' => 'title', 'label' => 'Judul Checklist', 'required' => true],
+                ['key' => 'category', 'label' => 'Kategori (Unit/Area)', 'required' => false],
+                ['key' => 'frequency', 'label' => 'Frekuensi (Harian/Bulanan)', 'required' => false],
+            ];
+
+            // 6. PARKING LOG
+        } elseif ($model === ParkingLog::class) {
+            $fields = [
+                ['key' => 'plate_number', 'label' => 'Plat Nomor', 'required' => true],
+                ['key' => 'vehicle_type', 'label' => 'Jenis Kendaraan', 'required' => false],
+                ['key' => 'entry_time', 'label' => 'Jam Masuk', 'required' => true],
+                ['key' => 'exit_time', 'label' => 'Jam Keluar', 'required' => false],
+                ['key' => 'gate_name', 'label' => 'Nama Gate', 'required' => false],
+                ['key' => 'notes', 'label' => 'Catatan', 'required' => false],
+            ];
+
+            // 7. ASSET LIFECYCLE LOG (Pelelangan)
+        } elseif ($model === AssetLifecycleLog::class) {
+            $fields = [
+                ['key' => 'item_id', 'label' => 'ID / Kode Barang', 'required' => false],
+                ['key' => 'reason', 'label' => 'Alasan / Keterangan', 'required' => true],
+                ['key' => 'approved_by', 'label' => 'Disetujui Oleh', 'required' => false],
+                ['key' => 'value', 'label' => 'Nilai / Harga', 'required' => false],
+                ['key' => 'action_date', 'label' => 'Tanggal Lelang', 'required' => false],
             ];
         }
 
@@ -590,13 +734,13 @@ class UrtProcedureController extends Controller
         if (!isset($this->procedures[$type]))
             abort(404);
 
-        // Generate simple headers array from getImportFields
+        // Generate user-friendly headers from labels
         $fields = $this->getImportFields($type);
-        $headers = array_map(fn($f) => $f['key'], $fields);
+        $headers = array_map(fn($f) => $f['label'], $fields);
 
-        // Fallback if empty (shouldn't differ much from previous logic, but safer)
+        // Fallback if empty
         if (empty($headers)) {
-            $headers = ['title', 'description', 'status'];
+            $headers = ['Judul', 'Deskripsi', 'Status'];
         }
 
         return Excel::download(
@@ -604,10 +748,12 @@ class UrtProcedureController extends Controller
             protected $h;
             public function __construct($h)
             {
-                $this->h = $h; }
+                $this->h = $h;
+            }
             public function array(): array
             {
-                return [$this->h]; }
+                return [$this->h];
+            }
             },
             "template-{$type}.xlsx"
         );

@@ -15,13 +15,18 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        $online_count = DB::table('sessions')
-            ->whereNotNull('user_id')
-            ->where('last_activity', '>=', now()->subMinutes(5)->timestamp)
-            ->count();
+        try {
+            $online_count = DB::table('sessions')
+                ->whereNotNull('user_id')
+                ->where('last_activity', '>=', now()->subMinutes(5)->timestamp)
+                ->count();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Dashboard Online Users Error: ' . $e->getMessage());
+            $online_count = 0;
+        }
 
-        return inertia('Admin/Dashboard', [
-            'stats' => [
+        try {
+            $stats = [
                 // Core counts
                 'total_institutions' => Institution::count(),
                 'total_users' => User::count(),
@@ -38,15 +43,46 @@ class AdminDashboardController extends Controller
 
                 // Realtime
                 'online_users' => $online_count,
-            ],
-            'recent_requests' => GeneralRequest::with(['user.institution', 'institution'])
+            ];
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Dashboard Stats Error: ' . $e->getMessage());
+            $stats = [
+                'total_institutions' => 0,
+                'total_users' => 0,
+                'total_items' => 0,
+                'pending_requests' => 0,
+                'low_stock_items' => 0,
+                'out_of_stock' => 0,
+                'total_cost_pending' => 0,
+                'total_cost_approved' => 0,
+                'online_users' => 0,
+            ];
+        }
+
+        try {
+            $recent_requests = GeneralRequest::with(['user.institution', 'institution'])
                 ->latest()
                 ->take(5)
-                ->get(),
-            'recent_activity' => Activity::with('causer')
+                ->get();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Dashboard Recent Requests Error: ' . $e->getMessage());
+            $recent_requests = [];
+        }
+
+        try {
+            $recent_activity = Activity::with('causer')
                 ->latest()
                 ->take(10)
-                ->get(),
+                ->get();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Dashboard Activity Log Error: ' . $e->getMessage());
+            $recent_activity = [];
+        }
+
+        return inertia('Admin/Dashboard', [
+            'stats' => $stats,
+            'recent_requests' => $recent_requests,
+            'recent_activity' => $recent_activity,
         ]);
     }
 }

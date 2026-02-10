@@ -12,10 +12,12 @@ use Illuminate\Support\Facades\Log;
 class ItemImport implements ToModel, WithHeadingRow
 {
     protected $mapping;
+    protected $defaultInstitutionId;
 
-    public function __construct($mapping = [])
+    public function __construct($mapping = [], $defaultInstitutionId = null)
     {
         $this->mapping = $mapping;
+        $this->defaultInstitutionId = $defaultInstitutionId;
     }
 
     private function get($key, $row)
@@ -52,17 +54,21 @@ class ItemImport implements ToModel, WithHeadingRow
             }
         }
 
-        if (!$institutionVal) {
-            Log::warning('Skip Item Row: Kolom lembaga tidak terdeteksi.', ['row' => $row, 'keys' => array_keys($row)]);
-            return null;
+        $institution = null;
+
+        if ($institutionVal) {
+            $institution = Institution::where('code', $institutionVal)
+                ->orWhere('name', 'LIKE', '%' . $institutionVal . '%')
+                ->first();
         }
 
-        $institution = Institution::where('code', $institutionVal)
-            ->orWhere('name', 'LIKE', '%' . $institutionVal . '%')
-            ->first();
+        // Fallback to default institution if not found from file
+        if (!$institution && $this->defaultInstitutionId) {
+            $institution = Institution::find($this->defaultInstitutionId);
+        }
 
         if (!$institution) {
-            Log::warning("Skip Item Row: Lembaga '{$institutionVal}' tidak ditemukan di database.");
+            Log::warning('Skip Item Row: Lembaga tidak terdeteksi atau tidak ditemukan, dan tidak ada default.', ['row' => $row]);
             return null;
         }
 

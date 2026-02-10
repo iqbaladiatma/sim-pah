@@ -32,6 +32,11 @@ const description = computed(() => {
         return props.message;
     }
 
+    // Allow custom message for 500 errors if provided (for debugging)
+    if (props.message && props.status === 500) {
+        return props.message;
+    }
+
     return {
         503: "Maaf, sistem sedang sibuk atau dalam pemeliharaan rutin. Silakan coba kembali sesaat lagi.",
         500: "Terjadi kesalahan pada server kami. Tim teknis telah dinotifikasi mengenai masalah ini.",

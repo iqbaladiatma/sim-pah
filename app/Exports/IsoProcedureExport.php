@@ -291,7 +291,7 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('J' . $currentRow, $item->price);
                         $sheet->setCellValue('K' . $currentRow, $item->note);
                     }
-                } elseif ($model === VehicleRequest::class) {
+                } elseif ($modelClass === VehicleRequest::class) {
                      $sheet->setCellValue('B' . $currentRow, $item->request_date ? date('d/m/Y', strtotime($item->request_date)) : '');
                      $sheet->setCellValue('C' . $currentRow, $item->vehicle?->name);
                      $sheet->setCellValue('D' . $currentRow, $item->time_range);
@@ -301,7 +301,7 @@ class IsoProcedureExport implements WithEvents
                      $sheet->setCellValue('H' . $currentRow, $item->fuel_level_before);
                      $sheet->setCellValue('I' . $currentRow, $item->condition_before);
                      $sheet->setCellValue('J' . $currentRow, $item->responsible_person);
-                } elseif ($model === BorrowingRecord::class) {
+                } elseif ($modelClass === BorrowingRecord::class) {
                      $sheet->setCellValue('B' . $currentRow, $item->borrow_date);
                      $sheet->setCellValue('C' . $currentRow, $item->borrower_name);
                      $sheet->setCellValue('D' . $currentRow, $item->item?->name);
@@ -310,21 +310,21 @@ class IsoProcedureExport implements WithEvents
                      $sheet->setCellValue('H' . $currentRow, $item->actual_return_date);
                      $sheet->setCellValue('I' . $currentRow, $item->return_condition);
                      $sheet->setCellValue('K' . $currentRow, $item->reason);
-                } elseif ($model === ParkingLog::class) {
+                } elseif ($modelClass === ParkingLog::class) {
                      $sheet->setCellValue('B' . $currentRow, $item->date);
                      $sheet->setCellValue('C' . $currentRow, $item->plate_number);
                      $sheet->setCellValue('D' . $currentRow, $item->vehicle_type);
                      $sheet->setCellValue('E' . $currentRow, $item->entry_time);
                      $sheet->setCellValue('F' . $currentRow, $item->exit_time);
                      $sheet->setCellValue('G' . $currentRow, $item->description);
-                } elseif ($model === AssetLifecycleLog::class) {
+                } elseif ($modelClass === AssetLifecycleLog::class) {
                     $sheet->setCellValue('B' . $currentRow, $item->item?->name);
                     $sheet->setCellValue('C' . $currentRow, $item->item?->code);
                     $sheet->setCellValue('D' . $currentRow, $item->item?->brand);
                     $sheet->setCellValue('E' . $currentRow, $item->item?->purchased_at);
                     $sheet->setCellValue('F' . $currentRow, $item->reason);
                     $sheet->setCellValue('G' . $currentRow, $item->approved_by);
-                } elseif ($model === Vehicle::class) {
+                } elseif ($modelClass === Vehicle::class) {
                     $sheet->setCellValue('B' . $currentRow, $item->name);
                     $sheet->setCellValue('C' . $currentRow, $item->plate_number);
                     $sheet->setCellValue('D' . $currentRow, $item->brand);
@@ -334,7 +334,7 @@ class IsoProcedureExport implements WithEvents
                     $sheet->setCellValue('H' . $currentRow, $item->tax_expiry);
                     $sheet->setCellValue('I' . $currentRow, $item->status);
                     $sheet->setCellValue('J' . $currentRow, $item->note);
-                } elseif ($model === IsoChecklist::class) {
+                } elseif ($modelClass === IsoChecklist::class) {
                     $sheet->setCellValue('B' . $currentRow, $item->title);
                     $sheet->setCellValue('C' . $currentRow, $item->category);
                     $sheet->setCellValue('D' . $currentRow, $item->frequency);
@@ -699,7 +699,7 @@ class IsoProcedureExport implements WithEvents
                             $sheet->setCellValue('J' . $currentRow, $item->price);
                             $sheet->setCellValue('K' . $currentRow, $item->note);
                         }
-                    } elseif ($model === VehicleRequest::class) {
+                    } elseif ($modelClass === VehicleRequest::class) {
                         $sheet->setCellValue('B' . $currentRow, $item->request_date ? date('d/m/Y', strtotime($item->request_date)) : '');
                         $sheet->setCellValue('C' . $currentRow, $item->vehicle?->name);
                         $sheet->setCellValue('D' . $currentRow, $item->time_range);
@@ -709,7 +709,7 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('H' . $currentRow, $item->fuel_level_before);
                         $sheet->setCellValue('I' . $currentRow, $item->condition_before);
                         $sheet->setCellValue('J' . $currentRow, $item->responsible_person);
-                    } elseif ($model === BorrowingRecord::class) {
+                    } elseif ($modelClass === BorrowingRecord::class) {
                         $sheet->setCellValue('B' . $currentRow, $item->borrow_date);
                         $sheet->setCellValue('C' . $currentRow, $item->borrower_name);
                         $sheet->setCellValue('D' . $currentRow, $item->item?->name);
@@ -718,21 +718,21 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('H' . $currentRow, $item->actual_return_date);
                         $sheet->setCellValue('I' . $currentRow, $item->return_condition);
                         $sheet->setCellValue('K' . $currentRow, $item->reason);
-                    } elseif ($model === ParkingLog::class) {
+                    } elseif ($modelClass === ParkingLog::class) {
                         $sheet->setCellValue('B' . $currentRow, $item->date);
                         $sheet->setCellValue('C' . $currentRow, $item->plate_number);
                         $sheet->setCellValue('D' . $currentRow, $item->vehicle_type);
                         $sheet->setCellValue('E' . $currentRow, $item->entry_time);
                         $sheet->setCellValue('F' . $currentRow, $item->exit_time);
                         $sheet->setCellValue('G' . $currentRow, $item->description);
-                    } elseif ($model === AssetLifecycleLog::class) {
+                    } elseif ($modelClass === AssetLifecycleLog::class) {
                         $sheet->setCellValue('B' . $currentRow, $item->item?->name);
                         $sheet->setCellValue('C' . $currentRow, $item->item?->code);
                         $sheet->setCellValue('D' . $currentRow, $item->item?->brand);
                         $sheet->setCellValue('E' . $currentRow, $item->item?->purchased_at);
                         $sheet->setCellValue('F' . $currentRow, $item->reason);
                         $sheet->setCellValue('G' . $currentRow, $item->approved_by);
-                    } elseif ($model === Vehicle::class) {
+                    } elseif ($modelClass === Vehicle::class) {
                         $sheet->setCellValue('B' . $currentRow, $item->name);
                         $sheet->setCellValue('C' . $currentRow, $item->plate_number);
                         $sheet->setCellValue('D' . $currentRow, $item->brand);
@@ -742,7 +742,7 @@ class IsoProcedureExport implements WithEvents
                         $sheet->setCellValue('H' . $currentRow, $item->tax_expiry);
                         $sheet->setCellValue('I' . $currentRow, $item->status);
                         $sheet->setCellValue('J' . $currentRow, $item->note);
-                    } elseif ($model === IsoChecklist::class) {
+                    } elseif ($modelClass === IsoChecklist::class) {
                         $sheet->setCellValue('B' . $currentRow, $item->title);
                         $sheet->setCellValue('C' . $currentRow, $item->category);
                         $sheet->setCellValue('D' . $currentRow, $item->frequency);

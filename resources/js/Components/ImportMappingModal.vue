@@ -18,7 +18,8 @@ const props = defineProps({
         type: Array,
         default: () => [] 
     },
-    fileName: String
+    fileName: String,
+    templateUrl: String
 });
 
 const emit = defineEmits(['close', 'analyze', 'submit']);
@@ -102,7 +103,7 @@ const submit = () => {
             </h2>
 
             <!-- Step 1: File Selection -->
-            <div v-if="!fileHeaders.length" class="space-y-4">
+            <div v-if="!selectedFile" class="space-y-4">
                 <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-8 text-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative">
                     <input 
                         type="file" 
@@ -116,10 +117,7 @@ const submit = () => {
                         <div class="w-12 h-12 bg-pail-gold/10 rounded-full flex items-center justify-center text-pail-gold">
                             <UploadIcon class="w-6 h-6" />
                         </div>
-                        <div v-if="processing" class="text-sm font-bold text-gray-500 animate-pulse">
-                            Menganalisis file...
-                        </div>
-                        <div v-else>
+                        <div>
                             <p class="text-sm font-bold text-gray-900 dark:text-white">
                                 Klik atau seret file ke sini
                             </p>
@@ -128,6 +126,24 @@ const submit = () => {
                             </p>
                         </div>
                     </div>
+                </div>
+
+                <!-- Template Download Help -->
+                <div v-if="templateUrl" class="bg-pail-gold/5 dark:bg-pail-gold/10 border border-pail-gold/20 dark:border-pail-gold/10 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-6 transition-all hover:bg-pail-gold/[0.07] group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center text-pail-gold shadow-sm border border-pail-gold/10 group-hover:scale-110 transition-transform duration-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-[12px] font-black text-gray-900 dark:text-white uppercase tracking-[0.2em] leading-none mb-2">Belum Memiliki Format?</p>
+                            <p class="text-[10px] text-gray-400 font-bold leading-relaxed max-w-[280px]">Optimalkan akurasi data dengan menggunakan template terstandarisasi kami.</p>
+                        </div>
+                    </div>
+                    <a :href="templateUrl" download class="w-full sm:w-auto text-center px-6 py-3.5 bg-gray-900 dark:bg-pail-gold text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-xl shadow-gray-200 dark:shadow-pail-gold/20">
+                        Download Template
+                    </a>
                 </div>
             </div>
 
@@ -191,12 +207,12 @@ const submit = () => {
                     Batal
                 </button>
                 <button 
-                    v-if="fileHeaders.length"
+                    v-if="selectedFile"
                     @click="submit" 
-                    :disabled="!isMappingValid || processing"
+                    :disabled="processing"
                     class="px-6 py-2.5 bg-pail-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-pail-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-pail-gold/20 flex items-center gap-2">
                     <span v-if="processing">Memproses...</span>
-                    <span v-else>Import Data</span>
+                    <span v-else>Simpan / Import Data</span>
                 </button>
             </div>
         </div>
