@@ -1,63 +1,144 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIM URT PAH - Mataram  
+**Sistem Informasi Manajemen Pondok Pesantren Abu Hurairah Mataram**  
+(ISO 9001:2015 Compliant – Developed with Vibe Coding Methodology)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+![Dashboard Screenshot](public/dashboard.png)  
 
-## About Laravel
+## Project Overview
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+SIM URT PAH - Mataram adalah sistem informasi manajemen lengkap yang dikembangkan untuk Pondok Pesantren Abu Hurairah Mataram, melayani 28 lembaga internal dalam pengelolaan kebutuhan rumah tangga (air, listrik, sabun pel lantai, dll), pengajuan, laporan, inventori, dan prosedur sesuai standar **ISO 9001:2015**.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Sistem ini berhasil dibangun dalam **hanya 7 hari** oleh satu developer menggunakan metodologi **Vibe Coding** — pendekatan kolaborasi manusia-AI di mana AI berperan sebagai *partner* development yang kuat, bukan pengganti, dengan pengawasan ketat manusia melalui MCP, schema engineering, dan tech stack terstruktur.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Highlight Utama (Metrics dari Pengembangan):**
+- Total waktu: 7 hari (vs estimasi konvensional 3–6 bulan)
+- Kode AI-generated: 70–85% secara keseluruhan (90–100% di fase terstruktur)
+- Total Lines of Code (LOC): ~37,875 (tanpa vendor/dependencies)
+- Git Commits: 45
+- Database Migrations: 66
+- Custom Files: 250+ (controllers, models, Vue components)
+- ISO Modules/Procedures: 39
+- Activity Logs (Audit Trail): 184
+- Total Prompts ke AI: ~45
 
-## Learning Laravel
+Proyek ini menjadi studi kasus utama dalam paper:  
+**"Analysis of the 'Vibe Coding' Methodology: Accelerating Complex System Development via AI-Driven Orchestration"**  
+(ID: 6823, sedang direvisi di *International Journal of Software Engineering and Computer Science – IJSECS*).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Fitur Utama
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Multi-tenancy dengan filter institution_id
+- Role-Based Access Control (RBAC): Admin (URT) vs Karyawan (per lembaga)
+- CRUD lengkap untuk item, pengajuan, laporan, inventori
+- Sistem request dengan upload gambar & approval workflow
+- Modul prosedur ISO 9001:2015 (documented information, monitoring, nonconformity)
+- Reporting & dashboard interaktif
+- Audit trail lengkap menggunakan Spatie Laravel Activitylog
+- Mobile-responsive UI (Tailwind CSS + Vue 3)
 
-## Laravel Sponsors
+## Tech Stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Komponen          | Teknologi                          | Catatan                                      |
+|-------------------|------------------------------------|----------------------------------------------|
+| Backend           | Laravel 12                         | Framework utama, opinionated structure       |
+| Frontend          | Vue 3 + Inertia.js                 | SPA tanpa Filament (manual coding)           |
+| Database          | MySQL                              | Managed via migrations                       |
+| Styling           | Tailwind CSS                       | Primary color: #C9A658                       |
+| Authentication    | Laravel Breeze                     | Customized login dengan searchable dropdown  |
+| Activity Logging  | spatie/laravel-activitylog         | Audit trail untuk setiap aksi model          |
+| AI Assistance     | Cursor + Model Context Protocol    | Rules.md untuk kontrol output AI             |
 
-### Premium Partners
+**Catatan Penting**: Tidak menggunakan Filament atau package admin panel lain — semua CRUD dan dashboard dibuat manual untuk kontrol maksimal.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Installation
 
-## Contributing
+### Prerequisites
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- PHP ≥ 8.2
+- Composer
+- Node.js ≥ 18 & npm
+- MySQL/MariaDB
 
-## Code of Conduct
+### Langkah Instalasi
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+1. Clone repository
+   ```bash
+   git clone https://github.com/iqbaladiatma/sim-pah.git
+   cd sim-pah
+   ```
 
-## Security Vulnerabilities
+2. Install dependencies
+   ```bash
+   composer install
+   npm install
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+3. Copy environment file
+   ```bash
+   cp .env.example .env
+   ```
 
-## License
+4. Generate app key
+   ```bash
+   php artisan key:generate
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+5. Konfigurasi .env (database, APP_URL, dll)
 
+6. Jalankan migrasi & seed (jika ada)
+   ```bash
+   php artisan migrate --seed
+   ```
 
+7. Compile assets
+   ```bash
+   npm run dev
+   # atau npm run build untuk production
+   ```
 
-BY IQBAL ADIATMA
+8. Jalankan server
+   ```bash
+   php artisan serve
+   ```
+
+Akses aplikasi di: http://localhost:8000
+
+## Penggunaan
+
+1. Login menggunakan kredensial lembaga (dropdown searchable untuk pilihan lembaga).
+2. Role Admin (URT Division): Kelola semua lembaga.
+3. Role Karyawan: Hanya akses pengajuan & laporan lembaga sendiri.
+4. Upload gambar disimpan di public/storage/reports.
+
+## Vibe Coding Methodology
+Proyek ini dikembangkan menggunakan Vibe Coding — framework 3-pilar:
+1. Context Persistence → MCP + rules.md (persistent rules untuk hindari context loss)
+2. Schema Engineering → ERD & workflow didefinisikan dulu sebelum generate kode
+3. Conditional Tech Stack → Pilih Laravel untuk struktur opinionated & dokumentasi lengkap
+
+Detail metodologi, metrics, dan hasil tersedia dalam paper (sedang revisi di IJSECS).
+
+## Open Science & Reproducibility
+
+- **Source Code**: Public di GitHub dengan struktur rapi
+- **License**: MIT (lihat file LICENSE)
+- **Data & Artifacts**: ERD, schema, prompt logs, MCP rules.md tersedia di folder /docs
+- **Citation** (untuk paper atau penggunaan kode):
+  ```bibtex
+  @misc{iqbal2026simpah,
+    author       = {Iqbal Muhammad Adiatma},
+    title        = {SIM URT PAH - Mataram: Vibe Coding MIS Implementation},
+    year         = {2026},
+    publisher    = {GitHub},
+    howpublished = {\url{https://github.com/iqbaladiatma/sim-pah}}
+  }
+  ```
+
+## Kontribusi & Kontak
+Feel free to open issues, fork, atau pull request jika ingin berkontribusi.
+
+**Kontak:**
+- Author: Iqbal Muhammad Adiatma
+- Email: iqbalmuhammadadiatma@gmail.com
+
+Terima kasih telah mengunjungi repo ini! Semangat Vibe Coding! 🚀
