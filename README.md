@@ -22,7 +22,7 @@ Sistem ini berhasil dibangun dalam **hanya 7 hari** oleh satu developer mengguna
 - Total Prompts ke AI: ~45
 
 Proyek ini menjadi studi kasus utama dalam paper:  
-**"Analysis of the 'Vibe Coding' Methodology: Accelerating Complex System Development via AI-Driven Orchestration"**  
+**"Evaluating Vibe Coding as an AI-Orchestrated Development Methodology: A Case Study on Accelerating Complex Web-Based Educational Management Systems"**  
 (ID: 6823, sedang direvisi di *International Journal of Software Engineering and Computer Science – IJSECS*).
 
 ## Fitur Utama
